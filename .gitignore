@@ -1,0 +1,10 @@
+.vscode
+
+*.o
+*.txt
+*.exe
+*.a
+
+os.iso
+kernel.bin
+ramdisk.fat
