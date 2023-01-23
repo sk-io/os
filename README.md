@@ -17,3 +17,16 @@ This is a completely monolithic OS with a single userspace API for everything (t
 All an application needs to do is to include "os.h" and statically link against libos.a (Shared library in the future).
 
 Current goal is to port Doom and some other stuff.
+
+## Building
+
+Requires i686-elf-gcc and NASM.
+
+To build and run (requires sudo access):
+```
+make
+./make-ramdisk.sh
+make run
+```
+
+

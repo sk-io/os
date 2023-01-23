@@ -29,10 +29,10 @@ void setup_gdt() {
     tss.ss0 = GDT_KERNEL_DATA;
 
     set_gdt_entry(0, 0, 0, 0, 0);                // 0x00: null
-    set_gdt_entry(1, 0, 0xFFFFFFFF, 0x9A, 0xCF); // 0x08: kernel text
-    set_gdt_entry(2, 0, 0xFFFFFFFF, 0x92, 0xCF); // 0x10: kernel data
-    set_gdt_entry(3, 0, 0xFFFFFFFF, 0xFA, 0xCF); // 0x18: User mode code segment
-    set_gdt_entry(4, 0, 0xFFFFFFFF, 0xF2, 0xCF); // 0x20: User mode data segment
+    set_gdt_entry(1, 0, 0xFFFFFFFF, 0x9A, 0xC0); // 0x08: kernel text
+    set_gdt_entry(2, 0, 0xFFFFFFFF, 0x92, 0xC0); // 0x10: kernel data
+    set_gdt_entry(3, 0, 0xFFFFFFFF, 0xFA, 0xC0); // 0x18: User mode code segment
+    set_gdt_entry(4, 0, 0xFFFFFFFF, 0xF2, 0xC0); // 0x20: User mode data segment
     set_gdt_entry(5, (u32) &tss, sizeof(tss), 0x89, 0x40); // 0x28: tss
 
     flush_gdt((u32) &gdt_pointer);

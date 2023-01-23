@@ -9,9 +9,9 @@ SOURCES_C = $(patsubst %.c, %.o, $(wildcard *.c))
 OBJ = $(SOURCES_C)
 EXE = terminal.exe
 
-all: $(OBJ) link
+all: $(EXE)
 
-link: $(OBJ)
+$(EXE): $(OBJ)
 	$(LD) -o $(EXE) $(OBJ) $(LDFLAGS)
 
 %.o: %.c

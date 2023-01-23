@@ -13,9 +13,9 @@ KERNEL = kernel.bin
 IMAGE = os.iso
 RAMDISK = ramdisk.fat
 
-all: $(OBJ) link
+all: $(KERNEL)
 
-link: $(OBJ)
+$(KERNEL): $(OBJ)
 	$(LD) -o $(KERNEL) $(OBJ) $(LDFLAGS)
 
 kernel/%.o: kernel/%.c
@@ -24,13 +24,13 @@ kernel/%.o: kernel/%.c
 kernel/%.o: kernel/%.asm
 	nasm $(ASFLAGS) $< -o $@
 
-run: all image
+run: image
 	qemu-system-i386 -cdrom $(IMAGE) -serial stdio
 
-drun: all
+drun: image
 	qemu-system-i386 -s -S -cdrom $(IMAGE) -serial stdio
 
-debug: all
+debug:
 	gdb --symbols=$(KERNEL) -ex 'target remote localhost:1234'
 
 clean:
