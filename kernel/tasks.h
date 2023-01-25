@@ -20,6 +20,7 @@ enum {
     TASK_STATE_READY,
     TASK_STATE_IDLE,
     TASK_STATE_WAIT_FOR_EVENT,
+    TASK_STATE_WAIT_FOR_REDRAW,
 };
 
 typedef struct {

@@ -102,8 +102,15 @@ static s32 swap_buffers(s32 window_id) {
     gui_needs_redraw = true;
 
     Window* w = &windows[window_id];
-    if (w->flags & WINDOW_FLAG_DOUBLE_BUFFERED)
+    if (w->flags & WINDOW_FLAG_DOUBLE_BUFFERED) {
         w->shown_buffer ^= 1;
+
+        // put task in wait state and yield
+        assert(current_task->state == TASK_STATE_READY);
+        current_task->state = TASK_STATE_WAIT_FOR_REDRAW;
+        task_schedule();
+        assert(current_task->state != TASK_STATE_WAIT_FOR_REDRAW);
+    }
     
     return w->shown_buffer;
 }
@@ -137,6 +144,14 @@ static void draw_window(s32 id) {
     s32 close_button_y = w->y + 1;
     graphics_fill_rect(close_button_x, close_button_y, CLOSE_BUTTON_WIDTH, CLOSE_BUTTON_HEIGHT, 0xFFFFFF);
     graphics_draw_string("x", close_button_x + 5, close_button_y + 3, 0);
+
+    // signal task
+    push_cli();
+    Task* task = get_task(w->owner_task_id);
+    if (task->state == TASK_STATE_WAIT_FOR_REDRAW) {
+        task->state = TASK_STATE_READY;
+    }
+    pop_cli();
 }
 
 bool check_window_close(s32 window, s32 x, s32 y) {

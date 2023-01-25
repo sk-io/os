@@ -44,3 +44,5 @@ typedef void (*ISRFunction)(TrapFrame*);
 void setup_interrupts();
 void register_isr(u8 vector, ISRFunction func);
 void handle_interrupt(TrapFrame* frame);
+void push_cli();
+void pop_cli();

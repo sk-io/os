@@ -15,6 +15,9 @@ static void remap_pic();
 extern void* isr_redirect_table[];
 extern void isr128();
 
+static bool cli_init_state;
+static s32 cli_level = 0;
+
 void setup_interrupts() {
     memset((u8*) &idt, 0, sizeof(IDTEntry) * 256);
     memset((u8*) &isr_functions, 0, sizeof(ISRFunction) * 256);
@@ -95,3 +98,25 @@ void handle_interrupt(TrapFrame* frame) {
     }
 }
 
+void push_cli() {
+    u32 eflags = read_eflags();
+
+    disable_interrupts();
+
+    if (cli_level == 0)
+        cli_init_state = (eflags | FL_IF) != 0;
+    
+    cli_level++;
+}
+
+void pop_cli() {
+    u32 eflags = read_eflags();
+    assert(eflags | FL_IF);
+
+    assert(cli_level > 0);
+    cli_level--;
+
+    if (cli_level == 0 && cli_init_state) {
+        enable_interrupts();
+    }
+}

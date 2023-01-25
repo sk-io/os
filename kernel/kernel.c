@@ -76,7 +76,7 @@ void kernel_main(struct multiboot_info* info) {
         init_gui(framebuffer_width, framebuffer_height);
         create_kernel_task(gui_thread_entry);
 
-        create_user_task("draw.exe");
+        create_user_task("test.exe");
     }
 
     init_keyboard();
