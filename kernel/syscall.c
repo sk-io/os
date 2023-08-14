@@ -5,6 +5,7 @@
 #include "util.h"
 #include "tasks.h"
 #include "ramdisk.h"
+#include "userheap.h"
 
 #define NUM_SYSCALLS 256
 void* syscall_handlers[NUM_SYSCALLS];
@@ -68,6 +69,18 @@ u32 syscall_get_file_size(u32 fd) {
     return f_size(&current_task->open_files[fd]);
 }
 
+u32 syscall_get_heap_start() {
+    return current_task->heap_start;
+}
+
+u32 syscall_get_heap_end() {
+    return current_task->heap_end;
+}
+
+void syscall_set_heap_end(u32 heap_end) {
+    set_user_heap_end(current_task, heap_end);
+}
+
 void init_syscalls() {
     memset(syscall_handlers, 0, sizeof(syscall_handlers));
 
@@ -79,6 +92,9 @@ void init_syscalls() {
     register_syscall(SYSCALL_CLOSE_FILE, syscall_close_file);
     register_syscall(SYSCALL_READ_FILE, syscall_read_file);
     register_syscall(SYSCALL_GET_FILE_SIZE, syscall_get_file_size);
+    register_syscall(SYSCALL_GET_HEAP_START, syscall_get_heap_start);
+    register_syscall(SYSCALL_GET_HEAP_END, syscall_get_heap_end);
+    register_syscall(SYSCALL_SET_HEAP_END, syscall_set_heap_end);
 
     register_isr(0x80, handle_syscall_interrupt);
 }

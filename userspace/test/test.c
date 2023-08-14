@@ -6,9 +6,22 @@
 
 int main(int argc, char* argv[]) {
     int window = os_create_window(width, height, OS_DOUBLE_BUFFERED);
-    os_set_window_title(window, "Double buffer test");
+    os_set_window_title(window, "HEAP TEST");
 
     int* fb = os_map_window_framebuffer(window);
+
+    int heap_start = os_get_heap_start();
+    int heap_end = os_get_heap_end();
+    os_printf("heap_start=%x heap_end=%x", heap_start, heap_end);
+
+    os_printf("allocating...");
+    int* test[100];
+    for (int i = 0; i < 100; i++)
+        test[i] = os_malloc(4);
+    
+    os_printf("writing...");
+    for (int i = 0; i < 100; i++)
+        *(test[i]) = i;
 
     int shown_buffer = 0;
     int count = 0;

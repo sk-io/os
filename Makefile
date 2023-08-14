@@ -13,21 +13,21 @@ KERNEL = kernel.bin
 IMAGE = os.iso
 RAMDISK = ramdisk.fat
 
-all: $(KERNEL)
+all: $(IMAGE)
 
 $(KERNEL): $(OBJ)
 	$(LD) -o $(KERNEL) $(OBJ) $(LDFLAGS)
 
-kernel/%.o: kernel/%.c
+%.o: %.c
 	$(CC) $< -o $@ $(CFLAGS)
 
-kernel/%.o: kernel/%.asm
+%.o: %.asm
 	nasm $(ASFLAGS) $< -o $@
 
-run: image
+run: $(IMAGE)
 	qemu-system-i386 -cdrom $(IMAGE) -serial stdio
 
-drun: image
+drun: $(IMAGE)
 	qemu-system-i386 -s -S -cdrom $(IMAGE) -serial stdio
 
 debug:
@@ -37,7 +37,7 @@ clean:
 	make -C userspace clean
 	rm -f kernel/*.o kernel/**/*.o $(KERNEL) $(IMAGE) $(RAMDISK)
 
-image: all user
+$(IMAGE): user $(KERNEL)
 	cp $(KERNEL) image/boot
 	cp $(RAMDISK) image/boot
 	grub-mkrescue -o $(IMAGE) image

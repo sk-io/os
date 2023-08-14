@@ -43,8 +43,7 @@ _start:
     or ecx, 0x80000000
     mov cr0, ecx
 
-    lea ecx, higher_half
-    jmp ecx
+    jmp higher_half
 
 section .text
 higher_half:

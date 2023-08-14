@@ -1,6 +1,6 @@
 CC = i686-elf-gcc
 LD = i686-elf-gcc
-CFLAGS = -g -std=gnu11 -nostdlib -ffreestanding -m32 -c -Wall -Wextra -lgcc -I ../api/include -O2
+CFLAGS = -g -std=gnu11 -nostdlib -ffreestanding -m32 -Wall -Wextra -lgcc -I ../api/include -O2
 LDFLAGS = -g -std=gnu11 -nostdlib -ffreestanding -lgcc -L../api -los -O2
 ASFLAGS = -felf32
 
@@ -15,7 +15,7 @@ $(EXE): $(OBJ)
 	$(LD) -o $(EXE) $(OBJ) $(LDFLAGS)
 
 %.o: %.c
-	$(CC) $< -o $@ $(CFLAGS)
+	$(CC) $< -o $@ -c $(CFLAGS)
 
 clean:
 	rm -f *.o $(EXE)

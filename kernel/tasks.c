@@ -9,6 +9,7 @@
 #include "elf.h"
 #include "ramdisk.h"
 #include "events.h"
+#include "userheap.h"
 
 #define KERNEL_STACK_SIZE (0x1000 - 16)
 
@@ -54,10 +55,12 @@ s32 create_user_task(const char* path) {
     }
     
     u32 elf_size = f_size(&file);
-    u8* elf = kmalloc(elf_size); // fixme: memory leak if error
+    u8* elf = kmalloc(elf_size);
     UINT br;
     res = f_read(&file, elf, elf_size, &br);
     if (res != FR_OK) {
+        f_close(&file);
+        kfree(elf);
         kernel_log("create_user_task: failed to read from executable file %s. error=%u", path, res);
         return -1;
     }
@@ -75,12 +78,13 @@ s32 create_user_task(const char* path) {
     }
 
     // load elf, requires memory to be set up
-    u32 entry = load_elf(elf);
+    u32 entry = load_elf_segments(elf);
     kfree(elf);
 
     // init the task
     create_task(index, entry, false, pagedir);
     init_events_for_task(&tasks[index]);
+    init_user_heap(&tasks[index]);
 
     for (int i = 0; i < MAX_OPEN_FILES; i++) {
         f_close(&tasks[index].open_files[i]);
@@ -169,11 +173,13 @@ void task_schedule() {
     switch_context(old, next);
 }
 
+// set up initial state of task
 static void create_task(u32 index, u32 eip, bool kernel_task, u32* pagedir) {
     assert(tasks[index].id == 0);
 
     memset(&tasks[index], 0, sizeof(Task));
     
+    // each task has its own kernel stack for syscalls.
     // setup initial kernel stack
     u32 kernel_stack = ((u32) kmalloc(KERNEL_STACK_SIZE)) + KERNEL_STACK_SIZE;
     u8* kesp = (u8*) (kernel_stack);

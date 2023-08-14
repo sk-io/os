@@ -50,4 +50,4 @@ typedef struct {
 #define PF_W 0x2
 #define PF_R 0x3
 
-u32 load_elf(u8* elf);
+u32 load_elf_segments(u8* elf);

@@ -26,8 +26,14 @@ void handle_general_protection_fault(TrapFrame* frame) {
 }
 
 void handle_page_fault(TrapFrame* frame) {
+    u32 cr2;
+    asm volatile(
+        "mov %%cr2, %0"
+        : "=r"(cr2)
+    );
+
     u32* pd = mem_get_current_page_directory();
-    kernel_log("page fault! pdir=%x error=%u eip=%x", pd, frame->error, frame->eip);
+    kernel_log("page fault! vaddr=%x eip=%x pdir=%x error=%u", cr2, frame->eip, pd, frame->error);
     crash_and_burn();
 }
 

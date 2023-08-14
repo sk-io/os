@@ -1,5 +1,7 @@
 #pragma once
 
+#include <stdint.h>
+
 // a single, unified API for:
 // thread/process control
 // file IO
@@ -30,6 +32,13 @@ int os_close_file(int fd);
 int os_read_file(int fd, char* buffer, int num_bytes);
 int os_get_file_size(int fd);
 void os_exit();
+
+// heap
+uint32_t os_get_heap_start();
+uint32_t os_get_heap_end();
+void os_set_heap_end(uint32_t heap_end);
+void* os_malloc(uint32_t size);
+void os_free(void* addr);
 
 // window
 #define OS_FULLSCREEN (1 << 0)

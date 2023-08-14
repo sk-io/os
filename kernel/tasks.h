@@ -38,6 +38,9 @@ typedef struct {
     void* event_buffer; // address in kernel vmem
     s32 event_shmem_id;
     u8 sharedmem_bitmap[8192]; // 1mb / 0x1000 bytes per page / 8 bits per byte
+
+    u32 heap_start; // page aligned
+    u32 heap_end;
 } Task;
 
 extern Task tasks[MAX_TASKS];
