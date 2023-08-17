@@ -71,6 +71,9 @@ int main(int argc, char* argv[]) {
 
             if (event.type == EVENT_MOUSE) {
                 OSMouseEvent* e = (OSMouseEvent*) &event;
+                
+                handle_mouse_move(e->x, e->y);
+
                 if (e->buttons) {
                     handle_left_click();
                 }
