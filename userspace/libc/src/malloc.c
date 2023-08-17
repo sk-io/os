@@ -9,6 +9,8 @@
 #include <assert.h>
 #include "malloc.h"
 
+#include <os.h>
+
 /* Both the arena list and the free memory list are double linked
    list with head node.  This the head node. Note that the arena list
    is sorted in order of address. */
@@ -144,29 +146,30 @@ static struct free_arena_header *__free_block(struct free_arena_header *ah)
 
 void *malloc(size_t size)
 {
-	struct free_arena_header *fp;
+	return os_malloc(size);
+	// struct free_arena_header *fp;
 
-	if (size == 0)
-		return NULL;
+	// if (size == 0)
+	// 	return NULL;
 
-	/* Add the obligatory arena header, and round up */
-	size = (size + 2 * sizeof(struct arena_header) - 1) & ARENA_SIZE_MASK;
+	// /* Add the obligatory arena header, and round up */
+	// size = (size + 2 * sizeof(struct arena_header) - 1) & ARENA_SIZE_MASK;
 
-        if (!malloc_lock())
-                return NULL;
+    //     if (!malloc_lock())
+    //             return NULL;
         
-        void *result = NULL;
-	for (fp = __malloc_head.next_free; fp->a.type != ARENA_TYPE_HEAD;
-	     fp = fp->next_free) {
-		if (fp->a.size >= size) {
-			/* Found fit -- allocate out of this block */
-			result = __malloc_from_block(fp, size);
-                        break;
-		}
-	}
+    //     void *result = NULL;
+	// for (fp = __malloc_head.next_free; fp->a.type != ARENA_TYPE_HEAD;
+	//      fp = fp->next_free) {
+	// 	if (fp->a.size >= size) {
+	// 		/* Found fit -- allocate out of this block */
+	// 		result = __malloc_from_block(fp, size);
+    //                     break;
+	// 	}
+	// }
 
-        malloc_unlock();
-	return result;
+    //     malloc_unlock();
+	// return result;
 }
 
 /* Call this to give malloc some memory to allocate from */
@@ -212,24 +215,25 @@ void add_malloc_block(void *buf, size_t size)
 
 void free(void *ptr)
 {
-	struct free_arena_header *ah;
+	os_free(ptr);
+// 	struct free_arena_header *ah;
 
-	if (!ptr)
-		return;
+// 	if (!ptr)
+// 		return;
 
-	ah = (struct free_arena_header *)
-	    ((struct arena_header *)ptr - 1);
+// 	ah = (struct free_arena_header *)
+// 	    ((struct arena_header *)ptr - 1);
 
-#ifdef DEBUG_MALLOC
-	assert(ah->a.type == ARENA_TYPE_USED);
-#endif
+// #ifdef DEBUG_MALLOC
+// 	assert(ah->a.type == ARENA_TYPE_USED);
+// #endif
 
-        if (!malloc_lock())
-            return;
+//         if (!malloc_lock())
+//             return;
         
-	/* Merge into adjacent free blocks */
-	ah = __free_block(ah);
-        malloc_unlock();
+// 	/* Merge into adjacent free blocks */
+// 	ah = __free_block(ah);
+//         malloc_unlock();
 }
 
 void get_malloc_memory_status(size_t *free_bytes, size_t *largest_block)

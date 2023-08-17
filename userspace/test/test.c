@@ -1,6 +1,7 @@
 #include <os.h>
 #include <types.h>
 #include <string.h>
+#include <stdlib.h>
 
 #define width 300
 #define height 240
@@ -10,22 +11,19 @@ int main(int argc, char* argv[]) {
     int heap_end = os_get_heap_end();
     os_printf("heap_start=%x heap_end=%x", heap_start, heap_end);
 
-    // os_printf("allocating...");
-    // int* test[100];
-    // for (int i = 0; i < 100; i++)
-    //     test[i] = os_malloc(4);
+    os_printf("allocating...");
+    int* test[100];
+    for (int i = 0; i < 100; i++)
+        test[i] = malloc(4);
     
-    // os_printf("writing...");
-    // for (int i = 0; i < 100; i++)
-    //     *(test[i]) = i;
+    os_printf("writing...");
+    for (int i = 0; i < 100; i++)
+        *(test[i]) = i;
 
-    char* test = "hello!";
-    char buf[64];
-    memset(buf, 0, 64);
-    strcpy(buf, test);
-    os_printf("test: %s", buf);
-    
-    
-
+    // char* test = "hello!";
+    // char buf[64];
+    // memset(buf, 0, 64);
+    // strcpy(buf, test);
+    // os_printf("test: %s", buf);
     return 0;
 }
