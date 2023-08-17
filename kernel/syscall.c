@@ -81,6 +81,26 @@ void syscall_set_heap_end(u32 heap_end) {
     set_user_heap_end(current_task, heap_end);
 }
 
+int syscall_open_dir(const char* path) {
+    return f_opendir(&current_task->open_dir, "/") == FR_OK;
+}
+
+int syscall_close_dir() {
+    return f_closedir(&current_task->open_dir) == FR_OK;
+}
+
+int syscall_next_file_in_dir(char* buffer, int buffer_size) {
+    FILINFO info;
+    f_readdir(&current_task->open_dir, &info);
+
+    if (info.fname[0] == '\0')
+        return 0;
+
+    assert(buffer_size >= sizeof(info.fname));
+    strncpy(buffer, info.fname, buffer_size);
+    return 1;
+}
+
 void init_syscalls() {
     memset(syscall_handlers, 0, sizeof(syscall_handlers));
 
@@ -95,6 +115,9 @@ void init_syscalls() {
     register_syscall(SYSCALL_GET_HEAP_START, syscall_get_heap_start);
     register_syscall(SYSCALL_GET_HEAP_END, syscall_get_heap_end);
     register_syscall(SYSCALL_SET_HEAP_END, syscall_set_heap_end);
+    register_syscall(SYSCALL_OPEN_DIR, syscall_open_dir);
+    register_syscall(SYSCALL_CLOSE_DIR, syscall_close_dir);
+    register_syscall(SYSCALL_NEXT_FILE_IN_DIR, syscall_next_file_in_dir);
 
     register_isr(0x80, handle_syscall_interrupt);
 }

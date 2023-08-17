@@ -24,6 +24,25 @@
 
 bool graphics_enabled;
 
+static void test() {
+    kernel_log("opening root dir..");
+    DIR dir;
+    f_opendir(&dir, "/");
+
+    kernel_log("file list:");
+    FILINFO info;
+    while (true) {
+        f_readdir(&dir, &info);
+
+        if (info.fname[0] == '\0')
+            break;
+        
+        kernel_log("file: %s", info.fname);
+    }
+
+    f_closedir(&dir);
+}
+
 void kernel_main(struct multiboot_info* info) {
     disable_interrupts();
     setup_gdt();
@@ -71,12 +90,14 @@ void kernel_main(struct multiboot_info* info) {
 
     init_ramdisk(mod0 + 0xC0000000, size);
 
+    test();
+
     if (graphics_enabled) {
         init_graphics((u32*) framebuffer_addr, framebuffer_width, framebuffer_height, (u32) framebuffer_bpp / 8, framebuffer_pitch);
         init_gui(framebuffer_width, framebuffer_height);
         create_kernel_task(gui_thread_entry);
 
-        create_user_task("test.exe");
+        create_user_task("files.exe");
     }
 
     init_keyboard();

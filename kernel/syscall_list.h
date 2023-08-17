@@ -1,5 +1,7 @@
 #pragma once
 
+// i need to organize this..
+
 #define SYSCALL_GET_TASK_ID 1
 #define SYSCALL_EXIT  2
 #define SYSCALL_PRINT 3
@@ -23,3 +25,6 @@
 #define SYSCALL_GET_HEAP_START 21
 #define SYSCALL_GET_HEAP_END 22
 #define SYSCALL_SET_HEAP_END 23
+#define SYSCALL_OPEN_DIR 24
+#define SYSCALL_CLOSE_DIR 25
+#define SYSCALL_NEXT_FILE_IN_DIR 26

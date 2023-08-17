@@ -1,6 +1,6 @@
 #pragma once
 
-// ps/2 mouse
+// PS/2 mouse
 
 #include "types.h"
 

@@ -1,5 +1,7 @@
 #pragma once
 
+// GUI window management
+
 #include "types.h"
 
 #define WINDOW_CONTENT_XOFFSET 1

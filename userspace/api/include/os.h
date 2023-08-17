@@ -8,30 +8,20 @@
 // window management
 // audio
 
-enum {
-    OS_EVENT_NULL,
-    OS_EVENT_KEY,
-};
-
-typedef struct {
-    unsigned short type;
-    unsigned short window;
-    unsigned int data0;
-    unsigned int data1;
-    unsigned int data2;
-} os_event;
-
-typedef int os_window_t;
-
 // basics
 int os_get_task_id();
 void os_print(const char* msg);
 void os_exec(const char* path);
+void os_exit();
+
+// file i/o
 int os_open_file(const char* path);
 int os_close_file(int fd);
 int os_read_file(int fd, char* buffer, int num_bytes);
 int os_get_file_size(int fd);
-void os_exit();
+int os_open_dir(const char* path);
+int os_close_dir();
+int os_next_file_in_dir(char* buffer, int buffer_size);
 
 // heap
 uint32_t os_get_heap_start();

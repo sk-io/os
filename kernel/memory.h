@@ -11,8 +11,8 @@
 
     0xC000 0000 - kernel start
 */
-#define USER_STACK_PAGES (0x10)
 
+#define USER_STACK_PAGES (0x10)
 
 #define USER_HEAP_START      0x20000000
 #define USER_STACK_BOTTOM    0xB0000000

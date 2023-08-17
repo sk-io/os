@@ -1,8 +1,8 @@
 #pragma once
 
-#include "types.h"
-
 // physical memory manager
+
+#include "types.h"
 
 void pmm_init(u32 mem_low, u32 mem_high);
 u32 pmm_alloc_pageframe();

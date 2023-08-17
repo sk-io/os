@@ -28,19 +28,21 @@ typedef struct {
 
     // kernel stack
     u32 kesp; // exchanged on task switch
-    u32 kesp0; // top of kernel stack (highest address). copied to TSS, unused in kernel threads
+    u32 kesp0; // top of kernel stack (highest address) ...
+    // ... stack ptr is set to this (via TSS) when transitioning from user to kernel mode (on interrupt/syscall)
 
-    // page directory
-    u32* pagedir;
-    u32 is_kernel_task; // flags
-    u32 state;
-    FIL open_files[MAX_OPEN_FILES];
-    void* event_buffer; // address in kernel vmem
-    s32 event_shmem_id;
+    u32* pagedir; // this task's page directory, kernel tasks use the initial pagedir
+    u32 is_kernel_task;
+    u32 state; // task state enum
+    FIL open_files[MAX_OPEN_FILES]; // hack
+    void* event_buffer; // address to shared memory in kernel vmem (kernel-side)
+    s32 event_shmem_id; // used to share the buffer with userspace
     u8 sharedmem_bitmap[8192]; // 1mb / 0x1000 bytes per page / 8 bits per byte
 
     u32 heap_start; // page aligned
     u32 heap_end;
+
+    DIR open_dir;
 } Task;
 
 extern Task tasks[MAX_TASKS];
