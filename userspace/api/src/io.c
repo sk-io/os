@@ -55,11 +55,11 @@ int os_close_dir() {
     return ret;
 }
 
-int os_next_file_in_dir(char* buffer, int buffer_size) {
+int os_next_file_in_dir(OSFileInfo* info) {
     int ret;
     asm volatile(
         "int $0x80"
-        : "=a"(ret) : "a"(SYSCALL_NEXT_FILE_IN_DIR), "b"(buffer), "c"(buffer_size)
+        : "=a"(ret) : "a"(SYSCALL_NEXT_FILE_IN_DIR), "b"(info)
     );
     return ret;
 }

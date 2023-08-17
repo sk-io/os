@@ -34,6 +34,7 @@ void* os_map_window_framebuffer(int window_id) {
 }
 
 // returns shown buffer index
+// rename to os_redraw_window?
 int os_swap_window_buffers(int window_id) {
     int ret;
     asm volatile(

@@ -82,22 +82,32 @@ void syscall_set_heap_end(u32 heap_end) {
 }
 
 int syscall_open_dir(const char* path) {
-    return f_opendir(&current_task->open_dir, "/") == FR_OK;
+    return f_opendir(&current_task->open_dir, path) == FR_OK;
 }
 
 int syscall_close_dir() {
     return f_closedir(&current_task->open_dir) == FR_OK;
 }
 
-int syscall_next_file_in_dir(char* buffer, int buffer_size) {
+typedef struct {
+    uint32_t attributes;
+    char name[256];
+} OSFileInfo;
+#define OS_FILE_INFO_IS_DIR 16
+
+int syscall_next_file_in_dir(OSFileInfo* info_out) {
     FILINFO info;
     f_readdir(&current_task->open_dir, &info);
-
+    
     if (info.fname[0] == '\0')
         return 0;
 
-    assert(buffer_size >= sizeof(info.fname));
-    strncpy(buffer, info.fname, buffer_size);
+    info_out->attributes = 0;
+    if (info.fattrib & AM_DIR) {
+        info_out->attributes |= OS_FILE_INFO_IS_DIR;
+    }
+
+    strncpy(info_out->name, info.fname, sizeof(info.fname));
     return 1;
 }
 

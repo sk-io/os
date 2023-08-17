@@ -36,6 +36,13 @@ u32 load_elf_segments(u8* elf) {
 
         // copy it.
         memcpy(segment->p_vaddr, elf + segment->p_offset, segment->p_filesz);
+
+        // zero remaining bytes
+        u32 file_start = (segment->p_vaddr & ~0xFFF) + segment->p_filesz;
+        u32 file_end = (segment->p_vaddr & ~0xFFF) + num_pages * 0x1000;
+
+        // kernel_log("ELF: zeroed %d bytes", file_end - file_start);
+        memset(file_start, 0, file_end - file_start);
     }
 
     return header->e_entry;
