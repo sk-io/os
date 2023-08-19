@@ -1,13 +1,14 @@
 #include <os.h>
 #include <types.h>
+#include <string.h>
 
 #include "graphics.h"
 
 #define width 240
-#define height 360
+#define height 320
 
 #define MAX_ENTRIES 64
-#define FILE_LIST_Y_OFFSET 20
+#define FILE_LIST_Y_OFFSET 32
 #define FILE_LIST_Y_SPACING 12
 
 OSFileInfo entries[MAX_ENTRIES] = {0};
@@ -18,6 +19,8 @@ char path[256] = {0};
 
 static void handle_mouse_move(int x, int y);
 static void handle_left_click();
+static void read_directory();
+static void go_up();
 
 int main(int argc, char* argv[]) {
     int window = os_create_window(width, height, 0);
@@ -28,27 +31,20 @@ int main(int argc, char* argv[]) {
 
     os_printf("reading dir...");
 
-    if (!os_open_dir("/")) {
-        os_printf("failed to open /");
-        return 1;
-    }
-
-    for (int i = 0; i < MAX_ENTRIES; i++) {
-        if (!os_next_file_in_dir(&entries[i]))
-            break;
-        num_entries++;
-    }
-    
-    os_close_dir();
+    strcpy(path, "/");
+    read_directory();
 
     os_printf("done! read %d entries.", num_entries);
 
     unsigned int prev_left_mouse_state = 0;
+    u32 last_mouse_button_state = 0;
 
     OSEvent event;
     while (1) {
         graphics_fill(0xFF000000);
-        graphics_draw_string("FILES", 3, 5, 0xFFFFFFFF);
+        graphics_draw_string("Path:", 3, 5, 0xFFFFFFFF);
+        graphics_draw_string(path, 3 + 10*7, 5, 0xFFFFFFFF);
+        graphics_draw_string("Go up", 3, 5+12, 0xFFFFFFFF);
 
         for (int i = 0; i < num_entries; i++) {
             const OSFileInfo* entry = &entries[i];
@@ -63,20 +59,16 @@ int main(int argc, char* argv[]) {
         os_wait_for_events();
         
         while (os_poll_event(&event)) {
-            if (event.type == EVENT_MOUSE_MOVE) {
+            if (event.type == EVENT_MOUSE_MOVE || event.type == EVENT_MOUSE) {
                 OSMouseEvent* e = (OSMouseEvent*) &event;
 
-                handle_mouse_move(e->x, e->y);
-            }
-
-            if (event.type == EVENT_MOUSE) {
-                OSMouseEvent* e = (OSMouseEvent*) &event;
-                
                 handle_mouse_move(e->x, e->y);
 
                 if (e->buttons) {
-                    handle_left_click();
+                    handle_left_click(e->x, e->y);
                 }
+
+                last_mouse_button_state = e->buttons;
             }
         }
     }
@@ -95,16 +87,57 @@ static void handle_mouse_move(int x, int y) {
     selected_entry = (y - FILE_LIST_Y_OFFSET) / FILE_LIST_Y_SPACING;
 }
 
-static void handle_left_click() {
+static void handle_left_click(int x, int y) {
+    if (x > 3 && x < width - 3 && y > 17 && y < 27) {
+        go_up();
+        read_directory();
+        return;
+    }
+
     if (selected_entry == -1 || selected_entry >= num_entries)
         return;
     
     if (entries[selected_entry].attributes & OS_FILE_INFO_IS_DIR) {
         // change directory
+
+        int len = strlen(path);
+        if (path[len - 1] != '/')
+            strcat(path, "/");
+
+        strcat(path, entries[selected_entry].name);
+
+        read_directory();
     } else {
         // execute binary
-        os_printf("executing");
-
         os_exec(entries[selected_entry].name);
     }
+}
+
+static void read_directory() {
+    num_entries = 0;
+    os_printf("reading from %s", path);
+
+    if (!os_open_dir(path)) {
+        os_printf("failed to open %s", path);
+        return 1;
+    }
+
+    for (int i = 0; i < MAX_ENTRIES; i++) {
+        if (!os_next_file_in_dir(&entries[i]))
+            break;
+        num_entries++;
+    }
+    
+    os_close_dir();
+}
+
+static void go_up() {
+    if (strcmp(path, "/") == 0)
+        return;
+    
+    char* last = strrchr(path, '/');
+    if (last == path)
+        last[1] = '\0';
+    else
+        last[0] = '\0';
 }

@@ -154,6 +154,7 @@ static void gui_handle_events() {
             move.type = EVENT_MOUSE_MOVE;
             move.data0 = cursor_x - windows[window_under_cursor].x - WINDOW_CONTENT_XOFFSET;
             move.data1 = cursor_y - windows[window_under_cursor].y - WINDOW_CONTENT_YOFFSET;
+            move.data2 = 0;
             handle_event(&move);
         }
 
