@@ -23,9 +23,15 @@ void set_user_heap_end(Task* task, u32 new_heap_end) {
         kernel_log("expanding process heap by %d pages", num);
 
         for (int i = 0; i < num; i++) {
-            int phys = pmm_alloc_pageframe();
-            kernel_log("mapping %x", (task->heap_start + old_page_top * 0x1000 + i * 0x1000));
-            mem_map_page(old_page_top * 0x1000 + i * 0x1000, phys, PAGE_FLAG_WRITE | PAGE_FLAG_USER);
+            u32 phys = pmm_alloc_pageframe();
+            u32 virt = old_page_top * 0x1000 + i * 0x1000;
+
+            // kernel_log("mapping %x", virt);
+
+            mem_map_page(virt, phys, PAGE_FLAG_WRITE | PAGE_FLAG_USER);
+
+            // zero memory to prevent leaking data
+            memset((void*) virt, 0, 0x1000);
         }
     } else if (new_page_top < old_page_top) {
         // todo

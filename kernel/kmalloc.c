@@ -158,7 +158,7 @@ void change_heap_size(int new_size) {
         // kernel_log("expanding kernel heap by %d pages", num);
 
         for (int i = 0; i < num; i++) {
-            int phys = pmm_alloc_pageframe();
+            u32 phys = pmm_alloc_pageframe();
             mem_map_page(KERNEL_MALLOC + old_page_top * 0x1000 + i * 0x1000, phys, PAGE_FLAG_WRITE);
         }
     } else if (new_page_top < old_page_top) {
