@@ -59,7 +59,7 @@ int main(int argc, char* argv[]) {
         os_wait_for_events();
         
         while (os_poll_event(&event)) {
-            if (event.type == EVENT_MOUSE_MOVE || event.type == EVENT_MOUSE) {
+            if (event.type == EVENT_MOUSE_MOVE || event.type == EVENT_MOUSE_CLICK) {
                 OSMouseEvent* e = (OSMouseEvent*) &event;
 
                 handle_mouse_move(e->x, e->y);

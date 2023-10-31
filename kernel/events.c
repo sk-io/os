@@ -40,15 +40,24 @@ void handle_event(const Event* event) {
         disable_interrupts();
 
     // should this be in gui.c?
-    Window* w = get_window(focused_window);
-    if (w != NULL) {
-        assert(w->owner_task_id > 1000);
-        send_event_to_task(w->owner_task_id, event);
-    } else if (event->type == EVENT_KEYBOARD) {
-        if (event->data0 >> 7 == 0 && event->data1 != 0)
-            console_key_typed(event->data1);
-    }
 
+    if (event->type == EVENT_MOUSE_MOVE) {
+        Window* w = get_window(window_under_cursor);
+        if (w != NULL) {
+            send_event_to_task(w->owner_task_id, event);
+        }
+    }
+    
+    if (event->type == EVENT_MOUSE_CLICK || event->type == EVENT_KEYBOARD) {
+        Window* w = get_window(focused_window);
+
+        if (w != NULL) {
+            send_event_to_task(w->owner_task_id, event);
+        } else if (event->type == EVENT_KEYBOARD) {
+            if (event->data0 >> 7 == 0 && event->data1 != 0)
+                console_key_typed(event->data1);
+        }
+    }
     // todo: send events to tasks listening in the background
 
     if (eflags & FL_IF)
@@ -56,6 +65,7 @@ void handle_event(const Event* event) {
 }
 
 static void send_event_to_task(s32 task_id, const Event* event) {
+    assert(task_id > 1000);
     Task* task = get_task(task_id);
     assert(task->state != TASK_STATE_DEAD);
     assert(task->event_buffer);

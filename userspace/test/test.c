@@ -2,11 +2,14 @@
 #include <types.h>
 #include <string.h>
 #include <stdlib.h>
+#include <stdio.h>
 
 #define width 300
 #define height 240
 
 int main(int argc, char* argv[]) {
+    // printf("hello!!");
+
     int heap_start = os_get_heap_start();
     int heap_end = os_get_heap_end();
     os_printf("heap_start=%x heap_end=%x", heap_start, heap_end);

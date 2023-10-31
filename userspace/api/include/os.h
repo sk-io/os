@@ -57,7 +57,7 @@ void os_unmap_shared_mem(int id);
 enum {
     EVENT_NONE,
     EVENT_KEYBOARD,
-    EVENT_MOUSE,
+    EVENT_MOUSE_CLICK,
     EVENT_MOUSE_MOVE,
 };
 

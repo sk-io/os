@@ -87,7 +87,7 @@ static void handle_left_click() {
 
         if (window_under_cursor_inside_content) {
             Event click;
-            click.type = EVENT_MOUSE;
+            click.type = EVENT_MOUSE_CLICK;
             click.data0 = cursor_x - windows[window_under_cursor].x - WINDOW_CONTENT_XOFFSET;
             click.data1 = cursor_y - windows[window_under_cursor].y - WINDOW_CONTENT_YOFFSET;
             click.data2 = 1;
@@ -149,7 +149,7 @@ static void gui_handle_events() {
         if (currently_dragging_window != -1) {
             windows[currently_dragging_window].x += dx;
             windows[currently_dragging_window].y += dy;
-        } else if (window_under_cursor_inside_content && focused_window == window_under_cursor) {
+        } else if (window_under_cursor_inside_content) { // && focused_window == window_under_cursor
             Event move;
             move.type = EVENT_MOUSE_MOVE;
             move.data0 = cursor_x - windows[window_under_cursor].x - WINDOW_CONTENT_XOFFSET;

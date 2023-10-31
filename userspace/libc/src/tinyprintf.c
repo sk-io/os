@@ -343,14 +343,14 @@ int fprintf(FILE *f, const char *fmt, ...)
     return rv;
 }
 
-int printf(const char *fmt, ...)
-{
-    va_list va;
-    va_start(va, fmt);
-    int rv = vfprintf(stdout, fmt, va);
-    va_end(va);
-    return rv;
-}
+// int printf(const char *fmt, ...)
+// {
+//     va_list va;
+//     va_start(va, fmt);
+//     int rv = vfprintf(stdout, fmt, va);
+//     va_end(va);
+//     return rv;
+// }
 
 int vsnprintf(char *str, size_t size, const char *fmt, va_list va)
 {
