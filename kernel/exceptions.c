@@ -41,4 +41,3 @@ static void handle_div_by_zero(TrapFrame* frame) {
     kernel_log("div by zero! error=%u eip=%x", frame->error, frame->eip);
     crash_and_burn();
 }
-

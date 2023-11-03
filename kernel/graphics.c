@@ -163,4 +163,3 @@ void graphics_draw_vline(s32 x, s32 y, s32 h, u32 color) {
         i += graphics.width;
     }
 }
-

@@ -1,12 +1,16 @@
 #pragma once
 
-// PS/2 mouse
-
 #include "types.h"
 
-// accumulators
-extern s32 mouse_x_acc;
-extern s32 mouse_y_acc;
-extern bool mouse_left_button;
+// PS/2 mouse
+
+typedef struct {
+    // accumulators
+    s32 x_acc;
+    s32 y_acc;
+    bool left_button;
+} Mouse;
+
+extern Mouse mouse;
 
 void init_mouse();

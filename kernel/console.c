@@ -19,7 +19,7 @@ void init_console() {
     console.height = graphics_enabled ? 50 : 25;
     console.cursor_x = 0;
     console.cursor_y = 0;
-    console.buffer = (u8*) (graphics_enabled ? fake_console_buffer : 0xC00B8000);
+    console.buffer = (u8*) (graphics_enabled ? gui.fake_console_buffer : 0xC00B8000);
     console.clear_color = 0x0F;
 
     clear_prompt();
@@ -56,7 +56,7 @@ void console_key_typed(char c) {
     update_cursor_pos();
 
     if (graphics_enabled)
-        gui_needs_redraw = true;
+        gui.needs_redraw = true;
 }
 
 void console_set_prompt_enabled(bool enabled) {

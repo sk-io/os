@@ -2,8 +2,9 @@
 
 #include "types.h"
 #include "ramdisk.h"
+#include "fatfs/fatfs_ff.h"
 
-#define MAX_TASKS 16
+#define MAX_TASKS 64
 #define MAX_OPEN_FILES 16
 #define MAX_TIMERS 4
 

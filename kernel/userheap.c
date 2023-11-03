@@ -12,7 +12,7 @@ void init_user_heap(Task* task) {
 
 void set_user_heap_end(Task* task, u32 new_heap_end) {
 	assert(new_heap_end > task->heap_start);
-    kernel_log("heap start is %x", task->heap_start);
+    // kernel_log("heap start is %x", task->heap_start);
 
     int old_page_top = CEIL_DIV(task->heap_end, 0x1000);
     int new_page_top = CEIL_DIV(new_heap_end, 0x1000);

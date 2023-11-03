@@ -39,7 +39,7 @@ u32 syscall_open_file(const char* path) {
         }
     }
     assert_msg(fd != -1, "too many opened files!");
-    kernel_log("fd=%d %s", fd, path);
+    // kernel_log("fd=%d %s", fd, path);
 
     FRESULT res = f_open(&current_task->open_files[fd], path, FA_READ);
     assert_msg(res == FR_OK, "f_open");

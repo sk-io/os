@@ -5,9 +5,7 @@
 #include "log.h"
 #include "gui.h"
 
-s32 mouse_x_acc;
-s32 mouse_y_acc;
-bool mouse_left_button;
+Mouse mouse;
 
 #define PACKET_BYTES 3
 static u8 buffer[PACKET_BYTES];
@@ -19,8 +17,9 @@ static void write_mouse(u8 data);
 static void handle_mouse_interrupt(TrapFrame* frame);
 
 void init_mouse() {
-    mouse_x_acc = 0;
-    mouse_y_acc = 0;
+    mouse.x_acc = 0;
+    mouse.y_acc = 0;
+    mouse.left_button = false;
 
     memset(buffer, 0, PACKET_BYTES);
     buffer_index = 0;
@@ -64,11 +63,11 @@ static void handle_mouse_interrupt(TrapFrame* frame) {
     if (buffer_index >= PACKET_BYTES) {
         buffer_index = 0;
 
-        mouse_x_acc += (s8) buffer[2];
-        mouse_y_acc -= (s8) buffer[0];
-        mouse_left_button = buffer[1] & 1;
-        if (mouse_left_button)
-            gui_left_click = true;
+        mouse.x_acc += (s8) buffer[2];
+        mouse.y_acc -= (s8) buffer[0];
+        mouse.left_button = buffer[1] & 1;
+        if (mouse.left_button)
+            gui.left_click = true;
         // kernel_log("mouse x=%d, y=%d", mouse_x_acc, mouse_y_acc);
     }
 }

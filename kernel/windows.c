@@ -65,7 +65,7 @@ s32 create_window(s32 width, s32 height, u32 flags) {
     move_window_to_front(index);
     focused_window = index;
 
-    gui_needs_redraw = true;
+    gui.needs_redraw = true;
 
     return index;
 }
@@ -82,7 +82,7 @@ void destroy_window(s32 window_id) {
         z_order_remove_at(index);
     }
 
-    gui_needs_redraw = true;
+    gui.needs_redraw = true;
 }
 
 static s32 find_window_slot() {
@@ -99,7 +99,7 @@ static s32 get_framebuffer_shmem_id(s32 window_id) {
 }
 
 static s32 swap_buffers(s32 window_id) {
-    gui_needs_redraw = true;
+    gui.needs_redraw = true;
 
     Window* w = &windows[window_id];
     if (w->flags & WINDOW_FLAG_DOUBLE_BUFFERED) {

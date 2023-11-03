@@ -64,11 +64,8 @@ void kernel_main(struct multiboot_info* info) {
     sharedmem_init();
     init_events();
 
-    u32 size = mod1 - mod0;
-    kernel_log("module addr: %x", mod0);
-    kernel_log("module size: %x", size);
-
-    init_ramdisk(mod0 + 0xC0000000, size);
+    u32 ramdisk_size = mod1 - mod0;
+    init_ramdisk(mod0 + 0xC0000000, ramdisk_size);
 
     if (graphics_enabled) {
         init_graphics((u32*) framebuffer_addr, framebuffer_width, framebuffer_height, (u32) framebuffer_bpp / 8, framebuffer_pitch);

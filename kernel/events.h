@@ -3,6 +3,8 @@
 #include "types.h"
 #include "tasks.h"
 
+// userspace events
+
 enum {
     EVENT_NONE,
     EVENT_KEYBOARD,

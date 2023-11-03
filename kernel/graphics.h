@@ -2,6 +2,8 @@
 
 #include "types.h"
 
+// basic software graphics
+
 typedef struct {
     u32* framebuffer;
     u32* backbuffer;

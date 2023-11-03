@@ -2,6 +2,8 @@
 
 #include "types.h"
 
+// virtual console, outputs either to framebuffer or directly to VGA
+
 enum VGAColor {
 	VGA_COLOR_BLACK = 0,
 	VGA_COLOR_BLUE = 1,
