@@ -59,6 +59,7 @@ enum {
     EVENT_KEYBOARD,
     EVENT_MOUSE_CLICK,
     EVENT_MOUSE_MOVE,
+    EVENT_TIMER,
 };
 
 typedef struct {
@@ -82,8 +83,16 @@ typedef struct {
     unsigned int buttons;
 } OSMouseEvent;
 
+typedef struct {
+    unsigned int type;
+    unsigned int timer_id;
+    unsigned int data1;
+    unsigned int data2;
+} OSTimerEvent;
+
 int os_poll_event(OSEvent* event);
 int os_wait_for_events();
+void os_set_timer_interval(int timer_id, int interval_ms);
 
 // utils
 void os_printf(const char* msg, ...);

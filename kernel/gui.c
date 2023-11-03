@@ -10,6 +10,7 @@
 #include "events.h"
 #include "windows.h"
 #include "res/cursor_img.h"
+#include "time.h"
 
 s32 gui_width, gui_height;
 s32 cursor_x, cursor_y;
@@ -67,6 +68,14 @@ static void gui_draw_frame() {
 
     graphics_fill_rect(graphics.width - 10, 2, 8, 8, redraw_indicator ? 0xFF00FF : 0);
     redraw_indicator ^= 1;
+
+    // draw time
+    u64 time = get_system_time_millis();
+    // if (time)
+    //     time /= 1000;
+    char time_str[128];
+    sprintf(time_str, "systime: %u", time);
+    graphics_draw_string(time_str, 3, graphics.height - 15, 0);
 
     graphics_copy_rect(cursor_x, cursor_y, 12, 19, 0, 0, res_cursor_raw);
 

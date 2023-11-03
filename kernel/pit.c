@@ -4,12 +4,12 @@
 #include "util.h"
 #include "tasks.h"
 
-u64 system_ticks = 0;
+PIT pit = {0};
 
-static bool timer_enabled = false;
 void handle_timer_int(TrapFrame* frame);
 
 void init_timer(u32 frequency) {
+    pit.freq = frequency;
     u32 divisor = 1193180 / frequency;
 
     outb(0x43, 0x36);
@@ -24,14 +24,14 @@ void init_timer(u32 frequency) {
 }
 
 void set_timer_enabled(bool enabled) {
-    timer_enabled = enabled;
+    pit.enabled = enabled;
 }
 
 void handle_timer_int(TrapFrame* frame) {
     UNUSED_VAR(frame);
-    system_ticks++;
+    pit.ticks++;
 
-    if (timer_enabled) {
+    if (pit.enabled) {
         task_schedule();
     }
 }

@@ -33,8 +33,6 @@ int main(int argc, char* argv[]) {
 
     int* fb = os_map_window_framebuffer(window);
 
-    int shown_buffer = 0;
-    int count = 0;
     OSEvent event;
 
     int i = 0;
@@ -57,7 +55,7 @@ int main(int argc, char* argv[]) {
     int color_i = 0;
 
     while (1) {
-        shown_buffer = os_swap_window_buffers(window);
+        os_swap_window_buffers(window);
 
         os_wait_for_events(); // limit cpu
         while (os_poll_event(&event)) {
@@ -67,7 +65,6 @@ int main(int argc, char* argv[]) {
                 int y = mouse->y;
                 int buttons = mouse->buttons;
                 int color = colors[color_i];
-
 
                 dot_at(fb, x, y, color);
 

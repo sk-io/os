@@ -43,3 +43,7 @@ int os_wait_for_events() {
 
     return 1;
 }
+
+void os_set_timer_interval(int timer_id, int interval_ms) {
+
+}

@@ -8,6 +8,7 @@ enum {
     EVENT_KEYBOARD,
     EVENT_MOUSE_CLICK,
     EVENT_MOUSE_MOVE,
+    EVENT_TIMER,
 };
 
 typedef struct {
@@ -16,9 +17,6 @@ typedef struct {
     u32 data1;
     u32 data2;
 } Event;
-
-typedef struct {
-} EventKeyboard;
 
 #define EVENT_BUFFER_SIZE 256
 

@@ -3,15 +3,17 @@ all:
 	make -C api
 	make -C libc
 	make -C draw
-	make -C terminal
-	make -C files
-	make -C test
-	# make -C cube
 	cp draw/draw.exe bin/
+	make -C terminal
 	cp terminal/terminal.exe bin/
-	# cp cube/cube.exe bin/
-	cp test/test.exe bin/
+	make -C files
 	cp files/files.exe bin/
+	make -C test
+	cp test/test.exe bin/
+	make -C breakout
+	cp breakout/breakout.exe bin/
+	# make -C cube
+	# cp cube/cube.exe bin/
 
 clean:
 	make -C api clean
@@ -21,4 +23,5 @@ clean:
 	make -C cube clean
 	make -C test clean
 	make -C files clean
+	make -C breakout clean
 	rm -f bin/*.exe
