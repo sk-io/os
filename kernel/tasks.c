@@ -39,12 +39,8 @@ void setup_tasks() {
 }
 
 s32 create_user_task(const char* path) {
-    // todo: push/pop interrupt state
-    u32 eflags = read_eflags();
-
-    // kernel_log("create_user_task eflags=%u", eflags);
-    if (eflags & FL_IF)
-        disable_interrupts();
+    // todo: handle all the errors
+    push_cli();
 
     FIL file;
     FRESULT res;
@@ -55,6 +51,12 @@ s32 create_user_task(const char* path) {
     }
     
     u32 elf_size = f_size(&file);
+    if (elf_size < 52) {
+        kernel_log("create_user_task: elf file is too small. size=%u", elf_size);
+        f_close(&file);
+        return -1;
+    }
+
     u8* elf = kmalloc(elf_size);
     UINT br;
     res = f_read(&file, elf, elf_size, &br);
@@ -80,6 +82,9 @@ s32 create_user_task(const char* path) {
     // load elf, requires memory to be set up
     u32 entry = load_elf_segments(elf);
     kfree(elf);
+    if (!entry) {
+        return -1;
+    }
 
     // init the task
     create_task(index, entry, false, pagedir);
@@ -93,8 +98,7 @@ s32 create_user_task(const char* path) {
 
     num_tasks++;
 
-    if (eflags & FL_IF)
-        enable_interrupts();
+    pop_cli();
     return tasks[index].id;
 }
 
@@ -106,9 +110,7 @@ void create_kernel_task(void* func) {
 }
 
 void kill_task(u32 id) {
-    u32 eflags = read_eflags();
-    if (eflags & FL_IF)
-        disable_interrupts();
+    push_cli();
 
     kernel_log("kill_task %u", id);
     if (id <= 1000) {
@@ -135,8 +137,7 @@ void kill_task(u32 id) {
 
     num_tasks--;
 
-    if (eflags & FL_IF)
-        enable_interrupts();
+    pop_cli();
 }
 
 static int choose_next_task() {

@@ -14,7 +14,16 @@ bool elf_is_valid(Elf32_Ehdr* hdr) {
 // copies ELF segments into their desired virtual addresses
 u32 load_elf_segments(u8* elf) {
     Elf32_Ehdr* header = (Elf32_Ehdr*) elf;
-    assert_msg(elf_is_valid(header), "elf identifier invalid");
+
+    if (!elf_is_valid(header)) {
+        kernel_log("elf identifier invalid");
+        return 0;
+    }
+
+    if (header->e_type != 0x02) {
+        kernel_log("elf is not an executable");
+        return 0;
+    }
 
     u32 num_segments = header->e_phnum;
     for (u32 i = 0; i < num_segments; i++) {

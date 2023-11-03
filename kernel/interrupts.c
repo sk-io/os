@@ -103,15 +103,16 @@ void push_cli() {
 
     disable_interrupts();
 
-    if (cli_level == 0)
-        cli_init_state = (eflags | FL_IF) != 0;
+    if (cli_level == 0) {
+        cli_init_state = (eflags & FL_IF) != 0;
+    }
     
     cli_level++;
 }
 
 void pop_cli() {
     u32 eflags = read_eflags();
-    assert(eflags | FL_IF);
+    assert((eflags & FL_IF) == 0);
 
     assert(cli_level > 0);
     cli_level--;

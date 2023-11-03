@@ -37,9 +37,7 @@ void destroy_events_for_task(Task* task) {
 }
 
 void handle_event(const Event* event) {
-    u32 eflags = read_eflags();
-    if (eflags & FL_IF)
-        disable_interrupts();
+    push_cli();
 
     // should this be in gui.c?
 
@@ -62,8 +60,7 @@ void handle_event(const Event* event) {
     }
     // todo: send events to tasks listening in the background
 
-    if (eflags & FL_IF)
-        enable_interrupts();
+    pop_cli();
 }
 
 static void send_event_to_task(s32 task_id, const Event* event) {
