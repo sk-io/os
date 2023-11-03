@@ -4,17 +4,19 @@ all:
 	make -C libc
 	mkdir -p bin
 	make -C draw
-	cp draw/draw.exe bin/
+	cp draw/*.exe bin/
 	make -C terminal
-	cp terminal/terminal.exe bin/
+	cp terminal/*.exe bin/
 	make -C files
-	cp files/files.exe bin/
+	cp files/*.exe bin/
 	make -C test
-	cp test/test.exe bin/
+	cp test/*.exe bin/
+	make -C test2
+	cp test2/*.exe bin/
 	make -C breakout
-	cp breakout/breakout.exe bin/
+	cp breakout/*.exe bin/
 	# make -C cube
-	# cp cube/cube.exe bin/
+	# cp cube/*.exe bin/
 
 clean:
 	make -C api clean

@@ -54,7 +54,6 @@ void kernel_main(struct multiboot_info* info) {
     //enable_fpu();
 
     init_timer(1000);
-    set_timer_enabled(true);
     
     init_memory(info->mem_upper * 1024);
     kernel_log("Initial pagedir is at %x", mem_get_current_page_directory());
@@ -76,12 +75,14 @@ void kernel_main(struct multiboot_info* info) {
         init_gui(framebuffer_width, framebuffer_height);
         create_kernel_task(gui_thread_entry);
 
-        create_user_task("breakout.exe");
+        create_user_task("files.exe");
     }
 
     init_keyboard();
     init_mouse();
 
+    set_timer_enabled(true);
+    
     kernel_log("Init done.");
 
     console_set_prompt_enabled(true);

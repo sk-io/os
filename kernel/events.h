@@ -29,3 +29,4 @@ void init_events();
 void init_events_for_task(Task* task);
 void destroy_events_for_task(Task* task);
 void handle_event(const Event* event);
+void check_event_timers();

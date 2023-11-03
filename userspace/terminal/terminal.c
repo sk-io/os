@@ -46,7 +46,7 @@ int main(int argc, char* argv[]) {
         os_wait_for_events();
         
         while (os_poll_event(&event)) {
-            if (event.type == EVENT_KEYBOARD) {
+            if (event.type == OS_EVENT_KEYBOARD) {
                 OSKeyboardEvent* e = (OSKeyboardEvent*) &event;
 
                 if (e->state)

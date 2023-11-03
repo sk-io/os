@@ -59,7 +59,7 @@ int main(int argc, char* argv[]) {
 
         os_wait_for_events(); // limit cpu
         while (os_poll_event(&event)) {
-            if (event.type == EVENT_MOUSE_MOVE) {
+            if (event.type == OS_EVENT_MOUSE_MOVE) {
                 OSMouseEvent* mouse = (OSMouseEvent*) &event;
                 int x = mouse->x;
                 int y = mouse->y;

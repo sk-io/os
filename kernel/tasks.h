@@ -5,6 +5,7 @@
 
 #define MAX_TASKS 16
 #define MAX_OPEN_FILES 16
+#define MAX_TIMERS 4
 
 // used for newly created tasks
 typedef struct {
@@ -22,6 +23,12 @@ enum {
     TASK_STATE_WAIT_FOR_EVENT,
     TASK_STATE_WAIT_FOR_REDRAW,
 };
+
+typedef struct {
+    u32 interval;
+    u64 next_fire;
+    bool active;
+} Timer;
 
 typedef struct {
     u32 id;
@@ -43,6 +50,8 @@ typedef struct {
     u32 heap_end;
 
     DIR open_dir;
+
+    Timer timers[MAX_TIMERS];
 } Task;
 
 extern Task tasks[MAX_TASKS];

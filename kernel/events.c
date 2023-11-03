@@ -8,6 +8,8 @@
 #include "gui.h"
 #include "windows.h"
 #include "console.h"
+#include "time.h"
+#include "log.h"
 
 static u32 get_event_buffer_shmem_id();
 static void task_wait_for_event();
@@ -87,4 +89,39 @@ static void task_wait_for_event() {
     
     task_schedule();
     assert(current_task->state != TASK_STATE_WAIT_FOR_EVENT);
+}
+
+typedef struct {
+    unsigned int type;
+    unsigned int timer_id;
+    unsigned int time_of_fire;
+    unsigned int data2;
+} OSTimerEvent;
+
+void check_event_timers() {
+    u64 time = get_system_time_millis();
+
+    for (int i = 0; i < MAX_TASKS; i++) {
+        Task* task = &tasks[i];
+        if (task->state == TASK_STATE_DEAD)
+            continue;
+        
+        for (int t = 0; t < MAX_TIMERS; t++) {
+            Timer* timer = &task->timers[t];
+
+            if (!timer->active)
+                continue;
+            
+            if (time >= timer->next_fire) {
+                OSTimerEvent event;
+                event.type = EVENT_TIMER;
+                event.timer_id = t;
+                event.time_of_fire = timer->next_fire;
+                event.data2 = 0;
+                send_event_to_task(task->id, (const Event*) &event);
+
+                timer->next_fire += timer->interval;
+            }
+        }
+    }
 }

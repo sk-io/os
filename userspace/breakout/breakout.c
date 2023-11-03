@@ -132,7 +132,7 @@ int main(int argc, char* argv[]) {
         shown_buffer = os_swap_window_buffers(window);
 
         while (os_poll_event(&event)) {
-            if (event.type == EVENT_MOUSE_MOVE) {
+            if (event.type == OS_EVENT_MOUSE_MOVE) {
                 OSMouseEvent* mouse = (OSMouseEvent*) &event;
                 paddle.x = mouse->x;
             }

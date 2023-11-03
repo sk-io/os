@@ -45,5 +45,8 @@ int os_wait_for_events() {
 }
 
 void os_set_timer_interval(int timer_id, int interval_ms) {
-
+    asm volatile(
+        "int $0x80"
+        :: "a"(SYSCALL_SET_TIMER_INTERVAL), "b"(timer_id), "c"(interval_ms)
+    );
 }

@@ -6,6 +6,7 @@
 #include "tasks.h"
 #include "ramdisk.h"
 #include "userheap.h"
+#include "time.h"
 
 #define NUM_SYSCALLS 256
 void* syscall_handlers[NUM_SYSCALLS];
@@ -111,6 +112,14 @@ int syscall_next_file_in_dir(OSFileInfo* info_out) {
     return 1;
 }
 
+void syscall_set_timer_interval(int timer_id, int interval_ms) {
+    assert_msg(timer_id < MAX_TIMERS, "too many timers!");
+    Timer* timer = &current_task->timers[timer_id];
+    timer->interval = interval_ms;
+    timer->active = interval_ms != 0;
+    timer->next_fire = get_system_time_millis() + interval_ms;
+}
+
 void init_syscalls() {
     memset(syscall_handlers, 0, sizeof(syscall_handlers));
 
@@ -128,6 +137,7 @@ void init_syscalls() {
     register_syscall(SYSCALL_OPEN_DIR, syscall_open_dir);
     register_syscall(SYSCALL_CLOSE_DIR, syscall_close_dir);
     register_syscall(SYSCALL_NEXT_FILE_IN_DIR, syscall_next_file_in_dir);
+    register_syscall(SYSCALL_SET_TIMER_INTERVAL, syscall_set_timer_interval);
 
     register_isr(0x80, handle_syscall_interrupt);
 }

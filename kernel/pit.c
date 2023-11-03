@@ -3,6 +3,7 @@
 #include "interrupts.h"
 #include "util.h"
 #include "tasks.h"
+#include "events.h"
 
 PIT pit = {0};
 
@@ -32,6 +33,7 @@ void handle_timer_int(TrapFrame* frame) {
     pit.ticks++;
 
     if (pit.enabled) {
+        check_event_timers();
         task_schedule();
     }
 }

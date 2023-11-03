@@ -55,11 +55,11 @@ void os_unmap_shared_mem(int id);
 
 // events
 enum {
-    EVENT_NONE,
-    EVENT_KEYBOARD,
-    EVENT_MOUSE_CLICK,
-    EVENT_MOUSE_MOVE,
-    EVENT_TIMER,
+    OS_EVENT_NONE,
+    OS_EVENT_KEYBOARD,
+    OS_EVENT_MOUSE_CLICK,
+    OS_EVENT_MOUSE_MOVE,
+    OS_EVENT_TIMER,
 };
 
 typedef struct {
@@ -86,7 +86,7 @@ typedef struct {
 typedef struct {
     unsigned int type;
     unsigned int timer_id;
-    unsigned int data1;
+    unsigned int time_of_fire;
     unsigned int data2;
 } OSTimerEvent;
 
