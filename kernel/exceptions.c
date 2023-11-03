@@ -9,6 +9,7 @@
 static void handle_div_by_zero(TrapFrame* frame);
 static void handle_page_fault(TrapFrame* frame);
 static void handle_general_protection_fault(TrapFrame* frame);
+static void crash();
 
 void init_exceptions() {
     register_isr(0, handle_div_by_zero);
@@ -22,7 +23,8 @@ void handle_general_protection_fault(TrapFrame* frame) {
     kernel_log("cs=%u ds=%u ss=%u eflags=%u", frame->cs, frame->ds, frame->usermode_ss, frame->eflags);
     kernel_log("pdir=%x", pd);
     kernel_log("current task id=%u", current_task->id);
-    crash_and_burn();
+    
+    crash(frame->eip);
 }
 
 void handle_page_fault(TrapFrame* frame) {
@@ -34,10 +36,22 @@ void handle_page_fault(TrapFrame* frame) {
 
     u32* pd = mem_get_current_page_directory();
     kernel_log("page fault! vaddr=%x eip=%x pdir=%x error=%u", cr2, frame->eip, pd, frame->error);
-    crash_and_burn();
+
+    crash(frame->eip);
 }
 
 static void handle_div_by_zero(TrapFrame* frame) {
     kernel_log("div by zero! error=%u eip=%x", frame->error, frame->eip);
-    crash_and_burn();
+
+    crash(frame->eip);
+}
+
+static void crash(u32 eip) {
+    if (eip >= KERNEL_START) {
+        crash_and_burn();
+        return;
+    }
+
+    kill_task(current_task->id);
+    task_schedule();
 }

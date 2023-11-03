@@ -28,5 +28,9 @@ int main(int argc, char* argv[]) {
     // memset(buf, 0, 64);
     // strcpy(buf, test);
     // os_printf("test: %s", buf);
-    return 0;
+
+    os_printf("crashing...");
+    
+    *(u32*) 0 = 12345;
+    return 12345 / argc;
 }
