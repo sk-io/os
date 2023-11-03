@@ -8,6 +8,8 @@
 #define board_w 12
 #define board_h 5
 
+#define ABS(N) ((N<0)?(-N):(N))
+
 const int cell_w = width / board_w;
 const int cell_h = 50 / board_h;
 
@@ -29,8 +31,10 @@ typedef struct {
 Ball ball; // rodata initialization is broken rn
 Paddle paddle;
 
+int wait;
+
 void reset();
-void move_ball(Ball* ball);
+void move_ball(Ball* ball, int dx, int dy);
 bool ball_intersects(Ball* ball, int x, int y, int w, int h);
 void frame();
 
@@ -43,45 +47,63 @@ void reset() {
     ball.dx = ball.dy = 4;
     ball.size = 10;
 
-    paddle.x = width / 2;
+    // paddle.x = width / 2;
     paddle.y = height - 25;
     paddle.w = 40;
     paddle.h = 10;
+    
+    wait = 50;
 }
 
-void move_ball(Ball* ball) {
-    // todo: move in individual axis
-
-    ball->x += ball->dx;
-    ball->y += ball->dy;
+void move_ball(Ball* ball, int dx, int dy) {
+    ball->x += dx;
+    ball->y += dy;
 
     if (ball->x < 0) {
         ball->x = 0;
-        ball->dx = -ball->dx;
+        ball->dx *= -1;
     }
     if (ball->x > width - ball->size) {
         ball->x = width - ball->size;
-        ball->dx = -ball->dx;
+        ball->dx *= -1;
     }
     if (ball->y < 0) {
         ball->y = 0;
-        ball->dy = -ball->dy;
+        ball->dy *= -1;
     }
 
-    if (ball->y > height - ball->size) {
-        ball->y = height - ball->size;
-        ball->dy = -ball->dy;
+    if (ball->y > height) {
+        reset();
     }
 
-    if (ball->dy > 0 && ball_intersects(ball, paddle.x - paddle.w / 2, paddle.y - paddle.h / 2, paddle.w, paddle.h)) {
-        ball->dy = -ball->dy;
+    if (ball_intersects(ball, paddle.x - paddle.w / 2, paddle.y - paddle.h / 2, paddle.w, paddle.h)) {
+        if (dx) {
+            ball->x -= dx;
+            ball->dx *= -1;
+        } else {
+            ball->y -= dy;
+            ball->dy *= -1;
+
+            int delta_x = ABS(ball->x + ball->size / 2 - paddle.x);
+            int speed = delta_x > paddle.w / 2 ? 7 : 4;
+            ball->dx = ball->dx > 0 ? speed : -speed;
+        }
     }
 
     for (int y = 0; y < board_h; y++) {
         for (int x = 0; x < board_w; x++) {
+            if (board[x + y * board_w] == 0)
+                continue;
+            
             if (ball_intersects(ball, x * cell_w, y * cell_h, cell_w - 1, cell_h - 1)) {
                 board[x + y * board_w] = 0;
-
+                if (dx) {
+                    ball->x -= dx;
+                    ball->dx *= -1;
+                } else {
+                    ball->y -= dy;
+                    ball->dy *= -1;
+                }
             }
         }
     }
@@ -96,7 +118,12 @@ bool ball_intersects(Ball* ball, int x, int y, int w, int h) {
 }
 
 void frame() {
-    move_ball(&ball);
+    if (wait) {
+        wait--;
+    } else {
+        move_ball(&ball, 0, ball.dy);
+        move_ball(&ball, ball.dx, 0);
+    }
 
     graphics_fill(&ctx, 0xff222034);
 
@@ -123,6 +150,7 @@ int main(int argc, char* argv[]) {
 
     init_graphics(&ctx, fb, width, height);
 
+    paddle.x = width / 2;
     reset();
 
     while (1) {
