@@ -2,6 +2,7 @@
 all:
 	make -C api
 	make -C libc
+	mkdir -p bin
 	make -C draw
 	cp draw/draw.exe bin/
 	make -C terminal
@@ -20,8 +21,8 @@ clean:
 	make -C libc clean
 	make -C draw clean
 	make -C terminal clean
-	make -C cube clean
 	make -C test clean
 	make -C files clean
 	make -C breakout clean
+	# make -C cube clean
 	rm -f bin/*.exe

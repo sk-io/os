@@ -15,6 +15,11 @@ RAMDISK = ramdisk.fat
 
 all: $(IMAGE)
 
+$(IMAGE): $(KERNEL) $(RAMDISK)
+	cp $(KERNEL) image/boot
+	cp $(RAMDISK) image/boot
+	grub-mkrescue -o $(IMAGE) image
+
 $(KERNEL): $(OBJ)
 	$(LD) -o $(KERNEL) $(OBJ) $(LDFLAGS)
 
@@ -23,6 +28,14 @@ $(KERNEL): $(OBJ)
 
 %.o: %.asm
 	nasm $(ASFLAGS) $< -o $@
+
+$(RAMDISK): user
+	dd if=/dev/zero of=$(RAMDISK) bs=8M count=1
+	mformat -i $(RAMDISK) ::
+	mcopy -i $(RAMDISK) userspace/bin/* ::
+
+user:
+	make -C userspace
 
 run: $(IMAGE)
 	qemu-system-i386 -cdrom $(IMAGE) -serial stdio
@@ -36,11 +49,3 @@ debug:
 clean:
 	make -C userspace clean
 	rm -f kernel/*.o kernel/**/*.o $(KERNEL) $(IMAGE) $(RAMDISK)
-
-$(IMAGE): user $(KERNEL)
-	cp $(KERNEL) image/boot
-	cp $(RAMDISK) image/boot
-	grub-mkrescue -o $(IMAGE) image
-
-user:
-	make -C userspace
