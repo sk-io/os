@@ -29,6 +29,7 @@ void init_gui(s32 width, s32 height) {
     gui.cursor_y = height / 2;
     gui.prev_cursor_x = gui.cursor_x;
     gui.prev_cursor_y = gui.cursor_y;
+    gui.needs_redraw = true;
 
     init_windows();
     

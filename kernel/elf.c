@@ -32,13 +32,21 @@ u32 load_elf_segments(u8* elf) {
         // only copy segments with the LOAD flag
         if (segment->p_type != PT_LOAD)
             continue;
-
+        
+        if (segment->p_memsz == 0)
+            continue;
+        
         u32 flags = PAGE_FLAG_USER;
         if (segment->p_flags & PF_W)
             flags |= PAGE_FLAG_WRITE;
         
-        // allocate virtual pages
         u32 num_pages = CEIL_DIV(segment->p_memsz, 0x1000);
+        if (segment->p_vaddr & 0xFFF) {
+            // if vaddr is not page aligned we need to map the next one aswell
+            num_pages++;
+        }
+
+        // allocate virtual pages
         for (int j = 0; j < num_pages; j++) {
             mem_map_page((segment->p_vaddr & ~0xFFF) + j * 0x1000, pmm_alloc_pageframe(), flags);
         }
@@ -53,6 +61,9 @@ u32 load_elf_segments(u8* elf) {
         // kernel_log("ELF: zeroed %d bytes", file_end - file_start);
         memset(file_start, 0, file_end - file_start);
     }
+
+    u32 num_sections = header->e_shnum;
+    kernel_log("ELF: num sections %u", num_sections);
 
     return header->e_entry;
 }
