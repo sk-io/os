@@ -47,6 +47,7 @@ s32 create_user_task(const char* path) {
     res = f_open(&file, path, FA_READ);
     if (res != FR_OK) {
         kernel_log("create_user_task: failed to open executable file %s. error=%u", path, res);
+        pop_cli();
         return -1;
     }
     
@@ -54,6 +55,7 @@ s32 create_user_task(const char* path) {
     if (elf_size < 52) {
         kernel_log("create_user_task: elf file is too small. size=%u", elf_size);
         f_close(&file);
+        pop_cli();
         return -1;
     }
 
@@ -64,6 +66,7 @@ s32 create_user_task(const char* path) {
         f_close(&file);
         kfree(elf);
         kernel_log("create_user_task: failed to read from executable file %s. error=%u", path, res);
+        pop_cli();
         return -1;
     }
     f_close(&file);
@@ -75,6 +78,7 @@ s32 create_user_task(const char* path) {
     u32* pagedir = mem_alloc_page_dir();
     mem_change_page_directory(pagedir);
 
+    // allocate and map user stack
     for (int i = 0; i < USER_STACK_PAGES; i++) {
         mem_map_page(USER_STACK_BOTTOM - USER_STACK_PAGES * 0x1000 + i * 0x1000, pmm_alloc_pageframe(), PAGE_FLAG_OWNER | PAGE_FLAG_USER | PAGE_FLAG_WRITE);
     }
@@ -82,7 +86,11 @@ s32 create_user_task(const char* path) {
     // load elf, requires memory to be set up
     u32 entry = load_elf_segments(elf);
     kfree(elf);
+    elf = NULL;
     if (!entry) {
+        mem_change_page_directory(prev_pd);
+        kernel_log("create_user_task: failed to parse ELF binary");
+        pop_cli();
         return -1;
     }
 
