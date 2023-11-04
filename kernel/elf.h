@@ -6,6 +6,7 @@ typedef u16 Elf32_Half;
 typedef u32 Elf32_Word;
 typedef u32 Elf32_Addr;
 typedef u32 Elf32_Off;
+typedef s32 Elf32_Sword;
 
 #define EI_NIDENT 16
 typedef struct {
@@ -36,19 +37,6 @@ typedef struct {
     Elf32_Word p_align;
 } Elf32_Phdr;
 
-typedef struct {
-    Elf32_Word sh_name;
-    Elf32_Word sh_type;
-    Elf32_Word sh_flags;
-    Elf32_Addr sh_addr;
-    Elf32_Off sh_offset;
-    Elf32_Word sh_size;
-    Elf32_Word sh_link;
-    Elf32_Word sh_info;
-    Elf32_Word sh_addralign;
-    Elf32_Word sh_entsize;
-} Elf32_Shdr;
-
 #define PT_NULL 0
 #define PT_LOAD 1
 #define PT_DYNAMIC 2
@@ -62,5 +50,32 @@ typedef struct {
 #define PF_X 0x1
 #define PF_W 0x2
 #define PF_R 0x3
+
+typedef struct {
+    Elf32_Word sh_name;
+    Elf32_Word sh_type;
+    Elf32_Word sh_flags;
+    Elf32_Addr sh_addr;
+    Elf32_Off sh_offset;
+    Elf32_Word sh_size;
+    Elf32_Word sh_link;
+    Elf32_Word sh_info;
+    Elf32_Word sh_addralign;
+    Elf32_Word sh_entsize;
+} Elf32_Shdr;
+
+typedef struct {
+    Elf32_Sword d_tag;
+    union {
+        Elf32_Word d_val;
+        Elf32_Addr d_ptr;
+    } d_un;
+} Elf32_Dyn;
+
+#define DT_NULL 0
+#define DT_NEEDED 1
+#define DT_STRTAB 5
+#define DT_SYMTAB 6
+// etc..
 
 u32 load_elf_segments(u8* elf);
