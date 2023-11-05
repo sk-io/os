@@ -75,9 +75,7 @@ void parse_dynamic_section(ELFObject* elf, Elf32_Shdr* section) {
 
         if (table[i].d_tag == DT_NEEDED) {
             const char* needed = string_table + table[i].d_un.d_val;
-            kernel_log("NEEDED: %s", needed);
             find_and_load_shared_lib(needed);
-            // todo: find and load it.
         }
     }
 }
@@ -110,19 +108,14 @@ bool parse_elf(ELFObject* elf) {
         // kernel_log("parsing section %s: type=%u size=%u", name, section->sh_type, section->sh_size);
 
         if (strcmp(name, ".dynamic") == 0) {
-            // kernel_log("found dynamic section!");
             elf->dynamic_section = section;
         } else if (strcmp(name, ".dynsym") == 0) {
-            // kernel_log("found dynamic symbol table section!");
             elf->dynamic_symbol_table = section;
         } else if (strcmp(name, ".dynstr") == 0) {
-            // kernel_log("found dynamic symbol string table section!");
             elf->dynamic_symbol_string_table = section;
         } else if (strcmp(name, ".got.plt") == 0) {
-            // kernel_log("found the GOT! at %x", section->sh_addr);
             elf->got_section = section;
         } else if (strcmp(name, ".rel.plt") == 0) {
-            // kernel_log("found the relocatable section!");
             elf->relocation_section = section;
         }
     }
@@ -182,7 +175,7 @@ bool load_elf_executable(ELFObject* elf) {
     parse_dynamic_section(elf, elf->dynamic_section);
     // parse_symbol_table(elf, elf->dynamic_symbol_table, elf->dynamic_symbol_string_table);
 
-    kernel_log("updating GOT");
+    // kernel_log("updating GOT");
     Elf32_Rel* relocation_table = elf->raw + elf->relocation_section->sh_offset;
 
     u32* got = elf->got_section->sh_addr;
@@ -194,7 +187,7 @@ bool load_elf_executable(ELFObject* elf) {
         assert(ELF32_R_TYPE(relocation_table[rel_index].r_info) == R_386_JUMP_SLOT);
         u32 sym_index = ELF32_R_SYM(relocation_table[rel_index].r_info);
         Symbol sym = get_symbol(elf, elf->dynamic_symbol_table, elf->dynamic_symbol_string_table, sym_index);
-        kernel_log("    finding %s", sym.name);
+        // kernel_log("    finding %s", sym.name);
 
         for (int s = 0; s < MAX_SHARED_LIBS_PER_TASK; s++) {
             OpenSharedLibrary* slib = &current_task->slibs[s];
@@ -205,9 +198,9 @@ bool load_elf_executable(ELFObject* elf) {
 
             Elf32_Sym* found = find_symbol(slib_elf, slib_elf->dynamic_symbol_table, slib_elf->dynamic_symbol_string_table, sym.name);
             if (found != NULL) {
-                kernel_log("FOUND IT! value=%x", found->st_value);
+                // kernel_log("FOUND IT! value=%x", found->st_value);
                 u32 addr = found->st_value + slib->offset;
-                kernel_log("addr=%x", addr);
+                // kernel_log("addr=%x", addr);
                 got[i] = addr;
             }
         }

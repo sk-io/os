@@ -29,12 +29,12 @@ int main(int argc, char* argv[]) {
 
     init_graphics(fb, width, height);
 
-    os_printf("reading dir...");
+    // os_printf("reading dir...");
 
     strcpy(path, "/");
     read_directory();
 
-    os_printf("done! read %d entries.", num_entries);
+    // os_printf("done! read %d entries.", num_entries);
 
     unsigned int prev_left_mouse_state = 0;
     u32 last_mouse_button_state = 0;
@@ -115,7 +115,7 @@ static void handle_left_click(int x, int y) {
 
 static void read_directory() {
     num_entries = 0;
-    os_printf("reading from %s", path);
+    // os_printf("reading from %s", path);
 
     if (!os_open_dir(path)) {
         os_printf("failed to open %s", path);

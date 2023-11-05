@@ -28,7 +28,7 @@ void find_and_load_shared_lib(const char* name) {
 
     char path[MAX_PATH_LENGTH];
     snprintf(path, MAX_PATH_LENGTH, "/%s", name);
-    kernel_log("path: %s", path);
+    // kernel_log("path: %s", path);
 
     // try to match path
     SharedLibrary* lib = NULL;
@@ -43,7 +43,7 @@ void find_and_load_shared_lib(const char* name) {
 
     if (lib == NULL) {
         // can't find it, load it from disk
-        kernel_log("loading from disk..");
+        kernel_log("shared lib is not loaded. loading from disk..");
         int index = find_slot();
 
         lib = loaded_shared_libs + index;
@@ -87,8 +87,6 @@ void find_and_load_shared_lib(const char* name) {
 
     // map it into userspace
     // load segments with offset
-
-    // should we only load .text?
 
     int slib_slot = -1;
     for (int i = 0; i < MAX_SHARED_LIBS_PER_TASK; i++) {
@@ -144,8 +142,6 @@ void find_and_load_shared_lib(const char* name) {
         // copy it.
         memcpy(addr, lib->elf.raw + segment->p_offset, segment->p_filesz);
     }
-
-    // resolve the refs
 
     lib->num_users++;
 }

@@ -42,6 +42,8 @@ s32 create_user_task(const char* path) {
     // todo: handle all the errors
     push_cli();
 
+    kernel_log("starting task: %s", path);
+
     FIL file;
     FRESULT res;
     res = f_open(&file, path, FA_READ);
