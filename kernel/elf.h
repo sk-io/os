@@ -114,4 +114,22 @@ typedef struct {
 
 #define R_386_JUMP_SLOT 7
 
-u32 load_elf_executable(u8* elf);
+typedef struct {
+    u8* raw; // fill this only
+    u32 size;
+    
+    u32 entry;
+    Elf32_Ehdr* header;
+
+    // relevant sections (maybe NULL)
+    Elf32_Shdr* dynamic_section;
+    Elf32_Shdr* dynamic_symbol_table;
+    Elf32_Shdr* dynamic_symbol_string_table;
+    Elf32_Shdr* got_section;
+    Elf32_Shdr* relocation_section;
+} ELFObject;
+
+bool parse_elf(ELFObject* elf);
+bool load_elf_executable(ELFObject* elf);
+
+// u32 load_elf_executable(u8* elf);

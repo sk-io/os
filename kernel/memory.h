@@ -7,8 +7,8 @@
     0x0 - user start
     0x2000 0000 - user heap start (for now)
     0xB000 0000 - user stack start (grows towards 0)
-    0xB000 0000 - user shared memory
-
+    0xB000 0000 - user shared memory (128MiB)
+    0xB800 0000 - user shared libraries (128MiB)
     0xC000 0000 - kernel start
 */
 
@@ -17,6 +17,7 @@
 #define USER_HEAP_START      0x20000000
 #define USER_STACK_BOTTOM    0xB0000000
 #define USER_SHARED_MEMORY   0xB0000000
+#define USER_SHARED_LIBS     0xB8000000
 #define KERNEL_START         0xC0000000
 #define KERNEL_GFX           0xC8000000
 #define KERNEL_MALLOC        0xD0000000

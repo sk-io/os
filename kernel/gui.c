@@ -68,7 +68,13 @@ static void gui_draw_frame() {
     // if (time)
     //     time /= 1000;
     char time_str[128];
-    sprintf(time_str, "systime: %u", time);
+
+    int phys_mem = pmm_get_total_allocated_pages() * 4;
+    // 2504
+    // 2536
+    // 32 kib = 8 pages
+
+    sprintf(time_str, "phys used: %dKiB   systime: %u", phys_mem, time);
     graphics_draw_string(time_str, 3, graphics.height - 15, 0);
 
     graphics_copy_rect(gui.cursor_x, gui.cursor_y, 12, 19, 0, 0, res_cursor_raw);

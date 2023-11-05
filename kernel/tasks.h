@@ -3,6 +3,7 @@
 #include "types.h"
 #include "ramdisk.h"
 #include "fatfs/fatfs_ff.h"
+#include "slib.h"
 
 #define MAX_TASKS 64
 #define MAX_OPEN_FILES 16
@@ -31,6 +32,8 @@ typedef struct {
     bool active;
 } Timer;
 
+#define MAX_SHARED_LIBS_PER_TASK 16
+
 typedef struct {
     u32 id;
 
@@ -53,6 +56,7 @@ typedef struct {
     DIR open_dir;
 
     Timer timers[MAX_TIMERS];
+    OpenSharedLibrary slibs[MAX_SHARED_LIBS_PER_TASK];
 } Task;
 
 extern Task tasks[MAX_TASKS];

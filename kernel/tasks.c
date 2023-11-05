@@ -50,21 +50,23 @@ s32 create_user_task(const char* path) {
         pop_cli();
         return -1;
     }
+
+    ELFObject elf = {0};
     
-    u32 elf_size = f_size(&file);
-    if (elf_size < 52) {
-        kernel_log("create_user_task: elf file is too small. size=%u", elf_size);
+    elf.size = f_size(&file);
+    if (elf.size < 52) {
+        kernel_log("create_user_task: elf file is too small. size=%u", elf.size);
         f_close(&file);
         pop_cli();
         return -1;
     }
 
-    u8* elf = kmalloc(elf_size);
+    elf.raw = kmalloc(elf.size);
     UINT br;
-    res = f_read(&file, elf, elf_size, &br);
+    res = f_read(&file, elf.raw, elf.size, &br);
     if (res != FR_OK) {
         f_close(&file);
-        kfree(elf);
+        kfree(elf.raw);
         kernel_log("create_user_task: failed to read from executable file %s. error=%u", path, res);
         pop_cli();
         return -1;
@@ -83,19 +85,34 @@ s32 create_user_task(const char* path) {
         mem_map_page(USER_STACK_BOTTOM - USER_STACK_PAGES * 0x1000 + i * 0x1000, pmm_alloc_pageframe(), PAGE_FLAG_OWNER | PAGE_FLAG_USER | PAGE_FLAG_WRITE);
     }
 
-    // load elf, requires memory to be set up
-    u32 entry = load_elf_executable(elf);
-    kfree(elf);
-    elf = NULL;
-    if (!entry) {
+    // load elf, requires some memory to be set up
+
+    if (!parse_elf(&elf)) {
         mem_change_page_directory(prev_pd);
         kernel_log("create_user_task: failed to parse ELF binary");
         pop_cli();
         return -1;
     }
+    
+    if (!load_elf_executable(&elf)) {
+        mem_change_page_directory(prev_pd);
+        kernel_log("create_user_task: failed to load ELF into memory");
+        pop_cli();
+        return -1;
+    }
+
+    kfree(elf.raw);
+    elf.raw = NULL;
+
+    if (!elf.entry) {
+        mem_change_page_directory(prev_pd);
+        kernel_log("create_user_task: ELF has no entry");
+        pop_cli();
+        return -1;
+    }
 
     // init the task
-    create_task(index, entry, false, pagedir);
+    create_task(index, elf.entry, false, pagedir);
     init_events_for_task(&tasks[index]);
     init_user_heap(&tasks[index]);
 

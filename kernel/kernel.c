@@ -21,6 +21,7 @@
 #include "gui.h"
 #include "mouse.h"
 #include "fpu.h"
+#include "slib.h"
 
 bool graphics_enabled;
 
@@ -62,6 +63,7 @@ void kernel_main(struct multiboot_info* info) {
 
     setup_tasks();
     sharedmem_init();
+    init_shared_libs();
     init_events();
 
     u32 ramdisk_size = mod1 - mod0;
@@ -72,7 +74,7 @@ void kernel_main(struct multiboot_info* info) {
         init_gui(framebuffer_width, framebuffer_height);
         create_kernel_task(gui_thread_entry);
 
-        create_user_task("test3.exe");
+        create_user_task("dltest.exe");
     }
 
     init_keyboard();
