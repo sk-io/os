@@ -1,7 +1,7 @@
-CC = i686-elf-gcc
-LD = i686-elf-ld
-AR = i686-elf-ar
-CFLAGS = -g -c -I include -nostdlib -ffreestanding -O2
+CC = clang
+LD = clang
+AR = ar
+CFLAGS = -g -c -I include -nostdlib -ffreestanding -m32 -O2
 
 SOURCES_C = $(patsubst %.c, %.o, $(wildcard src/*.c))
 OBJ = $(SOURCES_C)

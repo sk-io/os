@@ -23,7 +23,7 @@ Current goal is to port Doom and some other stuff. :)
 
 ## Building
 
-Requires i686-elf-gcc, NASM, mtools, xorriso.
+Requires clang, 32bit libgcc, NASM, mtools, xorriso.
 
 To build:
 ```

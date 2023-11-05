@@ -3,8 +3,8 @@
 CFLAGS = -g -std=gnu11 -nostdlib -ffreestanding -m32 -Wall -Wextra -lgcc -I ../api/include -O2
 CFLAGS += -g -Wall -I include
 
-CC = i686-elf-gcc
-AR = i686-elf-ar
+CC = clang
+AR = ar
 
 # With this, the makefile should work on Windows also.
 ifdef windir

@@ -7,7 +7,7 @@ ASFLAGS = -felf32
 SOURCES_C = $(patsubst %.c, %.o, $(wildcard *.c))
 
 OBJ = $(SOURCES_C)
-EXE = test.exe
+EXE = timer.exe
 
 all: $(EXE)
 

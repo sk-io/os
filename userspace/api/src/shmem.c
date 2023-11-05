@@ -43,5 +43,5 @@ void os_unmap_shared_mem(int id) {
         "int $0x80"
         :: "a"(SYSCALL_SHMEM_UNMAP), "b"(id)
     );
-    return 0;
+    return;
 }

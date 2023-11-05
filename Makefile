@@ -1,7 +1,7 @@
-CC = i686-elf-gcc
-LD = i686-elf-gcc
-CFLAGS = -g -std=gnu11 -nostdlib -ffreestanding -m32 -c -Wall -Wextra -lgcc -O2
-LDFLAGS = -g -std=gnu11 -nostdlib -ffreestanding -Tkernel.ld -lgcc -O2
+CC = clang
+LD = clang
+CFLAGS = -g -nostdlib -ffreestanding -m32 -fno-builtin -no-pie -c -Wall -Wextra -O2
+LDFLAGS = -g -nostdlib -ffreestanding -m32 -fno-builtin -no-pie -Tkernel.ld -O2 -lgcc
 ASFLAGS = -felf32
 
 SOURCES_C = $(patsubst %.c, %.o, $(wildcard kernel/*.c) $(wildcard kernel/**/*.c))
@@ -24,7 +24,7 @@ $(KERNEL): $(OBJ)
 	$(LD) -o $(KERNEL) $(OBJ) $(LDFLAGS)
 
 %.o: %.c
-	$(CC) $< -o $@ $(CFLAGS)
+	$(CC) -o $@ $(CFLAGS) $<
 
 %.o: %.asm
 	nasm $(ASFLAGS) $< -o $@

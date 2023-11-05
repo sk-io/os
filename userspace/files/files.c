@@ -119,7 +119,7 @@ static void read_directory() {
 
     if (!os_open_dir(path)) {
         os_printf("failed to open %s", path);
-        return 1;
+        return;
     }
 
     for (int i = 0; i < MAX_ENTRIES; i++) {
