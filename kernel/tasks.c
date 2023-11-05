@@ -84,7 +84,7 @@ s32 create_user_task(const char* path) {
     }
 
     // load elf, requires memory to be set up
-    u32 entry = load_elf_segments(elf);
+    u32 entry = load_elf_executable(elf);
     kfree(elf);
     elf = NULL;
     if (!entry) {
