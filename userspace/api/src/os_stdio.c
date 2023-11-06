@@ -118,3 +118,16 @@ void os_printf(const char *format, ...) {
 
     syscall_print(buffer);
 }
+
+void debug_printf(const char *format, ...) {
+    char buffer[1024];
+
+    __builtin_va_list vl;
+    __builtin_va_start(vl, format);
+
+    sprintf_va(buffer, 1024, 0, format, vl);
+
+    __builtin_va_end(vl);
+
+    syscall_print(buffer);
+}

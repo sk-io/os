@@ -23,14 +23,14 @@ int main(int argc, char* argv[]) {
     for (int i = 0; i < 100; i++)
         *(test[i]) = i;
 
+    os_printf("freeing...");
+    for (int i = 0; i < 100; i++)
+        free(test[i]);
+
     // char* test = "hello!";
     // char buf[64];
     // memset(buf, 0, 64);
     // strcpy(buf, test);
     // os_printf("test: %s", buf);
-
-    os_printf("crashing...");
-    
-    *(u32*) 0 = 12345;
-    return 12345 / argc;
+    return 0;
 }

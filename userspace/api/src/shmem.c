@@ -1,7 +1,6 @@
 #include "os.h"
 
 #include "syscalls.h"
-#include "shmem.h"
 
 int os_create_shared_mem(int id, int size) {
     syscall_create_shared_mem(id, size);

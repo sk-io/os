@@ -1,7 +1,6 @@
 #include "os.h"
 
 #include "syscalls.h"
-#include "shmem.h"
 
 int os_create_window(int width, int height, unsigned int flags) {
     return syscall_create_window(width, height, flags);

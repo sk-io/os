@@ -1,7 +1,6 @@
 #include "os.h"
 
 #include "syscalls.h"
-#include "shmem.h"
 
 #define EVENT_BUFFER_SIZE 256
 

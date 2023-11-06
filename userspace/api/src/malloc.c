@@ -3,6 +3,7 @@
 // copied from kmalloc.c
 
 #include "syscalls.h"
+#include "os_stdio.h"
 
 #include <stdint.h>
 #include <stdbool.h>
@@ -35,11 +36,11 @@ static u32 heap_size;
 static u32 threshold;
 static bool malloc_initialized = false;
 
-void merge_free_chunks();
-void change_heap_size(int new_size);
+static void merge_free_chunks();
+static void change_heap_size(int new_size);
 
 void malloc_init(unsigned int initial_heap_size) {
-	heap_start = get_heap_start();
+	heap_start = syscall_get_heap_start();
 	//os_printf("init user malloc at %x", heap_start);
 	heap_size = 0;
     threshold = 0;
@@ -51,7 +52,8 @@ void malloc_init(unsigned int initial_heap_size) {
 	*((u32*)heap_start) = 0;
 }
 
-void* os_malloc(uint32_t bytes) {
+static void* user_malloc(uint32_t bytes) {
+	// debug_printf("os_malloc %x", bytes);
 	u32 real_size = bytes + sizeof(ChunkHeader);
 	if (real_size & (ALIGNMENT - 1)) {
 		real_size += ALIGNMENT - (real_size & (ALIGNMENT - 1));
@@ -107,7 +109,7 @@ void* os_malloc(uint32_t bytes) {
 	return 0;
 }
 
-void os_free(void* addr) {
+static void user_free(void* addr) {
 	ChunkHeader* chunk = (ChunkHeader*) (((u32) addr) - sizeof(ChunkHeader));
 
 	if (!chunk->used) {
@@ -155,11 +157,20 @@ void merge_free_chunks() {
 	}
 }
 
-u32 kmalloc_get_total_bytes() {
+u32 get_total_bytes() {
 	return threshold - heap_start;
 }
 
 void change_heap_size(int new_size) {
+    syscall_print("api: change_heap_size");
 	syscall_set_heap_end(heap_start + new_size);
     heap_size = new_size;
+}
+
+void* os_malloc(uint32_t size) {
+	return user_malloc(size);
+}
+
+void os_free(void* addr) {
+	user_free(addr);
 }

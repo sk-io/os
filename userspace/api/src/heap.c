@@ -1,14 +1,9 @@
 #include "os.h"
 
 #include "syscalls.h"
-#include "heap.h"
-
-uint32_t get_heap_start() {
-    return syscall_get_heap_start();
-}
 
 uint32_t os_get_heap_start() {
-    return get_heap_start();
+    return syscall_get_heap_start();
 }
 
 uint32_t os_get_heap_end() {
