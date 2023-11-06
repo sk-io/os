@@ -23,7 +23,7 @@ Current goal is to port Doom and some other stuff. :)
 
 ## Building
 
-Requires clang, 32bit libgcc, NASM, mtools, xorriso.
+Requires clang, 32bit libgcc (gcc-multilib on debian), NASM, mtools and xorriso.
 
 To build:
 ```

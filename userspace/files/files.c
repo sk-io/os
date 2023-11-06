@@ -23,6 +23,8 @@ static void read_directory();
 static void go_up();
 
 int main(int argc, char* argv[]) {
+    os_temp_init();
+
     int window = os_create_window(width, height, 0);
     os_set_window_title(window, "File Browser");
     int* fb = os_map_window_framebuffer(window);
@@ -140,4 +142,12 @@ static void go_up() {
         last[1] = '\0';
     else
         last[0] = '\0';
+}
+
+void _start() {
+    os_temp_init();
+    // init_events();
+    // malloc_init(0x1000);
+    main(0, 0);
+    os_exit();
 }

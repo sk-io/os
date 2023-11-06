@@ -37,8 +37,8 @@ void merge_free_chunks();
 void change_heap_size(int new_size);
 
 void malloc_init(unsigned int initial_heap_size) {
-	heap_start = os_get_heap_start();
-	os_printf("init user malloc at %x", heap_start);
+	heap_start = get_heap_start();
+	//os_printf("init user malloc at %x", heap_start);
 	heap_size = 0;
     threshold = 0;
 	malloc_initialized = true;
@@ -158,6 +158,6 @@ u32 kmalloc_get_total_bytes() {
 }
 
 void change_heap_size(int new_size) {
-	os_set_heap_end(heap_start + new_size);
+	set_heap_end(heap_start + new_size);
     heap_size = new_size;
 }

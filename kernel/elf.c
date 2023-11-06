@@ -175,20 +175,21 @@ bool load_elf_executable(ELFObject* elf) {
     parse_dynamic_section(elf, elf->dynamic_section);
     // parse_symbol_table(elf, elf->dynamic_symbol_table, elf->dynamic_symbol_string_table);
 
-    // kernel_log("updating GOT");
     Elf32_Rel* relocation_table = elf->raw + elf->relocation_section->sh_offset;
 
     u32* got = elf->got_section->sh_addr;
+    kernel_log("GOT at %x", got);
     u32 num_got_entries = elf->got_section->sh_size / elf->got_section->sh_entsize;
     for (int i = 3; i < num_got_entries; i++) {
-        // kernel_log(" %x", &got[i]);
+        kernel_log("  got[%d] = %x", i, &got[i]);
         int rel_index = i - 3;
 
         assert(ELF32_R_TYPE(relocation_table[rel_index].r_info) == R_386_JUMP_SLOT);
         u32 sym_index = ELF32_R_SYM(relocation_table[rel_index].r_info);
         Symbol sym = get_symbol(elf, elf->dynamic_symbol_table, elf->dynamic_symbol_string_table, sym_index);
-        // kernel_log("    finding %s", sym.name);
+        kernel_log("   finding %s", sym.name);
 
+        bool found = false;
         for (int s = 0; s < MAX_SHARED_LIBS_PER_TASK; s++) {
             OpenSharedLibrary* slib = &current_task->slibs[s];
             if (slib->slib == NULL)
@@ -196,14 +197,18 @@ bool load_elf_executable(ELFObject* elf) {
             
             ELFObject* slib_elf = &slib->slib->elf;
 
-            Elf32_Sym* found = find_symbol(slib_elf, slib_elf->dynamic_symbol_table, slib_elf->dynamic_symbol_string_table, sym.name);
-            if (found != NULL) {
-                // kernel_log("FOUND IT! value=%x", found->st_value);
-                u32 addr = found->st_value + slib->offset;
+            Elf32_Sym* found_sym = find_symbol(slib_elf, slib_elf->dynamic_symbol_table, slib_elf->dynamic_symbol_string_table, sym.name);
+            if (found_sym != NULL) {
+                kernel_log("    FOUND IT! addr=%x", found_sym->st_value);
+                u32 addr = found_sym->st_value + slib->offset;
                 // kernel_log("addr=%x", addr);
                 got[i] = addr;
+                found = true;
+                break;
             }
         }
+
+        assert(found);
     }
 
     return true;

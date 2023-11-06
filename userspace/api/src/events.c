@@ -1,6 +1,7 @@
 #include "os.h"
 
 #include "../../../kernel/syscall_list.h"
+#include "shmem.h"
 
 #define EVENT_BUFFER_SIZE 256
 
@@ -23,7 +24,7 @@ void init_events() {
 
     // os_printf("my event buffer smobj id is %d", shmem_id);
 
-    event_buffer = os_map_shared_mem(shmem_id);
+    event_buffer = map_shared_mem(shmem_id);
 }
 
 int os_poll_event(OSEvent* event) {

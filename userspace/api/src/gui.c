@@ -1,6 +1,7 @@
 #include "os.h"
 
 #include "../../../kernel/syscall_list.h"
+#include "shmem.h"
 
 int os_create_window(int width, int height, unsigned int flags) {
     int ret;
@@ -30,7 +31,7 @@ void* os_map_window_framebuffer(int window_id) {
         : "a"(SYSCALL_GET_WINDOW_FB_SHMEM_ID), "b"(window_id)
     );
 
-    return os_map_shared_mem(id);
+    return map_shared_mem(id);
 }
 
 // returns shown buffer index

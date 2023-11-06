@@ -1,23 +1,24 @@
 
 all:
 	make -C api
+	cp api/*.so bin/
 	make -C libc
 	mkdir -p bin
-	make -C draw
-	cp draw/*.exe bin/
-	make -C terminal
-	cp terminal/*.exe bin/
 	make -C files
 	cp files/*.exe bin/
-	make -C timer
-	cp timer/*.exe bin/
-	make -C breakout
-	cp breakout/*.exe bin/
-	make -C test
-	cp test/*.exe bin/
-	make -C dltest
-	cp dltest/*.exe bin/
-	cp dltest/*.so bin/
+	# make -C draw
+	# cp draw/*.exe bin/
+	# make -C terminal
+	# cp terminal/*.exe bin/
+	# make -C timer
+	# cp timer/*.exe bin/
+	# make -C breakout
+	# cp breakout/*.exe bin/
+	# make -C test
+	# cp test/*.exe bin/
+	# make -C dltest
+	# cp dltest/*.exe bin/
+	# cp dltest/*.so bin/
 
 clean:
 	make -C api clean
