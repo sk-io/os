@@ -45,3 +45,4 @@ u32* mem_alloc_page_dir();
 void mem_free_page_dir(u32* page_dir);
 void mem_change_page_directory(u32* pd);
 u32* mem_get_current_page_directory();
+u32 mem_get_phys_from_virt(u32 virt_addr);

@@ -116,9 +116,10 @@ typedef struct {
 #define R_386_JUMP_SLOT 7
 
 typedef struct {
+    u8* mem; // malloc align hack
     u8* raw; // fill this only, owner?
     u32 size;
-    
+
     u32 entry;
     Elf32_Ehdr* header;
 

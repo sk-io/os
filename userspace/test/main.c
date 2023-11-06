@@ -26,6 +26,8 @@ int main(int argc, char* argv[]) {
     os_printf("freeing...");
     for (int i = 0; i < 100; i++)
         free(test[i]);
+        
+    // *(u32*) 0 = 1234; // this causes clang with -O2 to crap out completely for some reason
 
     // char* test = "hello!";
     // char buf[64];

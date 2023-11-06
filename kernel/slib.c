@@ -70,7 +70,18 @@ static void find_and_load_shared_lib(const char* name, Task* task) {
             return;
         }
 
-        elf.raw = kmalloc(elf.size);
+
+        // hack: pad malloc until page aligned.
+        elf.mem = kmalloc(elf.size + 0x1000);
+
+        elf.raw = elf.mem;
+        if ((u32) elf.raw & 0xFFF) {
+            u32 addr = (u32) elf.raw;
+            addr &= ~0xFFF;
+            addr += 0x1000;
+            elf.raw = (u8*) addr;
+        }
+
         UINT br;
         res = f_read(&file, elf.raw, elf.size, &br);
         f_close(&file);
@@ -120,6 +131,8 @@ static void find_and_load_shared_lib(const char* name, Task* task) {
         if (segment->p_memsz == 0)
             continue;
         
+        // kernel_log(">loading segment %u", i);
+
         u32 flags = PAGE_FLAG_USER;
         if (segment->p_flags & PF_W)
             flags |= PAGE_FLAG_WRITE;
@@ -133,20 +146,38 @@ static void find_and_load_shared_lib(const char* name, Task* task) {
             num_pages++;
         }
 
-        // TODO: don't copy, map virt pages in userspace to phys pages retrieved from
-        // kmalloc'ed elf
+        if (segment->p_flags & PF_W) {
+            // kernel_log("writable! allocate and copy!");
+            // allocate virtual pages
+            for (int j = 0; j < num_pages; j++) {
+                mem_map_page((addr & ~0xFFF) + j * 0x1000, pmm_alloc_pageframe(), flags);
+                // kernel_log("mapping %x", (addr & ~0xFFF) + j * 0x1000);
+            }
 
-        // allocate virtual pages
-        for (int j = 0; j < num_pages; j++) {
-            mem_map_page((addr & ~0xFFF) + j * 0x1000, pmm_alloc_pageframe(), flags);
-            // kernel_log("mapping %x", (addr & ~0xFFF) + j * 0x1000);
+            // zero them, small optimization: dont zero to-be overwritten parts
+            memset((addr & ~0xFFF), 0, num_pages * 0x1000);
+
+            // copy data
+            memcpy(addr, lib->elf.raw + segment->p_offset, segment->p_filesz);
+        } else {
+
+            // this is wrong.
+            // elf needs to be page aligned?
+            // pad kmalloc? prob not.
+
+            // one solution:
+            // on first load, pmm_allocate ELF size in pages
+            // map these to kernel space? where?
+            // copy ELF
+
+            // kernel_log("nonwritable! map it!");
+            // map to kmalloc'd physical pages
+            for (int j = 0; j < num_pages; j++) {
+                u32 phys = mem_get_phys_from_virt(lib->elf.raw + segment->p_offset + j * 0x1000);
+                mem_map_page((addr & ~0xFFF) + j * 0x1000, phys, flags);
+                // kernel_log("  mapping %x to %x", (addr & ~0xFFF) + j * 0x1000, phys);
+            }
         }
-
-        // zero them, small optimization: dont zero to-be overwritten parts
-        memset((addr & ~0xFFF), 0, num_pages * 0x1000);
-
-        // copy it.
-        memcpy(addr, lib->elf.raw + segment->p_offset, segment->p_filesz);
     }
 
     lib->num_users++;

@@ -19,7 +19,6 @@ void init_exceptions() {
 }
 
 void handle_general_protection_fault(TrapFrame* frame) {
-    
     u32* pd = mem_get_current_page_directory();
     kernel_log("general protection fault! error=%u eip=%x", frame->error, frame->eip);
     kernel_log("cs=%u ds=%u ss=%u eflags=%u", frame->cs, frame->ds, frame->usermode_ss, frame->eflags);
@@ -49,7 +48,7 @@ static void handle_div_by_zero(TrapFrame* frame) {
 }
 
 static void crash(TrapFrame* frame) {
-    //print_stack_trace(5, frame->ebp);
+    print_stack_trace(5, frame->ebp);
 
     if (frame->eip >= KERNEL_START) {
         crash_and_burn();
@@ -66,15 +65,16 @@ typedef struct _StackFrame {
 } StackFrame;
 
 static void print_stack_trace(int max_depth, u32 ebp) {
+    // kernel_log("ebp = %x", ebp);
     StackFrame *frame = (StackFrame*) ebp;
 
     // asm volatile(
     //     "movl %%ebp, %0"
     //     : "=r"(frame) ::
     // ); // gets optimized out on -O2
-    kernel_log("stack trace:");
-    for (u32 i = 0; frame && i < max_depth; i++) {
-        kernel_log("  0x%x", frame->eip);
-        frame = frame->ebp;
-    }
+    // kernel_log("stack trace:");
+    // for (u32 i = 0; frame && i < max_depth; i++) {
+    //     kernel_log("  0x%x", frame->eip);
+    //     frame = frame->ebp;
+    // }
 }

@@ -273,3 +273,16 @@ void sync_page_dirs() {
         }
     }
 }
+
+u32 mem_get_phys_from_virt(u32 virt_addr) {
+    u32 pd_index = virt_addr >> 22;
+    u32* page_dir = REC_PAGEDIR;
+    if (!(page_dir[pd_index] & PAGE_FLAG_PRESENT)) {
+        return -1;
+    }
+
+    u32 pt_index = virt_addr >> 12 & 0x3FF;
+    u32* pt = REC_PAGETABLE(pd_index);
+
+    return P_PHYS_ADDR(pt[pt_index]);
+}

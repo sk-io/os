@@ -65,6 +65,19 @@ s32 create_user_task(const char* path) {
     }
 
     elf.raw = kmalloc(elf.size);
+
+    // hack: pad malloc until page aligned.
+    // dont need it for exes since we copy everything anyway
+    // elf.mem = kmalloc(elf.size + 0x1000);
+
+    // elf.raw = elf.mem;
+    // if ((u32) elf.raw & 0xFFF) {
+    //     u32 addr = (u32) elf.raw;
+    //     addr &= ~0xFFF;
+    //     addr += 0x1000;
+    //     elf.raw = (u8*) addr;
+    // }
+
     UINT br;
     res = f_read(&file, elf.raw, elf.size, &br);
     if (res != FR_OK) {
