@@ -1,65 +1,32 @@
 #include "os.h"
 
-#include "../../../kernel/syscall_list.h"
+#include "syscalls.h"
 
 int os_open_file(const char* path) {
-    int ret;
-    asm volatile(
-        "int $0x80"
-        : "=a" (ret) : "a"(SYSCALL_OPEN_FILE), "b"(path)
-    );
-    return ret;
+    return syscall_open_file(path);
 }
 
 int os_close_file(int fd) {
-    asm volatile(
-        "int $0x80"
-        :: "a"(SYSCALL_CLOSE_FILE), "b"(fd)
-    );
+    syscall_close_file(fd);
     return 0;
 }
 
 int os_read_file(int fd, char* buffer, int num_bytes) {
-    int ret;
-    asm volatile(
-        "int $0x80"
-        : "=a" (ret) : "a"(SYSCALL_READ_FILE), "b"(fd), "c"(buffer), "d"(num_bytes)
-    );
-    return ret;
+    return syscall_read_file(fd, buffer, num_bytes);
 }
 
 int os_get_file_size(int fd) {
-    int ret;
-    asm volatile(
-        "int $0x80"
-        : "=a"(ret) : "a"(SYSCALL_GET_FILE_SIZE)
-    );
-    return ret;
+    return syscall_get_file_size(fd);
 }
 
 int os_open_dir(const char* path) {
-    int ret;
-    asm volatile(
-        "int $0x80"
-        : "=a"(ret) : "a"(SYSCALL_OPEN_DIR), "b"(path)
-    );
-    return ret;
+    return syscall_open_dir(path);
 }
 
 int os_close_dir() {
-    int ret;
-    asm volatile(
-        "int $0x80"
-        : "=a"(ret) : "a"(SYSCALL_CLOSE_DIR)
-    );
-    return ret;
+    return syscall_close_dir();
 }
 
 int os_next_file_in_dir(OSFileInfo* info) {
-    int ret;
-    asm volatile(
-        "int $0x80"
-        : "=a"(ret) : "a"(SYSCALL_NEXT_FILE_IN_DIR), "b"(info)
-    );
-    return ret;
+    return syscall_next_file_in_dir(info);
 }

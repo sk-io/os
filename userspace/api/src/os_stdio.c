@@ -1,4 +1,5 @@
 #include "os.h"
+#include "syscalls.h"
 
 #include <stdint.h>
 #include <stddef.h>
@@ -115,5 +116,5 @@ void os_printf(const char *format, ...) {
 
     __builtin_va_end(vl);
 
-    // os_print(buffer);
+    syscall_print(buffer);
 }

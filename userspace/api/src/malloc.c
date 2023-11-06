@@ -2,6 +2,8 @@
 
 // copied from kmalloc.c
 
+#include "syscalls.h"
+
 #include <stdint.h>
 #include <stdbool.h>
 #include <stddef.h>
@@ -158,6 +160,6 @@ u32 kmalloc_get_total_bytes() {
 }
 
 void change_heap_size(int new_size) {
-	set_heap_end(heap_start + new_size);
+	syscall_set_heap_end(heap_start + new_size);
     heap_size = new_size;
 }

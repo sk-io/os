@@ -7,4 +7,3 @@ void _start() {
     main(0, 0);
     os_exit();
 }
-
