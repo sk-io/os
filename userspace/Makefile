@@ -1,34 +1,36 @@
+CC = clang
+LD = clang
+CFLAGS = -g -std=gnu11 -nostdlib -ffreestanding -m32 -c -Wall -Wextra -I ../api/include -I ../libc/include -O2
+LDFLAGS = -g -std=gnu11 -nostdlib -ffreestanding -m32 -no-pie -L../api -l:api.so -L../libc -lc -O2 ../api/crt0.o
+ASFLAGS = -felf32
+
+export
 
 all:
-	make -C api
-	cp api/*.so bin/
-	make -C libc
 	mkdir -p bin
-	make -C files
+	$(MAKE) -C api
+	cp api/*.so bin/
+	$(MAKE) -C libc
+	$(MAKE) -C files
 	cp files/*.exe bin/
-	# make -C draw
-	# cp draw/*.exe bin/
-	# make -C terminal
-	# cp terminal/*.exe bin/
-	# make -C timer
-	# cp timer/*.exe bin/
-	# make -C breakout
-	# cp breakout/*.exe bin/
-	# make -C test
-	# cp test/*.exe bin/
-	# make -C dltest
-	# cp dltest/*.exe bin/
-	# cp dltest/*.so bin/
+	$(MAKE) -C terminal
+	cp terminal/*.exe bin/
+	$(MAKE) -C draw
+	cp draw/*.exe bin/
+	$(MAKE) -C timer
+	cp timer/*.exe bin/
+	$(MAKE) -C breakout
+	cp breakout/*.exe bin/
+	$(MAKE) -C test
+	cp test/*.exe bin/
 
 clean:
-	make -C api clean
-	make -C libc clean
-	make -C draw clean
-	make -C terminal clean
-	make -C files clean
-	make -C breakout clean
-	make -C timer clean
-	make -C test clean
-	# make -C dltest clean
-	# make -C cube clean
+	$(MAKE) -C api clean
+	$(MAKE) -C libc clean
+	$(MAKE) -C draw clean
+	$(MAKE) -C terminal clean
+	$(MAKE) -C files clean
+	$(MAKE) -C breakout clean
+	$(MAKE) -C timer clean
+	$(MAKE) -C test clean
 	rm -f bin/*.exe bin/*.so

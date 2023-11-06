@@ -1,9 +1,3 @@
-CC = clang
-LD = clang
-CFLAGS = -g -std=gnu11 -nostdlib -ffreestanding -m32 -c -Wall -Wextra -I ../api/include -I ../libc/include -O2
-LDFLAGS = -g -std=gnu11 -nostdlib -ffreestanding -m32 -no-pie -L../api -l:api.so -L../libc -lc -O2
-ASFLAGS = -felf32
-
 SOURCES_C = $(patsubst %.c, %.o, $(wildcard *.c))
 
 OBJ = $(SOURCES_C)

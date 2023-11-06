@@ -1,0 +1,8 @@
+#pragma once
+
+#define MAX_TASKS 64
+#define MAX_OPEN_FILES 16
+#define MAX_TIMERS 4
+#define MAX_SHARED_LIBS_PER_TASK 16
+#define MAX_SHARED_LIBRARIES 32
+#define MAX_PATH_LENGTH 256

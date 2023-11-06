@@ -2,9 +2,7 @@
 
 #include "types.h"
 #include "elf.h"
-
-#define MAX_SHARED_LIBRARIES 32
-#define MAX_PATH_LENGTH 256
+#include "config.h"
 
 typedef struct {
     u8 state;
@@ -21,4 +19,4 @@ typedef struct {
 } OpenSharedLibrary;
 
 void init_shared_libs();
-void find_and_load_shared_lib(const char* name);
+void init_shared_libs_for_task(u32 task_id, ELFObject* elf);

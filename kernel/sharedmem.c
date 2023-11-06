@@ -17,6 +17,7 @@ static s32 find_available_shmem_slot();
 static u32 find_available_virtual_region(u32 num_pages, bool map_to_kernel);
 static void mark_pages_used_in_bitmap(u8* bitmap, u32 start, u32 num);
 static void mark_pages_unused_in_bitmap(u8* bitmap, u32 start, u32 num);
+static void* sharedmem_map_syscall(s32 id);
 
 void sharedmem_init() {
     memset(kernel_sharedmem_bitmap, 0, sizeof(kernel_sharedmem_bitmap));
@@ -24,7 +25,7 @@ void sharedmem_init() {
     register_syscall(SYSCALL_SHMEM_CREATE, sharedmem_create);
     register_syscall(SYSCALL_SHMEM_DESTROY, sharedmem_destroy);
     register_syscall(SYSCALL_SHMEM_EXISTS, sharedmem_exists);
-    register_syscall(SYSCALL_SHMEM_MAP, sharedmem_map);
+    register_syscall(SYSCALL_SHMEM_MAP, sharedmem_map_syscall);
     register_syscall(SYSCALL_SHMEM_UNMAP, sharedmem_unmap);
 }
 
@@ -191,4 +192,9 @@ static s32 find_available_shmem_slot() {
         }
     }
     assert_msg(0, "no more shmem slots!");
+}
+
+void* sharedmem_map_syscall(s32 id) {
+    // kernel_log("sharedmem_map_syscall");
+    return sharedmem_map(id, false);
 }

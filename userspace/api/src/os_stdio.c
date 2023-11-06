@@ -115,5 +115,5 @@ void os_printf(const char *format, ...) {
 
     __builtin_va_end(vl);
 
-    os_print(buffer);
+    // os_print(buffer);
 }

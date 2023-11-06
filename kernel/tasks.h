@@ -4,10 +4,7 @@
 #include "ramdisk.h"
 #include "fatfs/fatfs_ff.h"
 #include "slib.h"
-
-#define MAX_TASKS 64
-#define MAX_OPEN_FILES 16
-#define MAX_TIMERS 4
+#include "config.h"
 
 // used for newly created tasks
 typedef struct {
@@ -31,8 +28,6 @@ typedef struct {
     u64 next_fire;
     bool active;
 } Timer;
-
-#define MAX_SHARED_LIBS_PER_TASK 16
 
 typedef struct {
     u32 id;

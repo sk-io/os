@@ -21,7 +21,7 @@ static int current_task_index;
 extern void isr_exit();
 extern void switch_context(Task* old, Task* new);
 
-static void create_task(u32 index, u32 eip, bool kernel_task, u32* pagedir);
+static Task* create_task(u32 index, u32 eip, bool kernel_task, u32* pagedir);
 static u32 get_task_index(int task_id);
 static u32 find_available_task_slot();
 
@@ -54,6 +54,7 @@ s32 create_user_task(const char* path) {
     }
 
     ELFObject elf = {0};
+    memset(&elf, 0, sizeof(ELFObject));
     
     elf.size = f_size(&file);
     if (elf.size < 52) {
@@ -91,35 +92,41 @@ s32 create_user_task(const char* path) {
 
     if (!parse_elf(&elf)) {
         mem_change_page_directory(prev_pd);
+        mem_free_page_dir(pagedir);
         kernel_log("create_user_task: failed to parse ELF binary");
+        kfree(elf.raw);
         pop_cli();
         return -1;
     }
     
     if (!load_elf_executable(&elf)) {
         mem_change_page_directory(prev_pd);
+        mem_free_page_dir(pagedir);
         kernel_log("create_user_task: failed to load ELF into memory");
+        kfree(elf.raw);
         pop_cli();
         return -1;
     }
 
-    kfree(elf.raw);
-    elf.raw = NULL;
-
     if (!elf.entry) {
         mem_change_page_directory(prev_pd);
+        mem_free_page_dir(pagedir);
         kernel_log("create_user_task: ELF has no entry");
         pop_cli();
         return -1;
     }
-
+    
     // init the task
-    create_task(index, elf.entry, false, pagedir);
-    init_events_for_task(&tasks[index]);
-    init_user_heap(&tasks[index]);
+    Task* new_task = create_task(index, elf.entry, false, pagedir);
+    init_events_for_task(new_task);
+    init_user_heap(new_task);
+    init_shared_libs_for_task(new_task->id, &elf);
+
+    kfree(elf.raw);
+    elf.raw = NULL;
 
     for (int i = 0; i < MAX_OPEN_FILES; i++) {
-        f_close(&tasks[index].open_files[i]);
+        f_close(&new_task->open_files[i]);
     }
     mem_change_page_directory(prev_pd);
 
@@ -202,8 +209,10 @@ void task_schedule() {
 }
 
 // set up initial state of task
-static void create_task(u32 index, u32 eip, bool kernel_task, u32* pagedir) {
+static Task* create_task(u32 index, u32 eip, bool kernel_task, u32* pagedir) {
     assert(tasks[index].id == 0);
+
+    Task* task = tasks + index;
 
     memset(&tasks[index], 0, sizeof(Task));
     
@@ -245,9 +254,12 @@ static void create_task(u32 index, u32 eip, bool kernel_task, u32* pagedir) {
     tasks[index].state = TASK_STATE_READY;
     tasks[index].pagedir = pagedir;
     tasks[index].is_kernel_task = kernel_task;
+
+    return task;
 }
 
 static u32 get_task_index(int task_id) {
+    assert(task_id >= 1000);
     return task_id - 1000;
 }
 

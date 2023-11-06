@@ -4,6 +4,7 @@
 *.txt
 *.exe
 *.a
+*.so
 
 os.iso
 kernel.bin

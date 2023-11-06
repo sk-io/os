@@ -26,7 +26,7 @@ align 4
 section .bss
 align 16
 stack_bottom:
-    resb 16384*4 ; 16 kib
+    resb 16384*8
 stack_top:
 
 section .boot
@@ -54,6 +54,7 @@ higher_half:
 
     push ebx ; multiboot mem info pointer
 
+    xor ebp, ebp ; set ebp to 0 as a stopping point for stack tracing
     extern kernel_main
     call kernel_main
 

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "types.h"
+#include "config.h"
 
 typedef u16 Elf32_Half;
 typedef u32 Elf32_Word;
@@ -115,7 +116,7 @@ typedef struct {
 #define R_386_JUMP_SLOT 7
 
 typedef struct {
-    u8* raw; // fill this only
+    u8* raw; // fill this only, owner?
     u32 size;
     
     u32 entry;
@@ -127,9 +128,10 @@ typedef struct {
     Elf32_Shdr* dynamic_symbol_string_table;
     Elf32_Shdr* got_section;
     Elf32_Shdr* relocation_section;
+
+    const char* dynamic_dependencies[MAX_SHARED_LIBS_PER_TASK];
 } ELFObject;
 
 bool parse_elf(ELFObject* elf);
 bool load_elf_executable(ELFObject* elf);
-
-// u32 load_elf_executable(u8* elf);
+const char* get_elf_symbol(const ELFObject* elf, Elf32_Shdr* symtab, Elf32_Shdr* strtab, int index);

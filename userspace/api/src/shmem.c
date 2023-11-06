@@ -29,11 +29,6 @@ int os_shared_mem_exists(int id) {
     return ret;
 }
 
-
-void* os_map_shared_mem(int id) {
-    return map_shared_mem(id);
-}
-
 void os_unmap_shared_mem(int id) {
     asm volatile(
         "int $0x80"
@@ -47,7 +42,11 @@ void* map_shared_mem(int id) {
     asm volatile(
         "int $0x80"
         : "=a"(addr)
-        : "a"(SYSCALL_SHMEM_MAP), "b"(id), "c"(0)
+        : "a"(SYSCALL_SHMEM_MAP), "b"(id)
     );
     return addr;
+}
+
+void* os_map_shared_mem(int id) {
+    return map_shared_mem(id);
 }

@@ -9,7 +9,8 @@
 static void handle_div_by_zero(TrapFrame* frame);
 static void handle_page_fault(TrapFrame* frame);
 static void handle_general_protection_fault(TrapFrame* frame);
-static void crash();
+static void crash(TrapFrame* frame);
+static void print_stack_trace(int max_depth, u32 ebp);
 
 void init_exceptions() {
     register_isr(0, handle_div_by_zero);
@@ -18,13 +19,14 @@ void init_exceptions() {
 }
 
 void handle_general_protection_fault(TrapFrame* frame) {
+    
     u32* pd = mem_get_current_page_directory();
     kernel_log("general protection fault! error=%u eip=%x", frame->error, frame->eip);
     kernel_log("cs=%u ds=%u ss=%u eflags=%u", frame->cs, frame->ds, frame->usermode_ss, frame->eflags);
     kernel_log("pdir=%x", pd);
     kernel_log("current task id=%u", current_task->id);
     
-    crash(frame->eip);
+    crash(frame);
 }
 
 void handle_page_fault(TrapFrame* frame) {
@@ -37,21 +39,42 @@ void handle_page_fault(TrapFrame* frame) {
     u32* pd = mem_get_current_page_directory();
     kernel_log("page fault! vaddr=%x eip=%x pdir=%x error=%u", cr2, frame->eip, pd, frame->error);
 
-    crash(frame->eip);
+    crash(frame);
 }
 
 static void handle_div_by_zero(TrapFrame* frame) {
     kernel_log("div by zero! error=%u eip=%x", frame->error, frame->eip);
 
-    crash(frame->eip);
+    crash(frame);
 }
 
-static void crash(u32 eip) {
-    if (eip >= KERNEL_START) {
+static void crash(TrapFrame* frame) {
+    //print_stack_trace(5, frame->ebp);
+
+    if (frame->eip >= KERNEL_START) {
         crash_and_burn();
         return;
     }
 
     kill_task(current_task->id);
     task_schedule();
+}
+
+typedef struct _StackFrame {
+    struct _StackFrame* ebp;
+    u32 eip;
+} StackFrame;
+
+static void print_stack_trace(int max_depth, u32 ebp) {
+    StackFrame *frame = (StackFrame*) ebp;
+
+    // asm volatile(
+    //     "movl %%ebp, %0"
+    //     : "=r"(frame) ::
+    // ); // gets optimized out on -O2
+    kernel_log("stack trace:");
+    for (u32 i = 0; frame && i < max_depth; i++) {
+        kernel_log("  0x%x", frame->eip);
+        frame = frame->ebp;
+    }
 }
