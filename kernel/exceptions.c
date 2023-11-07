@@ -65,16 +65,11 @@ typedef struct _StackFrame {
 } StackFrame;
 
 static void print_stack_trace(int max_depth, u32 ebp) {
-    // kernel_log("ebp = %x", ebp);
+    kernel_log("stack trace:");
+    
     StackFrame *frame = (StackFrame*) ebp;
-
-    // asm volatile(
-    //     "movl %%ebp, %0"
-    //     : "=r"(frame) ::
-    // ); // gets optimized out on -O2
-    // kernel_log("stack trace:");
-    // for (u32 i = 0; frame && i < max_depth; i++) {
-    //     kernel_log("  0x%x", frame->eip);
-    //     frame = frame->ebp;
-    // }
+    for (u32 i = 0; frame && i < max_depth; i++) {
+        kernel_log("  0x%x", frame->eip);
+        frame = frame->ebp;
+    }
 }
