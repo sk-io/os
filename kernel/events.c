@@ -21,7 +21,7 @@ void init_events() {
 }
 
 void init_events_for_task(Task* task) {
-    task->event_shmem_id = sharedmem_create(sizeof(EventBuffer));
+    task->event_shmem_id = sharedmem_create(sizeof(EventBuffer), 0);
 
     EventBuffer* buffer = sharedmem_map(task->event_shmem_id, true);
     memset(buffer, 0, sizeof(EventBuffer));

@@ -53,7 +53,7 @@ s32 create_window(s32 width, s32 height, u32 flags) {
     windows[index].actual_height = height + WINDOW_CONTENT_YOFFSET + 1;
     u32 fb_bytes = width * height * 4;
     windows[index].framebuffer_size_bytes = fb_bytes;
-    windows[index].fb_shmem_id = sharedmem_create(fb_bytes * (flags & WINDOW_FLAG_DOUBLE_BUFFERED ? 2 : 1));
+    windows[index].fb_shmem_id = sharedmem_create(fb_bytes * (flags & WINDOW_FLAG_DOUBLE_BUFFERED ? 2 : 1), 0);
     windows[index].framebuffer = sharedmem_map(windows[index].fb_shmem_id, true);
     windows[index].shown_buffer = 0;
     windows[index].owner_task_id = current_task->id;

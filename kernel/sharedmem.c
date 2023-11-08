@@ -4,45 +4,36 @@
 #include "kmalloc.h"
 #include "memory.h"
 #include "physalloc.h"
-#include "syscall.h"
 #include "log.h"
 #include "tasks.h"
 
-#define MAX_SHAREDMEM_OBJS 32
-
-static SharedMemory shmem[MAX_SHAREDMEM_OBJS];
+SharedMemory shmem[MAX_SHAREDMEM_OBJS];
 u8 kernel_sharedmem_bitmap[8192];
 
 static s32 find_available_shmem_slot();
 static u32 find_available_virtual_region(u32 num_pages, bool map_to_kernel);
 static void mark_pages_used_in_bitmap(u8* bitmap, u32 start, u32 num);
 static void mark_pages_unused_in_bitmap(u8* bitmap, u32 start, u32 num);
-static void* sharedmem_map_syscall(s32 id);
 
 void sharedmem_init() {
     memset(kernel_sharedmem_bitmap, 0, sizeof(kernel_sharedmem_bitmap));
     memset(shmem, 0, sizeof(shmem));
-    register_syscall(SYSCALL_SHMEM_CREATE, sharedmem_create);
-    register_syscall(SYSCALL_SHMEM_DESTROY, sharedmem_destroy);
-    register_syscall(SYSCALL_SHMEM_EXISTS, sharedmem_exists);
-    register_syscall(SYSCALL_SHMEM_MAP, sharedmem_map_syscall);
-    register_syscall(SYSCALL_SHMEM_UNMAP, sharedmem_unmap);
 }
 
 // problem: how do two processes agree on the same shmem obj id?
-// should we specify here if we are the owner?
-s32 sharedmem_create(u32 size) {
+s32 sharedmem_create(u32 size, u32 owner_task_id) {
     // assert(!sharedmem_exists(id));
     assert(size);
 
     s32 id = find_available_shmem_slot();
 
-    // kernel_log("sharedmem_create %u %u", id, size);
+    kernel_log("sharedmem_create id=%u owner=%u", id, owner_task_id);
 
     u32 num_pages = CEIL_DIV(size, 0x1000);
     shmem[id].size_in_pages = num_pages;
     // kernel_log("num_pages %u", shmem[id].size_in_pages);
     shmem[id].physical_pages = kmalloc(num_pages * sizeof(u32));
+    shmem[id].owner_task_id = owner_task_id;
 
     for (int i = 0; i < num_pages; i++) {
         shmem[id].physical_pages[i] = pmm_alloc_pageframe();
@@ -52,9 +43,13 @@ s32 sharedmem_create(u32 size) {
 }
 
 void sharedmem_destroy(s32 id) {
+    kernel_log("sharedmem_destroy %d", id);
+    // FIXME: unmap everywhere
+
     assert(sharedmem_exists(id));
 
     for (int i = 0; i < shmem[id].size_in_pages; i++) {
+        kernel_log("freeing %x", shmem[id].physical_pages[i]);
         pmm_free_pageframe(shmem[id].physical_pages[i]);
     }
 
@@ -62,7 +57,7 @@ void sharedmem_destroy(s32 id) {
 }
 
 bool sharedmem_exists(s32 id) {
-    if (id >= MAX_SHAREDMEM_OBJS)
+    if (id < 0 || id >= MAX_SHAREDMEM_OBJS)
         return false;
     return shmem[id].size_in_pages != 0;
 }
@@ -82,6 +77,9 @@ void* sharedmem_map(s32 id, bool map_to_kernel) {
         u32 flags = PAGE_FLAG_WRITE;
         if (!map_to_kernel)
             flags |= PAGE_FLAG_USER;
+        // if (obj->owner_task_id == 0)
+        //     flags |= PAGE_FLAG_OWNER; // owned by kernel
+
         // fixme: who is the owner? physical memory leak!!
         mem_map_page(vaddr + i * 0x1000, obj->physical_pages[i], flags);
     }
@@ -194,7 +192,3 @@ static s32 find_available_shmem_slot() {
     assert_msg(0, "no more shmem slots!");
 }
 
-void* sharedmem_map_syscall(s32 id) {
-    // kernel_log("sharedmem_map_syscall");
-    return sharedmem_map(id, false);
-}

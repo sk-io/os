@@ -71,6 +71,9 @@ void crash_and_burn() {
 void kernel_assert(int condition, const char* file, int line, const char *error_msg) {
     if (!condition) {
         kernel_log("%s:%d assert failed: %s", file, line, error_msg);
+        // hack to print stack trace
+        int g = 0;
+        g /= g;
         crash_and_burn();
     }
 }

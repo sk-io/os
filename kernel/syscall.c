@@ -7,30 +7,31 @@
 #include "ramdisk.h"
 #include "userheap.h"
 #include "time.h"
+#include "sharedmem.h"
 
 #define NUM_SYSCALLS 256
 void* syscall_handlers[NUM_SYSCALLS];
 
 static void handle_syscall_interrupt(TrapFrame* frame);
 
-int syscall_get_task_id() {
+static int syscall_get_task_id() {
     return current_task->id;
 }
 
-void syscall_exit() {
+static void syscall_exit() {
     kill_task(current_task->id);
 }
 
-void syscall_print(const char* string) {
+static void syscall_print(const char* string) {
     kernel_log("task %u: %s", current_task->id, string);
 }
 
-void syscall_exec(const char* path) {
+static void syscall_exec(const char* path) {
     // kernel_log("task %u exec: %s", current_task->id, path);
     create_user_task(path);
 }
 
-u32 syscall_open_file(const char* path) {
+static u32 syscall_open_file(const char* path) {
     int fd = -1;
     for (int i = 0; i < MAX_OPEN_FILES; i++) {
         if (current_task->open_files[i].obj.fs == 0) {
@@ -48,7 +49,7 @@ u32 syscall_open_file(const char* path) {
     return fd;
 }
 
-u32 syscall_read_file(u32 fd, u8* buf, u32 num_bytes) {
+static u32 syscall_read_file(u32 fd, u8* buf, u32 num_bytes) {
     assert_msg(fd < MAX_OPEN_FILES, "");
     assert_msg(current_task->open_files[fd].obj.fs != 0, "");
     UINT br;
@@ -57,36 +58,36 @@ u32 syscall_read_file(u32 fd, u8* buf, u32 num_bytes) {
     return br;
 }
 
-void syscall_close_file(u32 fd) {
+static void syscall_close_file(u32 fd) {
     assert_msg(fd < MAX_OPEN_FILES, "");
 
     FRESULT res = f_close(&current_task->open_files[fd]);
     assert_msg(res == FR_OK, "");
 }
 
-u32 syscall_get_file_size(u32 fd) {
+static u32 syscall_get_file_size(u32 fd) {
     assert_msg(fd < MAX_OPEN_FILES, "");
 
     return f_size(&current_task->open_files[fd]);
 }
 
-u32 syscall_get_heap_start() {
+static u32 syscall_get_heap_start() {
     return current_task->heap_start;
 }
 
-u32 syscall_get_heap_end() {
+static u32 syscall_get_heap_end() {
     return current_task->heap_end;
 }
 
-void syscall_set_heap_end(u32 heap_end) {
+static void syscall_set_heap_end(u32 heap_end) {
     set_user_heap_end(current_task, heap_end);
 }
 
-int syscall_open_dir(const char* path) {
+static int syscall_open_dir(const char* path) {
     return f_opendir(&current_task->open_dir, path) == FR_OK;
 }
 
-int syscall_close_dir() {
+static int syscall_close_dir() {
     return f_closedir(&current_task->open_dir) == FR_OK;
 }
 
@@ -96,7 +97,7 @@ typedef struct {
 } OSFileInfo;
 #define OS_FILE_INFO_IS_DIR 16
 
-int syscall_next_file_in_dir(OSFileInfo* info_out) {
+static int syscall_next_file_in_dir(OSFileInfo* info_out) {
     FILINFO info;
     f_readdir(&current_task->open_dir, &info);
     
@@ -112,12 +113,40 @@ int syscall_next_file_in_dir(OSFileInfo* info_out) {
     return 1;
 }
 
-void syscall_set_timer_interval(int timer_id, int interval_ms) {
+static void syscall_set_timer_interval(int timer_id, int interval_ms) {
     assert_msg(timer_id < MAX_TIMERS, "too many timers!");
     Timer* timer = &current_task->timers[timer_id];
     timer->interval = interval_ms;
     timer->active = interval_ms != 0;
     timer->next_fire = get_system_time_millis() + interval_ms;
+}
+
+static void* syscall_sharedmem_map(s32 id) {
+    return sharedmem_map(id, false);
+}
+
+static s32 syscall_shmem_create(u32 size) {    
+    return sharedmem_create(size, current_task->id);
+}
+
+static s32 syscall_shmem_destroy(s32 id) {
+    if (id < 0 || id >= MAX_SHAREDMEM_OBJS)
+        return 1;
+    
+    u32 task_id = current_task->id;
+    if (shmem[id].owner_task_id != task_id)
+        return 1;
+    
+    sharedmem_destroy(id);
+    return 0;
+}
+
+static bool syscall_sharedmem_exists(s32 id) {
+    return sharedmem_exists(id);
+}
+
+static void syscall_sharedmem_unmap(s32 id, void* vaddr) {
+    sharedmem_unmap(id, vaddr);
 }
 
 void init_syscalls() {
@@ -138,6 +167,12 @@ void init_syscalls() {
     register_syscall(SYSCALL_CLOSE_DIR, syscall_close_dir);
     register_syscall(SYSCALL_NEXT_FILE_IN_DIR, syscall_next_file_in_dir);
     register_syscall(SYSCALL_SET_TIMER_INTERVAL, syscall_set_timer_interval);
+    // shared mem
+    register_syscall(SYSCALL_SHMEM_CREATE, syscall_shmem_create);
+    register_syscall(SYSCALL_SHMEM_DESTROY, syscall_shmem_destroy);
+    register_syscall(SYSCALL_SHMEM_EXISTS, syscall_sharedmem_exists);
+    register_syscall(SYSCALL_SHMEM_MAP, syscall_sharedmem_map);
+    register_syscall(SYSCALL_SHMEM_UNMAP, syscall_sharedmem_unmap);
 
     register_isr(0x80, handle_syscall_interrupt);
 }

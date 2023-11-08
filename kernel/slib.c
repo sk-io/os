@@ -23,6 +23,7 @@ static int find_slot() {
     return -1;
 }
 
+// FIXME: acts on current pdir!!
 static void find_and_load_shared_lib(const char* name, Task* task) {
     kernel_log("attempting to load shared lib: %s", name);
 

@@ -1,15 +1,24 @@
 #pragma once
 
 #include "types.h"
+#include "config.h"
+
+typedef struct {
+    u32 vaddr;
+    // more later?
+} SharedMemoryMapping;
 
 typedef struct {
     u32 size_in_pages;
-
     u32* physical_pages;
+    u32 owner_task_id; // 1 means kernel owned
+    SharedMemoryMapping mappings[MAX_SHARED_MEMORY_MAPPINGS];
 } SharedMemory; // SharedMemoryObject
 
+extern SharedMemory shmem[MAX_SHAREDMEM_OBJS];
+
 void sharedmem_init();
-s32 sharedmem_create(u32 size);
+s32 sharedmem_create(u32 size, u32 owner_task_id);
 void sharedmem_destroy(s32 id);
 bool sharedmem_exists(s32 id);
 void* sharedmem_map(s32 id, bool map_to_kernel);

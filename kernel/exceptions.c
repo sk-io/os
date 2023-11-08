@@ -48,7 +48,7 @@ static void handle_div_by_zero(TrapFrame* frame) {
 }
 
 static void crash(TrapFrame* frame) {
-    print_stack_trace(5, frame->ebp);
+    print_stack_trace(8, frame->ebp);
 
     if (frame->eip >= KERNEL_START) {
         crash_and_burn();
@@ -64,7 +64,7 @@ typedef struct _StackFrame {
     u32 eip;
 } StackFrame;
 
-static void print_stack_trace(int max_depth, u32 ebp) {
+void print_stack_trace(int max_depth, u32 ebp) {
     kernel_log("stack trace:");
     
     StackFrame *frame = (StackFrame*) ebp;
