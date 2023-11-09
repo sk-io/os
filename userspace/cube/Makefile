@@ -15,7 +15,7 @@ link: $(OBJ)
 	$(LD) -o $(EXE) $(OBJ) $(LDFLAGS)
 
 %.o: %.c
-	$(CC) $< -o $@ $(CFLAGS)
+	$(CC) -c $< -o $@ $(CFLAGS)
 
 clean:
 	rm -f *.o $(EXE)

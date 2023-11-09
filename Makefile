@@ -1,7 +1,7 @@
 CC = clang
 LD = clang
-CFLAGS = -g -nostdlib -ffreestanding -m32 -fno-builtin -no-pie -c -Wall -Wextra
-LDFLAGS = -g -nostdlib -ffreestanding -m32 -fno-builtin -no-pie -Tkernel.ld -lgcc
+CFLAGS = -g -nostdlib -ffreestanding -m32 -fno-builtin -no-pie -Wall -Wextra -Isgfx
+LDFLAGS = -g -nostdlib -ffreestanding -m32 -fno-builtin -no-pie -Tkernel.ld -Lsgfx -lsgfx -lgcc
 ASFLAGS = -felf32
 
 SOURCES_C = $(patsubst %.c, %.o, $(wildcard kernel/*.c) $(wildcard kernel/**/*.c))
@@ -20,11 +20,11 @@ $(IMAGE): $(KERNEL) $(RAMDISK)
 	cp $(RAMDISK) image/boot
 	grub-mkrescue -o $(IMAGE) image
 
-$(KERNEL): $(OBJ)
+$(KERNEL): $(OBJ) libsgfx
 	$(LD) -o $(KERNEL) $(OBJ) $(LDFLAGS)
 
 %.o: %.c
-	$(CC) -o $@ $(CFLAGS) $<
+	$(CC) -o $@ $(CFLAGS) -c $<
 
 %.o: %.asm
 	nasm $(ASFLAGS) $< -o $@
@@ -34,8 +34,11 @@ $(RAMDISK): user
 	mformat -i $(RAMDISK) ::
 	mcopy -i $(RAMDISK) userspace/bin/* ::
 
-user:
+user: libsgfx
 	make -C userspace
+
+libsgfx:
+	make -C sgfx
 
 run: $(IMAGE)
 	qemu-system-i386 -cdrom $(IMAGE) -serial stdio
@@ -48,4 +51,5 @@ debug:
 
 clean:
 	make -C userspace clean
+	make -C sgfx clean
 	rm -f kernel/*.o kernel/**/*.o $(KERNEL) $(IMAGE) $(RAMDISK)

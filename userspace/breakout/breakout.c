@@ -1,6 +1,6 @@
 #include <os.h>
 #include <types.h>
-#include "graphics.h"
+#include <sgfx.h>
 
 #define width 300
 #define height 240
@@ -125,18 +125,18 @@ void frame() {
         move_ball(&ball, ball.dx, 0);
     }
 
-    graphics_fill(&ctx, 0xff222034);
+    sgfx_fill(&ctx, 0xff222034);
 
     for (int y = 0; y < board_h; y++) {
         for (int x = 0; x < board_w; x++) {
             if (board[x + y * board_w])
-                graphics_fill_rect(&ctx, x * cell_w, y * cell_h, cell_w - 1, cell_h - 1, 0xFF00FF00);
+                sgfx_fill_rect(&ctx, x * cell_w, y * cell_h, cell_w - 1, cell_h - 1, 0xFF00FF00);
         }
     }
 
-    graphics_fill_rect(&ctx, ball.x, ball.y, ball.size, ball.size, 0xFFFFFFFF);
+    sgfx_fill_rect(&ctx, ball.x, ball.y, ball.size, ball.size, 0xFFFFFFFF);
 
-    graphics_fill_rect(&ctx, paddle.x - paddle.w / 2, paddle.y - paddle.h / 2, paddle.w, paddle.h, 0xFFFFFFFF);
+    sgfx_fill_rect(&ctx, paddle.x - paddle.w / 2, paddle.y - paddle.h / 2, paddle.w, paddle.h, 0xFFFFFFFF);
 }
 
 int main(int argc, char* argv[]) {
@@ -148,7 +148,7 @@ int main(int argc, char* argv[]) {
     int shown_buffer = 0;
     OSEvent event;
 
-    init_graphics(&ctx, fb, width, height);
+    sgfx_init(&ctx, fb, width, height);
 
     paddle.x = width / 2;
     reset();

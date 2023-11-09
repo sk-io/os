@@ -1,7 +1,6 @@
 #include <os.h>
 #include <types.h>
-
-#include "graphics.h"
+#include <sgfx.h>
 
 #define width 360
 #define height 240
@@ -12,13 +11,14 @@
 char textbuffer[textbuffer_width * textbuffer_height];
 int cursor_x = 2;
 int cursor_y = 0;
+GraphicsContext ctx;
 
 int main(int argc, char* argv[]) {
     int window = os_create_window(width, height, 0);
     os_set_window_title(window, "Terminal");
     int* fb = os_map_window_framebuffer(window);
 
-    init_graphics(fb, width, height);
+    sgfx_init(&ctx, fb, width, height);
 
     OSEvent event;
 
@@ -28,7 +28,7 @@ int main(int argc, char* argv[]) {
     textbuffer[0] = '>';
 
     while (1) {
-        graphics_fill(0xFF000000);
+        sgfx_fill(&ctx, 0xFF000000);
         int i = 0;
         for (int y = 0; y < textbuffer_height; y++) {
             for (int x = 0; x < textbuffer_width; x++) {
@@ -36,11 +36,11 @@ int main(int argc, char* argv[]) {
                 if (c == 0)
                     continue;
                 
-                graphics_draw_char(c, x * 10, y * 10 + 2, 0xFFFFFFFF);
+                sgfx_draw_char(&ctx, c, x * 10, y * 10 + 2, 0xFFFFFFFF);
             }
         }
 
-        // graphics_draw_string("> ", 3, 5, 0xFFFFFFFF);
+        // sgfx_draw_string("> ", 3, 5, 0xFFFFFFFF);
 
         os_swap_window_buffers(window);
         os_wait_for_events();

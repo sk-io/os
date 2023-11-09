@@ -1,8 +1,7 @@
 #include <os.h>
 #include <types.h>
 #include <string.h>
-
-#include "graphics.h"
+#include <sgfx.h>
 
 #define width 240
 #define height 320
@@ -22,29 +21,27 @@ static void handle_left_click();
 static void read_directory();
 static void go_up();
 
+static GraphicsContext ctx;
+
 int main(int argc, char* argv[]) {
     int window = os_create_window(width, height, 0);
     os_set_window_title(window, "File Browser");
     int* fb = os_map_window_framebuffer(window);
 
-    init_graphics(fb, width, height);
-
-    // os_printf("reading dir...");
+    sgfx_init(&ctx, fb, width, height);
 
     strcpy(path, "/");
     read_directory();
-
-    // os_printf("done! read %d entries.", num_entries);
 
     unsigned int prev_left_mouse_state = 0;
     u32 last_mouse_button_state = 0;
 
     OSEvent event;
     while (1) {
-        graphics_fill(0xFF000000);
-        graphics_draw_string("Path:", 3, 5, 0xFFFFFFFF);
-        graphics_draw_string(path, 3 + 10*7, 5, 0xFFFFFFFF);
-        graphics_draw_string("Go up", 3, 5+12, 0xFFFFFFFF);
+        sgfx_fill(&ctx, 0xFF000000);
+        sgfx_draw_string(&ctx, "Path:", 3, 5, 0xFFFFFFFF);
+        sgfx_draw_string(&ctx, path, 3 + 10*7, 5, 0xFFFFFFFF);
+        sgfx_draw_string(&ctx, "Go up", 3, 5+12, 0xFFFFFFFF);
 
         for (int i = 0; i < num_entries; i++) {
             const OSFileInfo* entry = &entries[i];
@@ -52,7 +49,7 @@ int main(int argc, char* argv[]) {
             u32 color = (entry->attributes & OS_FILE_INFO_IS_DIR) ? 0xFF5b6ee1 : 0xFFcbdbfc;
             if (selected_entry == i)
                 color = 0xFFFFFFFF;
-            graphics_draw_string(entry->name, 3, FILE_LIST_Y_OFFSET + FILE_LIST_Y_SPACING * i, color);
+            sgfx_draw_string(&ctx, entry->name, 3, FILE_LIST_Y_OFFSET + FILE_LIST_Y_SPACING * i, color);
         }
 
         os_swap_window_buffers(window);

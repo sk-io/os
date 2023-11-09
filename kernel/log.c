@@ -33,5 +33,4 @@ void kernel_log(const char* format, ...) {
 
 void _putchar(char character) {
     serial_write(character);
-    //console_write_char(character);
 }

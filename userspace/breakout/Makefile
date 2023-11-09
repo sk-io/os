@@ -1,7 +1,8 @@
-SOURCES_C = $(patsubst %.c, %.o, $(wildcard *.c))
-
-OBJ = $(SOURCES_C)
+OBJ = $(patsubst %.c, %.o, $(wildcard *.c))
 EXE = breakout.exe
+
+CFLAGS += -I../../sgfx
+LDFLAGS += -L../../sgfx -lsgfx
 
 all: $(EXE)
 
@@ -9,7 +10,7 @@ $(EXE): $(OBJ)
 	$(LD) -o $(EXE) $(OBJ) $(LDFLAGS)
 
 %.o: %.c
-	$(CC) $< -o $@ -c $(CFLAGS)
+	$(CC) -c $< -o $@ $(CFLAGS)
 
 clean:
 	rm -f *.o $(EXE)

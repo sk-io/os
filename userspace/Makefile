@@ -1,6 +1,6 @@
 CC = clang
 LD = clang
-CFLAGS = -g -std=gnu11 -nostdlib -ffreestanding -m32 -c -Wall -Wextra -I ../api/include -I ../libc/include
+CFLAGS = -g -std=gnu11 -nostdlib -ffreestanding -m32 -Wall -Wextra -I ../api/include -I ../libc/include
 LDFLAGS = -g -std=gnu11 -nostdlib -ffreestanding -m32 -no-pie -L../api -l:api.so -L../libc -lc ../api/crt0.o
 ASFLAGS = -felf32
 

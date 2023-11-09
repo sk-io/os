@@ -1,6 +1,6 @@
 CC = clang
 LD = clang
-CFLAGS = -g -c -I include -nostdlib -fvisibility=hidden -ffreestanding -m32 -fpic
+CFLAGS = -g -I include -nostdlib -fvisibility=hidden -ffreestanding -m32 -fpic
 LDFLAGS = -g -ffreestanding -nostdlib -fvisibility=hidden -m32 -shared -fpic
 
 SOURCES_C = $(patsubst %.c, %.o, $(wildcard src/*.c))
@@ -15,7 +15,7 @@ crt0.o: crt0/crt0.c
 	$(CC) -g -c -I include -nostdlib -ffreestanding -m32 $< -o $@
 
 src/%.o: src/%.c
-	$(CC) $(CFLAGS) $< -o $@
+	$(CC) -c $< -o $@ $(CFLAGS)
 
 clean:
 	rm -f src/*.o api.so crt0.o

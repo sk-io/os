@@ -161,13 +161,7 @@ static void syscall_debug() {
         u32 valid = mem_is_valid_vaddr(i * 0x1000);
         if (valid)
             kernel_log("%x is valid!", i * 0x1000);
-
-        // mem_map_page(i, phys, 0);
     }
-
-    // for (int i = 0; i < KERNEL_START; i += 0x1000) {
-    //     mem_unmap_page(i);
-    // }
 
     kernel_log("-- syscall debug FINISH");
 

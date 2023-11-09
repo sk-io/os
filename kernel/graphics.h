@@ -1,20 +1,11 @@
 #pragma once
 
-#include "types.h"
-
 // basic software graphics
 
-typedef struct {
-    u32* framebuffer;
-    u32* backbuffer;
-    u32 width;
-    u32 height;
-    u32 bpp;
-    u32 pitch;
-    u32 bytesize;
-} GraphicsState;
+#include "types.h"
+#include <sgfx.h>
 
-extern GraphicsState graphics;
+extern GraphicsContext graphics;
 
 void init_graphics(u32* framebuffer, u32 width, u32 height, u32 bpp, u32 pitch);
 void graphics_fill(u32 color);
