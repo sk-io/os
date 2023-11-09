@@ -156,7 +156,7 @@ bool load_elf_executable(ELFObject* elf) {
 
         // allocate virtual pages
         for (int j = 0; j < num_pages; j++) {
-            mem_map_page((segment->p_vaddr & ~0xFFF) + j * 0x1000, pmm_alloc_pageframe(), flags);
+            mem_map_page((segment->p_vaddr & ~0xFFF) + j * 0x1000, pmm_alloc_pageframe(), flags | PAGE_FLAG_OWNER);
         }
         // zero them, small optimization: dont zero to-be overwritten parts
         memset((segment->p_vaddr & ~0xFFF), 0, num_pages * 0x1000);

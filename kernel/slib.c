@@ -71,8 +71,8 @@ static void find_and_load_shared_lib(const char* name, Task* task) {
             return;
         }
 
-
         // hack: pad malloc until page aligned.
+        // FIXME: memleak
         elf.mem = kmalloc(elf.size + 0x1000);
 
         elf.raw = elf.mem;
@@ -100,7 +100,6 @@ static void find_and_load_shared_lib(const char* name, Task* task) {
         lib->elf = elf; // copy
     }
 
-    // kernel_log("task = %x", task);
     // map it into userspace
     // load segments with offset
 
@@ -113,8 +112,6 @@ static void find_and_load_shared_lib(const char* name, Task* task) {
     }
     assert(slib_slot != -1);
     assert(slib_slot == 0); // temporary
-
-    // kernel_log("slib_slot = %d", slib_slot);
 
     OpenSharedLibrary* open_slib = &task->slibs[slib_slot];
     open_slib->slib = lib;
@@ -132,8 +129,6 @@ static void find_and_load_shared_lib(const char* name, Task* task) {
         if (segment->p_memsz == 0)
             continue;
         
-        // kernel_log(">loading segment %u", i);
-
         u32 flags = PAGE_FLAG_USER;
         if (segment->p_flags & PF_W)
             flags |= PAGE_FLAG_WRITE;
@@ -148,11 +143,9 @@ static void find_and_load_shared_lib(const char* name, Task* task) {
         }
 
         if (segment->p_flags & PF_W) {
-            // kernel_log("writable! allocate and copy!");
             // allocate virtual pages
             for (int j = 0; j < num_pages; j++) {
-                mem_map_page((addr & ~0xFFF) + j * 0x1000, pmm_alloc_pageframe(), flags);
-                // kernel_log("mapping %x", (addr & ~0xFFF) + j * 0x1000);
+                mem_map_page((addr & ~0xFFF) + j * 0x1000, pmm_alloc_pageframe(), flags | PAGE_FLAG_OWNER);
             }
 
             // zero them, small optimization: dont zero to-be overwritten parts
@@ -161,22 +154,10 @@ static void find_and_load_shared_lib(const char* name, Task* task) {
             // copy data
             memcpy(addr, lib->elf.raw + segment->p_offset, segment->p_filesz);
         } else {
-
-            // this is wrong.
-            // elf needs to be page aligned?
-            // pad kmalloc? prob not.
-
-            // one solution:
-            // on first load, pmm_allocate ELF size in pages
-            // map these to kernel space? where?
-            // copy ELF
-
-            // kernel_log("nonwritable! map it!");
             // map to kmalloc'd physical pages
             for (int j = 0; j < num_pages; j++) {
                 u32 phys = mem_get_phys_from_virt(lib->elf.raw + segment->p_offset + j * 0x1000);
                 mem_map_page((addr & ~0xFFF) + j * 0x1000, phys, flags);
-                // kernel_log("  mapping %x to %x", (addr & ~0xFFF) + j * 0x1000, phys);
             }
         }
     }
@@ -185,23 +166,17 @@ static void find_and_load_shared_lib(const char* name, Task* task) {
 }
 
 static void resolve_dynamic_references(ELFObject* elf, Task* task) {
-    // parse_symbol_table(elf, elf->dynamic_symbol_table, elf->dynamic_symbol_string_table);
-
     Elf32_Rel* relocation_table = elf->raw + elf->relocation_section->sh_offset;
-    // kernel_log("size=%u, entsize=%u", elf->got_section->sh_size, elf->got_section->sh_entsize);
 
     u32* got = elf->got_section->sh_addr;
-
-    // kernel_log("GOT at %x", got);
     u32 num_got_entries = elf->got_section->sh_size / elf->got_section->sh_entsize;
+
     for (int i = 3; i < num_got_entries; i++) {
-        // kernel_log("  got[%d] = %x", i, &got[i]);
         int rel_index = i - 3;
 
         assert(ELF32_R_TYPE(relocation_table[rel_index].r_info) == R_386_JUMP_SLOT);
         u32 sym_index = ELF32_R_SYM(relocation_table[rel_index].r_info);
         const char* sym_name = get_elf_symbol(elf, elf->dynamic_symbol_table, elf->dynamic_symbol_string_table, sym_index);
-        // kernel_log("   finding %s", sym_name);
 
         bool found = false;
         for (int s = 0; s < MAX_SHARED_LIBS_PER_TASK; s++) {
@@ -213,9 +188,7 @@ static void resolve_dynamic_references(ELFObject* elf, Task* task) {
 
             Elf32_Sym* found_sym = find_symbol(slib_elf, slib_elf->dynamic_symbol_table, slib_elf->dynamic_symbol_string_table, sym_name);
             if (found_sym != NULL) {
-                // kernel_log("    FOUND IT! addr=%x", found_sym->st_value);
                 u32 addr = found_sym->st_value + slib->offset;
-                // kernel_log("addr=%x", addr);
                 got[i] = addr;
                 found = true;
                 break;

@@ -125,6 +125,7 @@ s32 create_user_task(const char* path) {
         mem_change_page_directory(prev_pd);
         mem_free_page_dir(pagedir);
         kernel_log("create_user_task: ELF has no entry");
+        kfree(elf.raw);
         pop_cli();
         return -1;
     }

@@ -28,7 +28,7 @@ void set_user_heap_end(Task* task, u32 new_heap_end) {
 
             // kernel_log("mapping %x", virt);
 
-            mem_map_page(virt, phys, PAGE_FLAG_WRITE | PAGE_FLAG_USER);
+            mem_map_page(virt, phys, PAGE_FLAG_WRITE | PAGE_FLAG_USER | PAGE_FLAG_OWNER);
 
             // zero memory to prevent leaking data
             memset((void*) virt, 0, 0x1000);

@@ -27,17 +27,15 @@ s32 sharedmem_create(u32 size, u32 owner_task_id) {
     assert(size);
 
     s32 id = find_available_shmem_slot();
-
-    // kernel_log("sharedmem_create id=%u owner=%u", id, owner_task_id);
+    SharedMemory* obj = &shmem[id];
 
     u32 num_pages = CEIL_DIV(size, 0x1000);
-    shmem[id].size_in_pages = num_pages;
-    // kernel_log("num_pages %u", shmem[id].size_in_pages);
-    shmem[id].physical_pages = kmalloc(num_pages * sizeof(u32));
-    shmem[id].owner_task_id = owner_task_id;
+    obj->size_in_pages = num_pages;
+    obj->physical_pages = kmalloc(num_pages * sizeof(u32));
+    obj->owner_task_id = owner_task_id;
 
     for (int i = 0; i < num_pages; i++) {
-        shmem[id].physical_pages[i] = pmm_alloc_pageframe();
+        obj->physical_pages[i] = pmm_alloc_pageframe();
     }
 
     return id;
@@ -58,6 +56,7 @@ void sharedmem_destroy(s32 id) {
         pmm_free_pageframe(obj->physical_pages[i]);
     }
 
+    kfree(obj->physical_pages);
     memset(obj, 0, sizeof(SharedMemory));
 }
 
@@ -105,8 +104,6 @@ void* sharedmem_map(s32 id, u32 task_id) {
         u32 flags = PAGE_FLAG_WRITE;
         if (!map_to_kernel)
             flags |= PAGE_FLAG_USER;
-        // if (obj->owner_task_id == 0)
-        //     flags |= PAGE_FLAG_OWNER; // owned by kernel
 
         // kernel_log("sharedmem: mapping %x to %x", mapping->vaddr + i * 0x1000, obj->physical_pages[i]);
         mem_map_page(mapping->vaddr + i * 0x1000, obj->physical_pages[i], flags);
@@ -240,4 +237,3 @@ static s32 find_available_shmem_slot() {
     }
     assert_msg(0, "no more shmem slots!");
 }
-
