@@ -193,11 +193,12 @@ int syscall_next_file_in_dir(OSFileInfo* info) {
 }
 
 int syscall_create_shared_mem(int size) {
+    int ret;
     asm volatile(
         "int $0x80"
-        :: "a"(SYSCALL_SHMEM_CREATE), "b"(size)
+        : "=a"(ret) : "a"(SYSCALL_SHMEM_CREATE), "b"(size)
     );
-    return 0;
+    return ret;
 }
 
 int syscall_destroy_shared_mem(int id) {

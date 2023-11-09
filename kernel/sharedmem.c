@@ -8,7 +8,7 @@
 #include "tasks.h"
 #include "interrupts.h"
 
-SharedMemory shmem[MAX_SHAREDMEM_OBJS];
+SharedMemory shmem[MAX_SHARED_MEMORY_OBJS];
 u8 kernel_sharedmem_bitmap[8192];
 
 static s32 find_available_shmem_slot();
@@ -28,6 +28,8 @@ s32 sharedmem_create(u32 size, u32 owner_task_id) {
 
     s32 id = find_available_shmem_slot();
     SharedMemory* obj = &shmem[id];
+
+    // kernel_log("sharedmem_create task=%u id=%d", owner_task_id, id);
 
     u32 num_pages = CEIL_DIV(size, 0x1000);
     obj->size_in_pages = num_pages;
@@ -52,6 +54,8 @@ void sharedmem_destroy(s32 id) {
         }
     }
 
+    // kernel_log("sharedmem_destroy task=%u id=%d", obj->owner_task_id, id);
+
     for (int i = 0; i < obj->size_in_pages; i++) {
         pmm_free_pageframe(obj->physical_pages[i]);
     }
@@ -61,7 +65,7 @@ void sharedmem_destroy(s32 id) {
 }
 
 bool sharedmem_exists(s32 id) {
-    if (id < 0 || id >= MAX_SHAREDMEM_OBJS)
+    if (id < 0 || id >= MAX_SHARED_MEMORY_OBJS)
         return false;
     return shmem[id].size_in_pages != 0;
 }
@@ -230,7 +234,7 @@ static u32 find_available_virtual_region(u32 num_pages, bool map_to_kernel) {
 }
 
 static s32 find_available_shmem_slot() {
-    for (int i = 0; i < MAX_SHAREDMEM_OBJS; i++) {
+    for (int i = 0; i < MAX_SHARED_MEMORY_OBJS; i++) {
         if (!sharedmem_exists(i)) {
             return i;
         }

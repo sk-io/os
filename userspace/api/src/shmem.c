@@ -3,8 +3,7 @@
 #include "syscalls.h"
 
 int32_t os_create_shared_mem(int32_t size) {
-    syscall_create_shared_mem(size);
-    return 0;
+    return syscall_create_shared_mem(size);
 }
 
 int32_t os_destroy_shared_mem(int32_t id) {

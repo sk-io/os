@@ -132,12 +132,13 @@ static s32 syscall_shmem_create(u32 size) {
 }
 
 static s32 syscall_shmem_destroy(s32 id) {
-    if (id < 0 || id >= MAX_SHAREDMEM_OBJS)
-        return 1;
+    if (id < 0 || id >= MAX_SHARED_MEMORY_OBJS)
+        assert(0);
     
     u32 task_id = current_task->id;
+    // kernel_log("id = %d task_id = %d owner_task_id = %u", id, task_id, shmem[id].owner_task_id);
     if (shmem[id].owner_task_id != task_id)
-        return 1;
+        assert(0);
     
     sharedmem_destroy(id);
     return 0;

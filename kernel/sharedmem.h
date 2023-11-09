@@ -15,7 +15,7 @@ typedef struct {
     SharedMemoryMapping mappings[MAX_SHARED_MEMORY_MAPPINGS];
 } SharedMemory; // SharedMemoryObject?
 
-extern SharedMemory shmem[MAX_SHAREDMEM_OBJS];
+extern SharedMemory shmem[MAX_SHARED_MEMORY_OBJS];
 
 void sharedmem_init();
 s32 sharedmem_create(u32 size, u32 owner_task_id);

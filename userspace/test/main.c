@@ -17,10 +17,10 @@ void crash() {
 int main(int argc, char* argv[]) {
     // printf("hello!!");
 
-    for (int i = 0; i < 1; i++) {
-        int shmem = os_create_shared_mem(100000);
-        os_destroy_shared_mem(shmem);
-    }
+    // for (int i = 0; i < 1; i++) {
+    int shmem = os_create_shared_mem(50000);
+    os_destroy_shared_mem(shmem);
+    // }
 
     // asm volatile(
     //     "int $0x80"

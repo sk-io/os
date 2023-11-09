@@ -20,7 +20,7 @@ void set_user_heap_end(Task* task, u32 new_heap_end) {
     if (new_page_top > old_page_top) {
         int num = new_page_top - old_page_top;
 
-        kernel_log("expanding process heap by %d pages", num);
+        // kernel_log("expanding process heap by %d pages", num);
 
         for (int i = 0; i < num; i++) {
             u32 phys = pmm_alloc_pageframe();
@@ -35,7 +35,7 @@ void set_user_heap_end(Task* task, u32 new_heap_end) {
         }
     } else if (new_page_top < old_page_top) {
         // todo
-		kernel_log("userheap.c tried to shrink the heap!!");
+        assert(0);
     }
 
     task->heap_end = new_heap_end;

@@ -17,8 +17,7 @@ Currently relies on multiboot/grub to provide a ramdisk and a framebuffer.
 
 ## Architecture/Motivation
 
-This is a completely monolithic OS with a single userspace API for everything (task management, file I/O, window management, etc...). The kernel is not unix based.
-All an application needs to do is to include "os.h" and link against api.so.
+The kernel is not unix based. This is a completely monolithic OS with a single userspace API for everything (task management, file I/O, window management, etc...). All an application needs to do is to include os.h and link against api.so.
 
 I try to keep things as simple and understandable as possible whilst still being speedy. There are tons of security holes, that's not a priority right now.
 

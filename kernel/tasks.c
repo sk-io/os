@@ -179,6 +179,8 @@ void kill_task(u32 id) {
         destroy_events_for_task(task);
     }
 
+    // FIXME: destroy user owned shmem objs
+
     mem_free_page_dir(task->pagedir);
     kfree(task->kesp0 - KERNEL_STACK_SIZE);
     memset(&tasks[index], 0, sizeof(Task));
