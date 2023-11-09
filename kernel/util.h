@@ -30,6 +30,8 @@ void kernel_assert(int condition, const char* file, int line, const char* error_
 
 #define CEIL_DIV(a, b) (((a) + (b) - 1) / (b))
 #define CLAMP(x, a, b) (((x) < (a)) ? (a) : ((x) > (b) ? (b) : (x)))
+#define MIN(x, y) (((x) < (y)) ?  (x) : (y))
+#define MAX(x, y) (((x) > (y)) ?  (x) : (y))
 
 static inline u32 read_eflags() {
     u32 eflags;

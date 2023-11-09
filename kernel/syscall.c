@@ -164,7 +164,35 @@ static void syscall_debug() {
     }
 
     kernel_log("-- syscall debug FINISH");
+}
 
+typedef struct {
+    uint32_t id;
+    uint32_t state;
+} OSTaskInfo;
+
+os_errorcode syscall_get_task_info(OSTaskInfo* list, uint32_t list_max_size, uint32_t* num_tasks) {
+    if (list > KERNEL_START)
+        return 1;
+    
+    int index = 0;
+    for (int i = 0; i < MAX_TASKS; i++) {
+        Task* task = &tasks[i];
+        if (task->state == TASK_STATE_DEAD)
+            continue;
+        
+        OSTaskInfo* info = list + index;
+        info->id = task->id;
+        info->state = task->state;
+    
+        index++;
+        if (index >= list_max_size)
+            break;
+    }
+
+    *num_tasks = index;
+
+    return 0;
 }
 
 void init_syscalls() {
@@ -191,7 +219,9 @@ void init_syscalls() {
     register_syscall(SYSCALL_SHMEM_EXISTS, syscall_sharedmem_exists);
     register_syscall(SYSCALL_SHMEM_MAP, syscall_sharedmem_map);
     register_syscall(SYSCALL_SHMEM_UNMAP, syscall_sharedmem_unmap);
+
     register_syscall(SYSCALL_DEBUG, syscall_debug);
+    register_syscall(SYSCALL_GET_TASK_INFO, syscall_get_task_info);
 
     register_isr(0x80, handle_syscall_interrupt);
 }

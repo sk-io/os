@@ -5,11 +5,11 @@
 #define EVENT_BUFFER_SIZE 256
 
 typedef struct {
-    unsigned int num_events;
+    uint32_t num_events;
     OSEvent buffer[EVENT_BUFFER_SIZE];
 } EventBuffer;
 
-static int last_handled_event;
+static int32_t last_handled_event;
 static EventBuffer* event_buffer;
 
 void init_events() {
@@ -21,7 +21,7 @@ void init_events() {
     event_buffer = syscall_map_shared_mem(shmem_id);
 }
 
-int os_poll_event(OSEvent* event) {
+int32_t os_poll_event(OSEvent* event) {
     if (last_handled_event == event_buffer->num_events)
         return 0;
     
@@ -30,11 +30,11 @@ int os_poll_event(OSEvent* event) {
     return 1;
 }
 
-int os_wait_for_events() {
+int32_t os_wait_for_events() {
     syscall_wait_for_events();
     return 1;
 }
 
-void os_set_timer_interval(int timer_id, int interval_ms) {
+void os_set_timer_interval(int32_t timer_id, int32_t interval_ms) {
     syscall_set_timer_interval(timer_id, interval_ms);
 }

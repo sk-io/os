@@ -8,12 +8,14 @@
 // window management
 // audio
 
+typedef uint32_t os_errorcode;
+
 #define OS_EXPORT __attribute__((visibility("default")))
 
-OS_EXPORT void os_temp_init(); // todo: remove this
+OS_EXPORT void os_temp_init(); // todo: remove this?
 
 // basics
-OS_EXPORT int os_get_task_id();
+OS_EXPORT int32_t os_get_task_id();
 OS_EXPORT void os_print(const char* msg);
 OS_EXPORT void os_exec(const char* path);
 OS_EXPORT void os_exit();
@@ -25,13 +27,13 @@ typedef struct {
 } OSFileInfo;
 #define OS_FILE_INFO_IS_DIR 16
 
-OS_EXPORT int os_open_file(const char* path);
-OS_EXPORT int os_close_file(int fd);
-OS_EXPORT int os_read_file(int fd, char* buffer, int num_bytes);
-OS_EXPORT int os_get_file_size(int fd);
-OS_EXPORT int os_open_dir(const char* path);
-OS_EXPORT int os_close_dir();
-OS_EXPORT int os_next_file_in_dir(OSFileInfo* info);
+OS_EXPORT int32_t os_open_file(const char* path);
+OS_EXPORT int32_t os_close_file(int32_t fd);
+OS_EXPORT int32_t os_read_file(int32_t fd, char* buffer, int32_t num_bytes);
+OS_EXPORT int32_t os_get_file_size(int32_t fd);
+OS_EXPORT int32_t os_open_dir(const char* path);
+OS_EXPORT int32_t os_close_dir();
+OS_EXPORT int32_t os_next_file_in_dir(OSFileInfo* info);
 
 // heap
 OS_EXPORT uint32_t os_get_heap_start();
@@ -44,18 +46,18 @@ OS_EXPORT void os_free(void* addr);
 #define OS_FULLSCREEN (1 << 0)
 #define OS_DOUBLE_BUFFERED (1 << 1)
 
-OS_EXPORT int os_create_window(int width, int height, unsigned int flags);
-OS_EXPORT int os_destroy_window(int window_id);
-OS_EXPORT void* os_map_window_framebuffer(int window_id);
-OS_EXPORT int os_swap_window_buffers(int window_id);
-OS_EXPORT int os_set_window_title(int window_id, const char* title);
+OS_EXPORT int32_t os_create_window(int32_t width, int32_t height, uint32_t flags);
+OS_EXPORT int32_t os_destroy_window(int32_t window_id);
+OS_EXPORT void* os_map_window_framebuffer(int32_t window_id);
+OS_EXPORT int32_t os_swap_window_buffers(int32_t window_id);
+OS_EXPORT int32_t os_set_window_title(int32_t window_id, const char* title);
 
 // shared memory
-OS_EXPORT int os_create_shared_mem(int size);
-OS_EXPORT int os_destroy_shared_mem(int id);
-OS_EXPORT int os_shared_mem_exists(int id);
-OS_EXPORT void* os_map_shared_mem(int id);
-OS_EXPORT void os_unmap_shared_mem(int id);
+OS_EXPORT int32_t os_create_shared_mem(int32_t size);
+OS_EXPORT int32_t os_destroy_shared_mem(int32_t id);
+OS_EXPORT int32_t os_shared_mem_exists(int32_t id);
+OS_EXPORT void* os_map_shared_mem(int32_t id);
+OS_EXPORT void os_unmap_shared_mem(int32_t id);
 
 // events
 enum {
@@ -67,36 +69,44 @@ enum {
 };
 
 typedef struct {
-    unsigned int type;
-    unsigned int data0;
-    unsigned int data1;
-    unsigned int data2;
+    uint32_t type;
+    uint32_t data0;
+    uint32_t data1;
+    uint32_t data2;
 } OSEvent;
 
 typedef struct {
-    unsigned int type;
-    unsigned int scancode;
-    unsigned int ascii;
-    unsigned int state;
+    uint32_t type;
+    uint32_t scancode;
+    uint32_t ascii;
+    uint32_t state;
 } OSKeyboardEvent;
 
 typedef struct {
-    unsigned int type;
-    unsigned int x;
-    unsigned int y;
-    unsigned int buttons;
+    uint32_t type;
+    uint32_t x;
+    uint32_t y;
+    uint32_t buttons;
 } OSMouseEvent;
 
 typedef struct {
-    unsigned int type;
-    unsigned int timer_id;
-    unsigned int time_of_fire;
-    unsigned int data2;
+    uint32_t type;
+    uint32_t timer_id;
+    uint32_t time_of_fire;
+    uint32_t data2;
 } OSTimerEvent;
 
-OS_EXPORT int os_poll_event(OSEvent* event);
-OS_EXPORT int os_wait_for_events();
-OS_EXPORT void os_set_timer_interval(int timer_id, int interval_ms);
+OS_EXPORT int32_t os_poll_event(OSEvent* event);
+OS_EXPORT int32_t os_wait_for_events();
+OS_EXPORT void os_set_timer_interval(int32_t timer_id, int32_t interval_ms);
 
 // utils
 OS_EXPORT void os_printf(const char* msg, ...);
+
+// system info
+typedef struct {
+    uint32_t id;
+    uint32_t state;
+} OSTaskInfo;
+
+OS_EXPORT os_errorcode os_get_task_info(OSTaskInfo* list, uint32_t list_max_size, uint32_t* num_tasks);

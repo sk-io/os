@@ -23,6 +23,8 @@ all:
 	cp breakout/*.exe bin/
 	$(MAKE) -C test
 	cp test/*.exe bin/
+	$(MAKE) -C tasks
+	cp tasks/*.exe bin/
 
 clean:
 	$(MAKE) -C api clean

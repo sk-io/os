@@ -2,7 +2,6 @@
 
 #include "../../../kernel/syscall_list.h"
 
-
 int syscall_get_task_id() {
     int ret;
     asm volatile(
@@ -235,4 +234,14 @@ void* syscall_map_shared_mem(int id) {
         : "a"(SYSCALL_SHMEM_MAP), "b"(id)
     );
     return addr;
+}
+
+os_errorcode syscall_get_task_info(OSTaskInfo* list, uint32_t list_max_size, uint32_t* num_tasks) {
+    os_errorcode error;
+    asm volatile(
+        "int $0x80"
+        : "=a"(error)
+        : "a"(SYSCALL_GET_TASK_INFO), "b"(list), "c"(list_max_size), "d"(num_tasks)
+    );
+    return error;
 }

@@ -29,3 +29,4 @@ int syscall_destroy_shared_mem(int id);
 int syscall_shared_mem_exists(int id);
 void syscall_unmap_shared_mem(int id);
 void* syscall_map_shared_mem(int id);
+os_errorcode syscall_get_task_info(OSTaskInfo* list, uint32_t list_max_size, uint32_t* num_tasks);

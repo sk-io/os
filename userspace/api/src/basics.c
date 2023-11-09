@@ -2,7 +2,7 @@
 
 #include "syscalls.h"
 
-int os_get_task_id() {
+int32_t os_get_task_id() {
     return syscall_get_task_id();
 }
 
