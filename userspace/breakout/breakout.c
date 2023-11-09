@@ -8,7 +8,7 @@
 #define board_w 12
 #define board_h 5
 
-#define ABS(N) ((N<0)?(-N):(N))
+#define ABS(N) (((N)<0)?(-(N)):(N))
 
 const int cell_w = width / board_w;
 const int cell_h = 50 / board_h;
@@ -85,7 +85,7 @@ void move_ball(Ball* ball, int dx, int dy) {
             ball->dy *= -1;
 
             int delta_x = ABS(ball->x + ball->size / 2 - paddle.x);
-            int speed = delta_x > paddle.w / 2 ? 7 : 4;
+            int speed = (delta_x > paddle.w / 3) ? 7 : 4;
             ball->dx = ball->dx > 0 ? speed : -speed;
         }
     }

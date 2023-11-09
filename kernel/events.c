@@ -23,7 +23,7 @@ void init_events() {
 void init_events_for_task(Task* task) {
     task->event_shmem_id = sharedmem_create(sizeof(EventBuffer), 0);
 
-    EventBuffer* buffer = sharedmem_map(task->event_shmem_id, true);
+    EventBuffer* buffer = sharedmem_map(task->event_shmem_id, 0);
     memset(buffer, 0, sizeof(EventBuffer));
     task->event_buffer = buffer;
 }
@@ -31,7 +31,6 @@ void init_events_for_task(Task* task) {
 void destroy_events_for_task(Task* task) {
     assert(task->event_shmem_id >= 0);
     
-    sharedmem_unmap(task->event_shmem_id, task->event_buffer);
     sharedmem_destroy(task->event_shmem_id);
     task->event_shmem_id = -1;
 }

@@ -11,6 +11,7 @@
 #include "windows.h"
 #include "res/cursor_img.h"
 #include "time.h"
+#include "interrupts.h"
 
 GUI gui;
 
@@ -40,15 +41,16 @@ void init_gui(s32 width, s32 height) {
 }
 
 void gui_thread_entry() {
+    // disable_interrupts();
     while (1) {
-        gui_handle_events();
-
         if (gui.needs_redraw) {
             gui.needs_redraw = false;
             gui_draw_frame();
         }
 
-        // task_schedule();
+        disable_interrupts();
+        gui_handle_events();
+        enable_interrupts();
     }
 }
 
@@ -85,7 +87,7 @@ static void gui_draw_frame() {
 static void handle_left_click() {
     if (gui.cursor_x >= testbutton_x && gui.cursor_x < testbutton_x + testbutton_w
         && gui.cursor_y >= testbutton_y && gui.cursor_y < testbutton_y + testbutton_h) {
-        create_user_task("cube.exe");
+        create_user_task("files.exe");
     }
 
     focused_window = window_under_cursor;
@@ -105,9 +107,10 @@ static void handle_left_click() {
             // we are clicking on its border
             if (check_window_close(window_under_cursor, gui.cursor_x, gui.cursor_y)) {
                 Window* w = get_window(window_under_cursor);
+                u32 task_id = w->owner_task_id;
                 // todo: allow for multiple windows
-                kill_task(w->owner_task_id);
                 destroy_window(window_under_cursor);
+                kill_task(task_id);
                 window_under_cursor = -1;
                 focused_window = -1;
             }

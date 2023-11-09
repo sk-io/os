@@ -121,3 +121,7 @@ void pop_cli() {
         enable_interrupts();
     }
 }
+
+bool are_interrupts_enabled() {
+    return read_eflags() & FL_IF;
+}

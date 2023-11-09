@@ -54,7 +54,7 @@ s32 create_window(s32 width, s32 height, u32 flags) {
     u32 fb_bytes = width * height * 4;
     windows[index].framebuffer_size_bytes = fb_bytes;
     windows[index].fb_shmem_id = sharedmem_create(fb_bytes * (flags & WINDOW_FLAG_DOUBLE_BUFFERED ? 2 : 1), 0);
-    windows[index].framebuffer = sharedmem_map(windows[index].fb_shmem_id, true);
+    windows[index].framebuffer = sharedmem_map(windows[index].fb_shmem_id, 0);
     windows[index].shown_buffer = 0;
     windows[index].owner_task_id = current_task->id;
 
@@ -72,7 +72,6 @@ s32 create_window(s32 width, s32 height, u32 flags) {
 
 void destroy_window(s32 window_id) {
     Window* w = &windows[window_id];
-    sharedmem_unmap(w->fb_shmem_id, w->framebuffer);
     sharedmem_destroy(w->fb_shmem_id);
 
     memset(&windows[window_id], 0, sizeof(Window));

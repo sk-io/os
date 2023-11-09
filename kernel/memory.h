@@ -34,6 +34,7 @@
 // note that these are virtual addresses!
 #define REC_PAGEDIR ((u32*) 0xFFFFF000)
 #define REC_PAGETABLE(i) ((u32*) (0xFFC00000 + ((i) << 12)))
+// #define REC_PAGETABLE(i) ((u32*) (0xFFC00000 + ((i) * 0x400)))
 
 extern u32 initial_page_dir[1024];
 extern int mem_num_vpages;
@@ -46,3 +47,4 @@ void mem_free_page_dir(u32* page_dir);
 void mem_change_page_directory(u32* pd);
 u32* mem_get_current_page_directory();
 u32 mem_get_phys_from_virt(u32 virt_addr);
+bool mem_is_valid_vaddr(u32 vaddr);

@@ -8,6 +8,8 @@
 #define disable_interrupts() asm volatile("cli")
 #define FL_IF 0x200 // interrupt enable
 
+#define VERIFY_INTERRUPTS_DISABLED assert(!are_interrupts_enabled())
+
 typedef struct {
     u16 isr_low;
     u16 kernel_cs;
@@ -46,3 +48,4 @@ void register_isr(u8 vector, ISRFunction func);
 void handle_interrupt(TrapFrame* frame);
 void push_cli();
 void pop_cli();
+bool are_interrupts_enabled();

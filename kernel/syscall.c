@@ -8,6 +8,8 @@
 #include "userheap.h"
 #include "time.h"
 #include "sharedmem.h"
+#include "physalloc.h"
+#include "memory.h"
 
 #define NUM_SYSCALLS 256
 void* syscall_handlers[NUM_SYSCALLS];
@@ -122,10 +124,10 @@ static void syscall_set_timer_interval(int timer_id, int interval_ms) {
 }
 
 static void* syscall_sharedmem_map(s32 id) {
-    return sharedmem_map(id, false);
+    return sharedmem_map(id, current_task->id);
 }
 
-static s32 syscall_shmem_create(u32 size) {    
+static s32 syscall_shmem_create(u32 size) {
     return sharedmem_create(size, current_task->id);
 }
 
@@ -145,8 +147,30 @@ static bool syscall_sharedmem_exists(s32 id) {
     return sharedmem_exists(id);
 }
 
-static void syscall_sharedmem_unmap(s32 id, void* vaddr) {
-    sharedmem_unmap(id, vaddr);
+static void syscall_sharedmem_unmap(s32 id) {
+    sharedmem_unmap(id, current_task->id);
+}
+
+static void syscall_debug() {
+    kernel_log("-- syscall debug BEGIN");
+    kernel_log("our pdir=%x", mem_get_current_page_directory());
+
+    u32 phys = pmm_alloc_pageframe();
+
+    for (u32 i = 0; i < 1024 * 1024; i++) {
+        u32 valid = mem_is_valid_vaddr(i * 0x1000);
+        if (valid)
+            kernel_log("%x is valid!", i * 0x1000);
+
+        // mem_map_page(i, phys, 0);
+    }
+
+    // for (int i = 0; i < KERNEL_START; i += 0x1000) {
+    //     mem_unmap_page(i);
+    // }
+
+    kernel_log("-- syscall debug FINISH");
+
 }
 
 void init_syscalls() {
@@ -173,6 +197,7 @@ void init_syscalls() {
     register_syscall(SYSCALL_SHMEM_EXISTS, syscall_sharedmem_exists);
     register_syscall(SYSCALL_SHMEM_MAP, syscall_sharedmem_map);
     register_syscall(SYSCALL_SHMEM_UNMAP, syscall_sharedmem_unmap);
+    register_syscall(SYSCALL_DEBUG, syscall_debug);
 
     register_isr(0x80, handle_syscall_interrupt);
 }

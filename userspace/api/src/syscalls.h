@@ -24,7 +24,7 @@ int syscall_get_file_size(int fd);
 int syscall_open_dir(const char* path);
 int syscall_close_dir();
 int syscall_next_file_in_dir(OSFileInfo* info);
-int syscall_create_shared_mem(int id, int size);
+int syscall_create_shared_mem(int size);
 int syscall_destroy_shared_mem(int id);
 int syscall_shared_mem_exists(int id);
 void syscall_unmap_shared_mem(int id);

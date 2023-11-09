@@ -2,8 +2,8 @@
 
 #include "syscalls.h"
 
-int os_create_shared_mem(int id, int size) {
-    syscall_create_shared_mem(id, size);
+int os_create_shared_mem(int size) {
+    syscall_create_shared_mem(size);
     return 0;
 }
 

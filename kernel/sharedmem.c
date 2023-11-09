@@ -6,6 +6,7 @@
 #include "physalloc.h"
 #include "log.h"
 #include "tasks.h"
+#include "interrupts.h"
 
 SharedMemory shmem[MAX_SHAREDMEM_OBJS];
 u8 kernel_sharedmem_bitmap[8192];
@@ -22,12 +23,12 @@ void sharedmem_init() {
 
 // problem: how do two processes agree on the same shmem obj id?
 s32 sharedmem_create(u32 size, u32 owner_task_id) {
-    // assert(!sharedmem_exists(id));
+    VERIFY_INTERRUPTS_DISABLED;
     assert(size);
 
     s32 id = find_available_shmem_slot();
 
-    kernel_log("sharedmem_create id=%u owner=%u", id, owner_task_id);
+    // kernel_log("sharedmem_create id=%u owner=%u", id, owner_task_id);
 
     u32 num_pages = CEIL_DIV(size, 0x1000);
     shmem[id].size_in_pages = num_pages;
@@ -43,17 +44,21 @@ s32 sharedmem_create(u32 size, u32 owner_task_id) {
 }
 
 void sharedmem_destroy(s32 id) {
-    kernel_log("sharedmem_destroy %d", id);
-    // FIXME: unmap everywhere
-
+    VERIFY_INTERRUPTS_DISABLED;
     assert(sharedmem_exists(id));
 
-    for (int i = 0; i < shmem[id].size_in_pages; i++) {
-        kernel_log("freeing %x", shmem[id].physical_pages[i]);
-        pmm_free_pageframe(shmem[id].physical_pages[i]);
+    SharedMemory* obj = &shmem[id];
+    for (int i = 0; i < MAX_SHARED_MEMORY_MAPPINGS; i++) {
+        if (obj->mappings[i].vaddr != 0) {
+            sharedmem_unmap(id, obj->mappings[i].task_id);
+        }
     }
 
-    memset(&shmem[id], 0, sizeof(SharedMemory));
+    for (int i = 0; i < obj->size_in_pages; i++) {
+        pmm_free_pageframe(obj->physical_pages[i]);
+    }
+
+    memset(obj, 0, sizeof(SharedMemory));
 }
 
 bool sharedmem_exists(s32 id) {
@@ -62,43 +67,100 @@ bool sharedmem_exists(s32 id) {
     return shmem[id].size_in_pages != 0;
 }
 
-// should we specify here if we are the owner?
-void* sharedmem_map(s32 id, bool map_to_kernel) {
+// if task_id == 0, map to kernel
+void* sharedmem_map(s32 id, u32 task_id) {
+    VERIFY_INTERRUPTS_DISABLED;
+
     assert(sharedmem_exists(id));
 
     SharedMemory* obj = &shmem[id];
 
+    int slot = -1;
+    for (int i = 0; i < MAX_SHARED_MEMORY_MAPPINGS; i++) {
+        if (obj->mappings[i].vaddr == 0) {
+            slot = i;
+            break;
+        }
+    }
+
+    assert_msg(slot != -1, "too many tasks tried to map to the same shmem!");
+
+    SharedMemoryMapping* mapping = &obj->mappings[slot];
+    memset(mapping, 0, sizeof(SharedMemoryMapping));
+    mapping->task_id = task_id;
+
     u32 required = obj->size_in_pages;
-    u32 vaddr = find_available_virtual_region(required, map_to_kernel);
-    // kernel_log("id=%u vaddr=%x map_to_kernel=%u", id, vaddr, map_to_kernel);
+    bool map_to_kernel = task_id == 0;
+    mapping->vaddr = find_available_virtual_region(required, map_to_kernel);
+    // kernel_log("shmem obj=%u vaddr=%x task_id=%u", id, mapping->vaddr, task_id);
+
+    u32* prev_pd = NULL;
+    if (!map_to_kernel) {
+        prev_pd = mem_get_current_page_directory();
+        Task* task = get_task(task_id);
+        mem_change_page_directory(task->pagedir);
+    }
 
     for (int i = 0; i < required; i++) {
-        // kernel_log("sharedmem: mapping %x to %x", vaddr + i * 0x1000, obj->physical_pages[i]);
         u32 flags = PAGE_FLAG_WRITE;
         if (!map_to_kernel)
             flags |= PAGE_FLAG_USER;
         // if (obj->owner_task_id == 0)
         //     flags |= PAGE_FLAG_OWNER; // owned by kernel
 
-        // fixme: who is the owner? physical memory leak!!
-        mem_map_page(vaddr + i * 0x1000, obj->physical_pages[i], flags);
+        // kernel_log("sharedmem: mapping %x to %x", mapping->vaddr + i * 0x1000, obj->physical_pages[i]);
+        mem_map_page(mapping->vaddr + i * 0x1000, obj->physical_pages[i], flags);
     }
 
-    return vaddr;
+    if (!map_to_kernel) {
+        mem_change_page_directory(prev_pd);
+    }
+
+    return mapping->vaddr;
 }
 
-void sharedmem_unmap(s32 id, void* vaddr) {
+void sharedmem_unmap(s32 id, u32 task_id) {
+    VERIFY_INTERRUPTS_DISABLED;
+
+    // kernel_log("unmapping %d for task %u", id, task_id);
     assert(sharedmem_exists(id));
     SharedMemory* obj = &shmem[id];
 
-    for (int i = 0; i < obj->size_in_pages; i++) {
-        mem_unmap_page(((u32) vaddr) + 0x1000 * i);
+    int slot = -1;
+    for (int i = 0; i < MAX_SHARED_MEMORY_MAPPINGS; i++) {
+        if (obj->mappings[i].task_id == task_id) {
+            slot = i;
+            break;
+        }
     }
 
-    if (vaddr >= 0xC0000000) {
-        // mapped to kernel space
-        mark_pages_unused_in_bitmap(kernel_sharedmem_bitmap, (((u32) vaddr) - KERNEL_SHARED_MEMORY) / 0x1000, obj->size_in_pages);
+    assert_msg(slot != -1, "tried to unmap shmem when its not mapped!");
+
+    SharedMemoryMapping* mapping = &obj->mappings[slot];
+    bool kernel_space = task_id == 0;
+
+    u32* prev_pd = NULL;
+    if (!kernel_space) {
+        prev_pd = mem_get_current_page_directory();
+        Task* task = get_task(task_id);
+
+        mem_change_page_directory(task->pagedir);
     }
+
+    for (int i = 0; i < obj->size_in_pages; i++) {
+        mem_unmap_page(mapping->vaddr + 0x1000 * i);
+    }
+
+    if (!kernel_space) {
+        mem_change_page_directory(prev_pd);
+    }
+
+    if (mapping->vaddr >= KERNEL_START) {
+        // mapped to kernel space
+        mark_pages_unused_in_bitmap(kernel_sharedmem_bitmap, (mapping->vaddr - KERNEL_SHARED_MEMORY) / 0x1000, obj->size_in_pages);
+    }
+
+    memset(mapping, 0, sizeof(SharedMemoryMapping));
 }
 
 static void mark_pages_used_in_bitmap(u8* bitmap, u32 start, u32 num) {
@@ -133,6 +195,7 @@ static void mark_pages_unused_in_bitmap(u8* bitmap, u32 start, u32 num) {
     }
 }
 
+// TODO: use a region table instead
 static u32 find_available_virtual_region(u32 num_pages, bool map_to_kernel) {
     u32 search_start = map_to_kernel ? KERNEL_SHARED_MEMORY : USER_SHARED_MEMORY;
     u8* bitmap = map_to_kernel ? kernel_sharedmem_bitmap : current_task->sharedmem_bitmap;
@@ -167,20 +230,6 @@ static u32 find_available_virtual_region(u32 num_pages, bool map_to_kernel) {
 
     assert(0);
     return 0;
-
-    // todo
-
-    // u32* pdir = REC_PAGEDIR;
-    // u32 start = 0;
-    // u32 end = 0;
-    // u32 available_pages;
-    // for (int p = USER_SHARED_MEMORY / 0x1000; p < KERNEL_START / 0x1000;) {
-    //     if (!(pdir[p / 1024] & PAGE_FLAG_PRESENT)) {
-    //         p += 1024;
-    //     } else {
-    //         // p
-    //     }
-    // }
 }
 
 static s32 find_available_shmem_slot() {

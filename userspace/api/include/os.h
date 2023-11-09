@@ -51,7 +51,7 @@ OS_EXPORT int os_swap_window_buffers(int window_id);
 OS_EXPORT int os_set_window_title(int window_id, const char* title);
 
 // shared memory
-OS_EXPORT int os_create_shared_mem(int id, int size);
+OS_EXPORT int os_create_shared_mem(int size);
 OS_EXPORT int os_destroy_shared_mem(int id);
 OS_EXPORT int os_shared_mem_exists(int id);
 OS_EXPORT void* os_map_shared_mem(int id);
