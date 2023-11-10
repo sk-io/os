@@ -38,6 +38,20 @@ void shell_execute(const char* code) {
         return;
     }
 
+    if (strncmp(code, "shmem", 5) == 0) {
+        kernel_log("[kernel shmem]");
+        shmem_print_mappings(NULL);
+        for (int i = 0; i < MAX_TASKS; i++) {
+            Task* task = &tasks[i];
+            if (task->state == TASK_STATE_DEAD)
+                continue;
+            
+            kernel_log("[task %u shmem]", task->id);
+            shmem_print_mappings(&task->shmem);
+        }
+        return;
+    }
+
     if (code[0] == 'p') {
         kernel_log("physical pageframes used: %u", pmm_get_total_allocated_pages());
         return;
@@ -67,11 +81,6 @@ void shell_execute(const char* code) {
 
     if (code[0] == 't') {
         kernel_log("num tasks: %u", num_tasks);
-        return;
-    }
-
-    if (code[0] == 'd') {
-        kernel_log("current pagedir: %x", mem_get_current_page_directory());
         return;
     }
 

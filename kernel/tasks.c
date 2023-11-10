@@ -180,6 +180,11 @@ void kill_task(u32 id) {
     }
 
     // FIXME: destroy user owned shmem objs
+    for (int i = 0; i < MAX_SHARED_MEMORY_OBJS; i++) {
+        if (shmem[i].owner_task_id == id) {
+            sharedmem_destroy(i);
+        }
+    }
 
     mem_free_page_dir(task->pagedir);
     kfree(task->kesp0 - KERNEL_STACK_SIZE);
@@ -270,6 +275,7 @@ static Task* create_task(u32 index, u32 eip, bool kernel_task, u32* pagedir) {
     tasks[index].state = TASK_STATE_READY;
     tasks[index].pagedir = pagedir;
     tasks[index].is_kernel_task = kernel_task;
+    tasks[index].shmem.vaddr_start = USER_SHARED_MEMORY;
 
     return task;
 }

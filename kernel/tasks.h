@@ -5,6 +5,7 @@
 #include "fatfs/fatfs_ff.h"
 #include "slib.h"
 #include "config.h"
+#include "sharedmem.h"
 
 // used for newly created tasks
 typedef struct {
@@ -43,7 +44,7 @@ typedef struct {
     FIL open_files[MAX_OPEN_FILES]; // hack
     void* event_buffer; // address to shared memory in kernel vmem (kernel-side)
     s32 event_shmem_id; // used to share the buffer with userspace
-    u8 sharedmem_bitmap[8192]; // 1mb / 0x1000 bytes per page / 8 bits per byte
+    SharedMemoryMappingPool shmem;
 
     u32 heap_start; // page aligned
     u32 heap_end;
