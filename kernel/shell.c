@@ -11,6 +11,9 @@
 #include "ramdisk.h"
 
 void shell_execute(const char* code) {
+    if (strcmp(code, "\n") == 0)
+        return;
+
     if (strncmp(code, "ls", 2) == 0) {
         FRESULT res;
         DIR dir;
@@ -84,5 +87,5 @@ void shell_execute(const char* code) {
         return;
     }
 
-    console_print(code);
+    kernel_log("unknown command");
 }

@@ -42,15 +42,16 @@ void init_gui(s32 width, s32 height) {
 
 void gui_thread_entry() {
     // disable_interrupts();
+
     while (1) {
         if (gui.needs_redraw) {
             gui.needs_redraw = false;
             gui_draw_frame();
         }
 
-        disable_interrupts();
+        push_cli();
         gui_handle_events();
-        enable_interrupts();
+        pop_cli();
     }
 }
 
@@ -72,9 +73,6 @@ static void gui_draw_frame() {
     char time_str[128];
 
     int phys_mem = pmm_get_total_allocated_pages() * 4;
-    // 2504
-    // 2536
-    // 32 kib = 8 pages
 
     sprintf(time_str, "phys used: %dKiB   systime: %u", phys_mem, time);
     graphics_draw_string(time_str, 3, graphics.height - 15, 0);

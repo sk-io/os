@@ -39,7 +39,7 @@
 extern u32 initial_page_dir[1024];
 extern int mem_num_vpages;
 
-void init_memory(u32 mem_high);
+void init_memory(u32 mem_high, u32 phys_alloc_start);
 void mem_map_page(u32 virt_addr, u32 phys_addr, u32 flags);
 u32 mem_unmap_page(u32 virt_addr);
 u32* mem_alloc_page_dir();

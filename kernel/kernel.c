@@ -55,8 +55,10 @@ void kernel_main(struct multiboot_info* info) {
     //enable_fpu();
 
     init_timer(1000);
-    
-    init_memory(info->mem_upper * 1024);
+
+    u32 phys_alloc_start = (mod1 + 0xFFF) & ~0xFFF;
+    assert(phys_alloc_start >= mod1);
+    init_memory(info->mem_upper * 1024, phys_alloc_start);
     kernel_log("Initial pagedir is at %x", mem_get_current_page_directory());
     kernel_log("Setting up kernel heap");
     kmalloc_init(0x1000);
@@ -69,11 +71,17 @@ void kernel_main(struct multiboot_info* info) {
     u32 ramdisk_size = mod1 - mod0;
     init_ramdisk(mod0 + 0xC0000000, ramdisk_size);
 
+    assert(mod1 < 0x100000 * 16); // kernel is only mapped to 16 mb
+    kernel_log("ramdisk is at %x to %x", mod0 + 0xC0000000, mod1 + 0xC0000000);
+
     if (graphics_enabled) {
+        kernel_log("framebuffer is at %x", framebuffer_addr);
+
         init_graphics((u32*) framebuffer_addr, framebuffer_width, framebuffer_height, (u32) framebuffer_bpp / 8, framebuffer_pitch);
         init_gui(framebuffer_width, framebuffer_height);
         create_kernel_task(gui_thread_entry);
 
+        graphics_fill(0xFFFFFFFF);
         create_user_task("files.exe");
     }
 

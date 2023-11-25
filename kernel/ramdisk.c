@@ -36,9 +36,9 @@ DSTATUS disk_status(BYTE pdrv) {
 }
 
 DRESULT disk_read(BYTE pdrv, BYTE* buffer, DWORD sector, UINT count) {
+    VERIFY_INTERRUPTS_DISABLED;
     uint32_t offset = sector * RAMDISK_BLOCKSIZE;
     uint32_t size = count * RAMDISK_BLOCKSIZE;
-
     // disable_interrupts();
     memcpy(buffer, (u8*) (ramdisk.location + offset), size);
     // enable_interrupts();
@@ -50,6 +50,7 @@ DRESULT disk_read(BYTE pdrv, BYTE* buffer, DWORD sector, UINT count) {
 // }
 
 DRESULT disk_ioctl(BYTE pdrv, BYTE cmd, void* buff) {
+    VERIFY_INTERRUPTS_DISABLED;
     DRESULT dr = RES_ERROR;
 
     switch (cmd)

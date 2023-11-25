@@ -18,7 +18,7 @@ static void enable_paging();
 static void invalidate(int vaddr);
 static void sync_page_dirs();
 
-void init_memory(u32 mem_high) {
+void init_memory(u32 mem_high, u32 phys_alloc_start) {
     mem_num_vpages = 0;
 
     // unmap the first 4 mb
@@ -29,7 +29,7 @@ void init_memory(u32 mem_high) {
     initial_page_dir[1023] = ((u32) initial_page_dir - KERNEL_START) | PAGE_FLAG_PRESENT | PAGE_FLAG_WRITE;
     invalidate(0xFFFFF000);
 
-    pmm_init(0x100000 * 4, mem_high);
+    pmm_init(phys_alloc_start, mem_high);
 
     memset(page_dirs, 0, 0x1000 * NUM_PAGE_DIRS);
     memset(page_dir_used, 0, NUM_PAGE_DIRS);
