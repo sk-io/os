@@ -1,8 +1,8 @@
 OBJ = $(patsubst %.c, %.o, $(wildcard *.c))
 EXE = files.exe
 
-CFLAGS += -I../../sgfx
-LDFLAGS += -L../../sgfx -lsgfx
+CFLAGS += -I../../sgfx -I../libc/include
+LDFLAGS += -L../../sgfx -lsgfx -L../libc -lc
 
 all: $(EXE)
 

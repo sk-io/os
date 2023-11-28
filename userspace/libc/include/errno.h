@@ -158,3 +158,4 @@
 
 #define __ELASTERROR 2000	/* Users can add values starting here */
 
+#define errno 0

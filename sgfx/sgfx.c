@@ -11,7 +11,8 @@ void sgfx_init(GraphicsContext* ctx, u32* framebuffer, u32 width, u32 height) {
 }
 
 void sgfx_fill(const GraphicsContext* ctx, u32 color) {
-    u32 size = ctx->bytesize >> 2;
+    u32 size = ctx->bytesize / 4;
+
     for (u32 i = 0; i < size; i++) {
         ctx->framebuffer[i] = color;
     }

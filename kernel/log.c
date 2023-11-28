@@ -34,3 +34,11 @@ void kernel_log(const char* format, ...) {
 void _putchar(char character) {
     serial_write(character);
 }
+
+void kernel_log_char(char c) {
+    char lazy[2];
+    lazy[0] = c;
+    lazy[1] = '\0';
+    console_print(lazy);
+    serial_write(c);
+}

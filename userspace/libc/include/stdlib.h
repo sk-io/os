@@ -16,6 +16,7 @@ __extern_inline int abs(int __n)
 }
 
 __extern int atoi(const char *);
+__extern double atof(const char *s);
 __extern long atol(const char *);
 __extern long long atoll(const char *);
 

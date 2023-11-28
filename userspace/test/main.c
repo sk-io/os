@@ -15,11 +15,40 @@ void crash() {
 }
 
 int main(int argc, char* argv[]) {
-    // printf("hello!!");
+    printf("hello!!");
+
+
+    FILE* file = fopen("DOOM1.WAD", "r");
+
+    fseek(file, 0, SEEK_END);
+    int size = ftell(file);
+    fseek(file, size, SEEK_SET);
+    printf("file size: %u\n", size);
+
+    // fseek(file, 4196010, SEEK_SET);
+    // fseek(file, -16, SEEK_END);
+    fseek(file, -16, SEEK_CUR);
+    int pos = ftell(file);
+    printf("current file pos: %u\n", pos);
+
+    char buf[16];
+    fread(buf, 1, sizeof(buf), file);
+
+    for (int i = 0; i < sizeof(buf); i++) {
+        // os_print_char(buf[i]);
+        os_printf("%x: %x", i, (uint8_t) buf[i]);
+    }
+
+    fclose(file);
 
     // for (int i = 0; i < 1; i++) {
-    int shmem = os_create_shared_mem(50000);
-    os_destroy_shared_mem(shmem);
+    // int shmem = os_create_shared_mem(1000);
+
+    // u32* data = os_map_shared_mem(shmem);
+    // *data = 235;
+    // os_unmap_shared_mem(shmem);
+
+    // os_destroy_shared_mem(shmem);
     // }
 
     // asm volatile(

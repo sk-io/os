@@ -19,6 +19,14 @@ int32_t os_get_file_size(int32_t fd) {
     return syscall_get_file_size(fd);
 }
 
+uint32_t os_get_file_offset(int32_t fd) {
+    return syscall_get_file_offset(fd);
+}
+
+uint32_t os_set_file_offset(int32_t fd, uint32_t offset) {
+    return syscall_set_file_offset(fd, offset);
+}
+
 int32_t os_open_dir(const char* path) {
     return syscall_open_dir(path);
 }

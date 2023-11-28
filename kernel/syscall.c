@@ -25,7 +25,13 @@ static void syscall_exit() {
 }
 
 static void syscall_print(const char* string) {
-    kernel_log("task %u: %s", current_task->id, string);
+    // kernel_log("task %u: %s", current_task->id, string);
+    kernel_log("%s", string);
+}
+
+// "temporary" solution.
+static void syscall_print_char(char c) {
+    kernel_log_char(c);
 }
 
 static void syscall_exec(const char* path) {
@@ -42,16 +48,17 @@ static u32 syscall_open_file(const char* path) {
         }
     }
     assert_msg(fd != -1, "too many opened files!");
-    // kernel_log("fd=%d %s", fd, path);
+    // kernel_log("--> syscall_open_file   fd=%d %s", fd, path);
 
     FRESULT res = f_open(&current_task->open_files[fd], path, FA_READ);
     assert_msg(res == FR_OK, "f_open");
 
     kernel_log("opened file %s with fd=%d", path, fd);
-    return fd;
+    return fd + 1000;
 }
 
 static u32 syscall_read_file(u32 fd, u8* buf, u32 num_bytes) {
+    fd -= 1000;
     assert_msg(fd < MAX_OPEN_FILES, "");
     assert_msg(current_task->open_files[fd].obj.fs != 0, "");
     UINT br;
@@ -61,6 +68,7 @@ static u32 syscall_read_file(u32 fd, u8* buf, u32 num_bytes) {
 }
 
 static void syscall_close_file(u32 fd) {
+    fd -= 1000;
     assert_msg(fd < MAX_OPEN_FILES, "");
 
     FRESULT res = f_close(&current_task->open_files[fd]);
@@ -68,9 +76,25 @@ static void syscall_close_file(u32 fd) {
 }
 
 static u32 syscall_get_file_size(u32 fd) {
+    fd -= 1000;
     assert_msg(fd < MAX_OPEN_FILES, "");
 
     return f_size(&current_task->open_files[fd]);
+}
+
+static u32 syscall_get_file_offset(u32 fd) {
+    fd -= 1000;
+    assert_msg(fd < MAX_OPEN_FILES, "");
+
+    return f_tell(&current_task->open_files[fd]);
+}
+
+static u32 syscall_set_file_offset(u32 fd, u32 offset) {
+    fd -= 1000;
+    assert_msg(fd < MAX_OPEN_FILES, "");
+
+    f_lseek(&current_task->open_files[fd], offset);
+    return 0;
 }
 
 static u32 syscall_get_heap_start() {
@@ -167,6 +191,11 @@ static void syscall_debug() {
     kernel_log("-- syscall debug FINISH");
 }
 
+// FIXME: u64
+static u32 syscall_get_system_time() {
+    return (u32) get_system_time_millis();
+}
+
 typedef struct {
     uint32_t id;
     uint32_t state;
@@ -202,18 +231,26 @@ void init_syscalls() {
     register_syscall(SYSCALL_GET_TASK_ID, syscall_get_task_id);
     register_syscall(SYSCALL_EXIT, syscall_exit);
     register_syscall(SYSCALL_PRINT, syscall_print);
+    register_syscall(SYSCALL_PRINT_CHAR, syscall_print_char);
     register_syscall(SYSCALL_EXEC, syscall_exec);
+    register_syscall(SYSCALL_GET_HEAP_START, syscall_get_heap_start);
+    register_syscall(SYSCALL_GET_HEAP_END, syscall_get_heap_end);
+    register_syscall(SYSCALL_SET_HEAP_END, syscall_set_heap_end);
+    register_syscall(SYSCALL_SET_TIMER_INTERVAL, syscall_set_timer_interval);
+    register_syscall(SYSCALL_GET_SYSTEM_TIME, syscall_get_system_time);
+
+    // file io
     register_syscall(SYSCALL_OPEN_FILE, syscall_open_file);
     register_syscall(SYSCALL_CLOSE_FILE, syscall_close_file);
     register_syscall(SYSCALL_READ_FILE, syscall_read_file);
     register_syscall(SYSCALL_GET_FILE_SIZE, syscall_get_file_size);
-    register_syscall(SYSCALL_GET_HEAP_START, syscall_get_heap_start);
-    register_syscall(SYSCALL_GET_HEAP_END, syscall_get_heap_end);
-    register_syscall(SYSCALL_SET_HEAP_END, syscall_set_heap_end);
+    register_syscall(SYSCALL_GET_FILE_OFFSET, syscall_get_file_offset);
+    register_syscall(SYSCALL_SET_FILE_OFFSET, syscall_set_file_offset);
+
     register_syscall(SYSCALL_OPEN_DIR, syscall_open_dir);
     register_syscall(SYSCALL_CLOSE_DIR, syscall_close_dir);
     register_syscall(SYSCALL_NEXT_FILE_IN_DIR, syscall_next_file_in_dir);
-    register_syscall(SYSCALL_SET_TIMER_INTERVAL, syscall_set_timer_interval);
+
     // shared mem
     register_syscall(SYSCALL_SHMEM_CREATE, syscall_shmem_create);
     register_syscall(SYSCALL_SHMEM_DESTROY, syscall_shmem_destroy);

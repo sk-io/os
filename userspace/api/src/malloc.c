@@ -172,5 +172,5 @@ void* os_malloc(uint32_t size) {
 }
 
 void os_free(void* addr) {
-	user_free(addr);
+	//user_free(addr);
 }

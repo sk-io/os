@@ -25,6 +25,13 @@ void syscall_print(const char* str) {
     );
 }
 
+void syscall_print_char(char c) {
+    asm volatile(
+        "int $0x80"
+        :: "a"(SYSCALL_PRINT_CHAR), "b"(c)
+    );
+}
+
 void syscall_exec(const char* path) {
     asm volatile(
         "int $0x80"
@@ -160,7 +167,25 @@ int syscall_get_file_size(int fd) {
     int ret;
     asm volatile(
         "int $0x80"
-        : "=a"(ret) : "a"(SYSCALL_GET_FILE_SIZE)
+        : "=a"(ret) : "a"(SYSCALL_GET_FILE_SIZE), "b"(fd)
+    );
+    return ret;
+}
+
+int syscall_get_file_offset(int fd) {
+    int ret;
+    asm volatile(
+        "int $0x80"
+        : "=a"(ret) : "a"(SYSCALL_GET_FILE_OFFSET), "b"(fd)
+    );
+    return ret;
+}
+
+int syscall_set_file_offset(int fd, uint32_t offset) {
+    int ret;
+    asm volatile(
+        "int $0x80"
+        : "=a"(ret) : "a"(SYSCALL_SET_FILE_OFFSET), "b"(fd), "c"(offset)
     );
     return ret;
 }
@@ -245,4 +270,14 @@ os_errorcode syscall_get_task_info(OSTaskInfo* list, uint32_t list_max_size, uin
         : "a"(SYSCALL_GET_TASK_INFO), "b"(list), "c"(list_max_size), "d"(num_tasks)
     );
     return error;
+}
+
+uint32_t syscall_get_system_time() {
+    uint32_t ret;
+    asm volatile(
+        "int $0x80"
+        : "=a"(ret)
+        : "a"(SYSCALL_GET_SYSTEM_TIME)
+    );
+    return ret;
 }

@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include <stddef.h>
+#include <stdarg.h>
 
 void itoa(char *buf, int32_t base, int32_t d) {
     char *p = buf;
@@ -106,28 +107,32 @@ int sprintf_va(char *buffer, uint32_t buffer_size, uint8_t replace_newline, cons
     return buffer_index;
 }
 
-void os_printf(const char *format, ...) {
+void os_printf(const char* format, ...) {
     char buffer[1024];
 
-    __builtin_va_list vl;
-    __builtin_va_start(vl, format);
-
-    sprintf_va(buffer, 1024, 0, format, vl);
-
-    __builtin_va_end(vl);
+    va_list vl;
+    va_start(vl, format);
+    sprintf_va(buffer, sizeof(buffer), 0, format, vl);
+    va_end(vl);
 
     syscall_print(buffer);
 }
 
-void debug_printf(const char *format, ...) {
+void os_vprintf(const char* format, va_list args) {
     char buffer[1024];
-
-    __builtin_va_list vl;
-    __builtin_va_start(vl, format);
-
-    sprintf_va(buffer, 1024, 0, format, vl);
-
-    __builtin_va_end(vl);
-
+    sprintf_va(buffer, sizeof(buffer), 0, format, args);
     syscall_print(buffer);
 }
+
+// void debug_printf(const char *format, ...) {
+//     char buffer[1024];
+
+//     va_list vl;
+//     va_start(vl, format);
+
+//     sprintf_va(buffer, 1024, 0, format, vl);
+
+//     va_end(vl);
+
+//     syscall_print(buffer);
+// }

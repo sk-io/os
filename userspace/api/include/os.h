@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stdint.h>
+#include <stdarg.h>
 
 // a single, unified API for:
 // thread/process control
@@ -17,8 +18,10 @@ OS_EXPORT void os_temp_init(); // todo: remove this?
 // basics
 OS_EXPORT int32_t os_get_task_id();
 OS_EXPORT void os_print(const char* msg);
+OS_EXPORT void os_print_char(char c);
 OS_EXPORT void os_exec(const char* path);
 OS_EXPORT void os_exit();
+OS_EXPORT uint32_t os_get_system_time();
 
 // file i/o
 typedef struct {
@@ -31,6 +34,8 @@ OS_EXPORT int32_t os_open_file(const char* path);
 OS_EXPORT int32_t os_close_file(int32_t fd);
 OS_EXPORT int32_t os_read_file(int32_t fd, char* buffer, int32_t num_bytes);
 OS_EXPORT int32_t os_get_file_size(int32_t fd);
+OS_EXPORT uint32_t os_get_file_offset(int32_t fd);
+OS_EXPORT uint32_t os_set_file_offset(int32_t fd, uint32_t offset);
 OS_EXPORT int32_t os_open_dir(const char* path);
 OS_EXPORT int32_t os_close_dir();
 OS_EXPORT int32_t os_next_file_in_dir(OSFileInfo* info);
@@ -102,6 +107,7 @@ OS_EXPORT void os_set_timer_interval(int32_t timer_id, int32_t interval_ms);
 
 // utils
 OS_EXPORT void os_printf(const char* msg, ...);
+OS_EXPORT void os_vprintf(const char* format, va_list args);
 
 // system info
 typedef struct {

@@ -14,6 +14,14 @@ void os_print(const char* str) {
     syscall_print(str);
 }
 
+void os_print_char(char c) {
+    syscall_print_char(c);
+}
+
 void os_exec(const char* path) {
     syscall_exec(path);
+}
+
+uint32_t os_get_system_time() {
+    return syscall_get_system_time();
 }
