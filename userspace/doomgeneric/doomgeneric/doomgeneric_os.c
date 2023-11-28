@@ -13,7 +13,8 @@
 #include <stdbool.h>
 
 int window;
-int *fb;
+uint32_t* fb;
+int shown_buffer;
 
 #define KEYQUEUE_SIZE 16
 
@@ -22,8 +23,9 @@ static unsigned int s_KeyQueueWriteIndex = 0;
 static unsigned int s_KeyQueueReadIndex = 0;
 
 void DG_Init() {
-    window = os_create_window(DOOMGENERIC_RESX, DOOMGENERIC_RESY, 0);
+    window = os_create_window(DOOMGENERIC_RESX, DOOMGENERIC_RESY, OS_DOUBLE_BUFFERED);
     fb = os_map_window_framebuffer(window);
+    shown_buffer = 0;
 }
 
 static unsigned char ascii_to_doomkey(unsigned int key) {
@@ -35,20 +37,18 @@ static unsigned char ascii_to_doomkey(unsigned int key) {
 
     case 'k': return KEY_LEFTARROW;
     case 'l': return KEY_RIGHTARROW;
-    case 'u': return KEY_FIRE;
 
-    case 'o':
+    case ' ': return KEY_USE;
+
     case 0x1b:
         return KEY_ESCAPE;
-    case 'p':
+    case '\n':
         return KEY_ENTER;
     }
     return -1;
 }
 
-static void add_key_to_queue(int pressed, unsigned int keyCode) {
-    unsigned char key = ascii_to_doomkey(keyCode);
-
+static void add_key_to_queue(int pressed, unsigned char key) {
     unsigned short keyData = (pressed << 8) | key;
 
     s_KeyQueue[s_KeyQueueWriteIndex] = keyData;
@@ -59,17 +59,31 @@ static void add_key_to_queue(int pressed, unsigned int keyCode) {
 void DG_DrawFrame() {
     // for (int i = 0; i < DOOMGENERIC_RESX * DOOMGENERIC_RESY; i++)
     //     fb[i] = 0xFF00FF00;
-    memcpy(fb, DG_ScreenBuffer, DOOMGENERIC_RESX * DOOMGENERIC_RESY * 4);
-    for (int i = 0; i < DOOMGENERIC_RESX * DOOMGENERIC_RESY; i++)
-        fb[i] |= 0xFF000000;
+    uint32_t* draw_fb = fb + (shown_buffer == 0 ? (DOOMGENERIC_RESX * DOOMGENERIC_RESY) : 0);
 
-    os_swap_window_buffers(window);
+    memcpy(draw_fb, DG_ScreenBuffer, DOOMGENERIC_RESX * DOOMGENERIC_RESY * 4);
+    for (int i = 0; i < DOOMGENERIC_RESX * DOOMGENERIC_RESY; i++)
+        draw_fb[i] |= 0xFF000000;
+
+    shown_buffer = os_swap_window_buffers(window);
 
     OSEvent event;
     while (os_poll_event(&event)) {
         if (event.type == OS_EVENT_KEYBOARD) {
             OSKeyboardEvent *key_event = (OSKeyboardEvent *) &event;
-            add_key_to_queue(key_event->state == 1, key_event->ascii);
+            int pressed = key_event->state == 1;
+
+            unsigned char key = ascii_to_doomkey(key_event->ascii);
+            if (key_event->scancode == 29) {
+                key = KEY_FIRE;
+                pressed = 1;
+            }
+            if (key_event->scancode == 157) {
+                key = KEY_FIRE;
+                pressed = 0;
+            }
+            
+            add_key_to_queue(pressed, key);
         }
     }
 }
