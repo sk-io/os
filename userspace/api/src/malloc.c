@@ -110,6 +110,9 @@ static void* user_malloc(uint32_t bytes) {
 }
 
 static void user_free(void* addr) {
+	if (addr == 0)
+		return; // apparently this is correct
+	
 	ChunkHeader* chunk = (ChunkHeader*) (((u32) addr) - sizeof(ChunkHeader));
 
 	if (!chunk->used) {
@@ -172,5 +175,5 @@ void* os_malloc(uint32_t size) {
 }
 
 void os_free(void* addr) {
-	//user_free(addr);
+	user_free(addr);
 }

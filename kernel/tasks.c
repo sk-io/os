@@ -10,6 +10,7 @@
 #include "ramdisk.h"
 #include "events.h"
 #include "userheap.h"
+#include "windows.h"
 
 #define KERNEL_STACK_SIZE (0x1000 - 16)
 
@@ -185,6 +186,8 @@ void kill_task(u32 id) {
             sharedmem_destroy(i);
         }
     }
+
+    destroy_all_windows_belonging_to(task->id);
 
     mem_free_page_dir(task->pagedir);
     kfree(task->kesp0 - KERNEL_STACK_SIZE);

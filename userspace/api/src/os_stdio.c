@@ -124,15 +124,13 @@ void os_vprintf(const char* format, va_list args) {
     syscall_print(buffer);
 }
 
-// void debug_printf(const char *format, ...) {
-//     char buffer[1024];
+void debug_printf(const char *format, ...) {
+    char buffer[1024];
 
-//     va_list vl;
-//     va_start(vl, format);
+    va_list vl;
+    va_start(vl, format);
+    sprintf_va(buffer, sizeof(buffer), 0, format, vl);
+    va_end(vl);
 
-//     sprintf_va(buffer, 1024, 0, format, vl);
-
-//     va_end(vl);
-
-//     syscall_print(buffer);
-// }
+    syscall_print(buffer);
+}

@@ -74,6 +74,15 @@ void destroy_window(s32 window_id) {
     Window* w = &windows[window_id];
     sharedmem_destroy(w->fb_shmem_id);
 
+    if (focused_window == window_id)
+        focused_window = -1;
+    
+    if (currently_dragging_window == window_id)
+        currently_dragging_window = -1;
+
+    if (window_under_cursor == window_id)
+        window_under_cursor = -1;
+    
     memset(&windows[window_id], 0, sizeof(Window));
 
     int index = z_order_find_index(window_id);
@@ -200,7 +209,10 @@ Window* get_focused_window() {
 }
 
 void destroy_all_windows_belonging_to(s32 task_id) {
-    // todo
+    for (int i = 0; i < MAX_WINDOWS; i++) {
+        if (windows[i].owner_task_id == task_id)
+            destroy_window(i);
+    }
 }
 
 void draw_windows() {
