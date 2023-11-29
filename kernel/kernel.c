@@ -83,7 +83,7 @@ void kernel_main(struct multiboot_info* info) {
         get_task(gui.task_id)->state = TASK_STATE_IDLE;
 
         graphics_fill(0xFFFFFFFF);
-        create_user_task("doom.exe");
+        // create_user_task("doom.exe");
     }
 
     init_keyboard();

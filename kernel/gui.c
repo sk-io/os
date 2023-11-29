@@ -13,7 +13,7 @@
 #include "time.h"
 #include "interrupts.h"
 
-#define GUI_DRAW_INTERVAL 40
+#define GUI_DRAW_INTERVAL 30
 
 GUI gui;
 

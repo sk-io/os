@@ -12,6 +12,7 @@ static void handle_key_event(TrapFrame* frame);
 static u8 translate_to_ascii(u8 scancode, bool shift, bool alt);
 
 static bool holding_shift = false;
+static bool extended_byte = false;
 
 void init_keyboard() {
     register_isr(IRQ_OFFSET + 1, handle_key_event);
@@ -20,27 +21,44 @@ void init_keyboard() {
 void handle_key_event(TrapFrame* frame) {
     UNUSED_VAR(frame);
 
+    // poll until ready
     u8 scancode = 0;
     do {
         scancode = inb(0x64);
     } while ((scancode & 0x01) == 0);
 
+    // read in scancode
     scancode = inb(0x60);
 
-    if ((scancode & 0b01111111) == 42) {
-        holding_shift = (scancode >> 7) == 0;
+    // scancodes with extented byte generate two interrupts
+    if (scancode == 0xE0) {
+        extended_byte = true;
         return;
     }
+    
+    // 7th bit dictates whether pressed or not
+    bool pressed = scancode >> 7 == 0;
+    scancode &= 127;
 
-    char key = translate_to_ascii(scancode, holding_shift, false);
-    // kernel_log("key scancode: %u   ASCII: %u", scancode, key);
+    if (scancode == 42) { // lshift
+        holding_shift = pressed;
+        return;
+    }
+    
+    char ascii = extended_byte ? 0 : translate_to_ascii(scancode, holding_shift, false);
 
+    u32 ps2_scancode = scancode | (extended_byte ? 0xE000 : 0);
     Event event;
     event.type = EVENT_KEYBOARD;
-    event.data0 = scancode;
-    event.data1 = key;
-    event.data2 = scancode >> 7 == 0;
+    event.data0 = ps2_scancode;
+    event.data1 = ascii;
+    event.data2 = pressed;
     handle_event(&event);
+
+    // kernel_log("key scancode: %x, pressed=%u EB=%u", scancode, pressed, extended_byte);
+    // kernel_log("ps2 scancode: %x", ps2_scancode);
+
+    extended_byte = false;
 }
 
 static char scancode_map[128] = {

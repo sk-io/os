@@ -28,25 +28,26 @@ void DG_Init() {
     shown_buffer = 0;
 }
 
-static unsigned char ascii_to_doomkey(unsigned int key) {
-    switch (key) {
+static uint8_t convert_to_doomkey(uint8_t ascii, uint32_t scancode) {
+    switch (ascii) {
     case 'w': return KEY_UPARROW;
     case 's': return KEY_DOWNARROW;
     case 'a': return KEY_STRAFE_L;
     case 'd': return KEY_STRAFE_R;
-
     case 'k': return KEY_LEFTARROW;
     case 'l': return KEY_RIGHTARROW;
-
     case ' ': return KEY_USE;
-
-    case 0x1b:
-        return KEY_ESCAPE;
-    case '\n':
-        return KEY_ENTER;
+    case 0x1b: return KEY_ESCAPE;
+    case '\n': return KEY_ENTER;
     }
-    
-    return 0xfe;
+
+    switch (scancode) {
+    case 0xE04B: return KEY_LEFTARROW;
+    case 0xE04D: return KEY_RIGHTARROW;
+    case 0x1D: return KEY_FIRE;
+    }
+
+    return ascii;
 }
 
 static void add_key_to_queue(int pressed, unsigned char key) {
@@ -58,14 +59,6 @@ static void add_key_to_queue(int pressed, unsigned char key) {
 }
 
 void DG_DrawFrame() {
-    // for (int i = 0; i < DOOMGENERIC_RESX * DOOMGENERIC_RESY; i++)
-    //     fb[i] = 0xFF00FF00;
-    // uint32_t* draw_fb = fb + (shown_buffer == 0 ? (DOOMGENERIC_RESX * DOOMGENERIC_RESY) : 0);
-
-    // memcpy(draw_fb, DG_ScreenBuffer, DOOMGENERIC_RESX * DOOMGENERIC_RESY * 4);
-    // // for (int i = 0; i < DOOMGENERIC_RESX * DOOMGENERIC_RESY; i++)
-    // //     draw_fb[i] |= 0xFF000000;
-
     shown_buffer = os_swap_window_buffers(window);
     uint32_t* draw_fb = fb + (shown_buffer == 0 ? (DOOMGENERIC_RESX * DOOMGENERIC_RESY) : 0);
     DG_ScreenBuffer = draw_fb;
@@ -76,16 +69,7 @@ void DG_DrawFrame() {
             OSKeyboardEvent *key_event = (OSKeyboardEvent *) &event;
             int pressed = key_event->state == 1;
 
-            unsigned char key = ascii_to_doomkey(key_event->ascii);
-
-            if (key_event->scancode == 29) {
-                key = KEY_FIRE;
-                pressed = 1;
-            }
-            if (key_event->scancode == 157) {
-                key = KEY_FIRE;
-                pressed = 0;
-            }
+            unsigned char key = convert_to_doomkey((uint8_t) key_event->ascii, key_event->scancode);
 
             if (key != 0xfe)
                 add_key_to_queue(pressed, key);
