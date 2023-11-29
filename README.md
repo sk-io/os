@@ -1,6 +1,6 @@
 # Untitled 32bit Graphical OS
 
-![Screenshot](res/screenshot.png)
+![Screenshot](res/screenshot2.png)
 
 ## Features/Limitations
 
@@ -12,16 +12,19 @@
 * Event system (using shared memory)
 * Shared libraries
 * A single userspace OS API a la winapi
+* Runs DOOM using [doomgeneric](https://github.com/ozkl/doomgeneric)
 
-Currently relies on multiboot/grub to provide a ramdisk and a framebuffer.
+Currently relies on multiboot/grub to provide a ramdisk and a framebuffer. Does not have SMP support.
 
 ## Architecture/Motivation
 
-The kernel is not unix based. This is a completely monolithic OS with a single userspace API for everything (task management, file I/O, window management, etc...). All an application needs to do is to include os.h and link against api.so.
+This is a completely monolithic OS with a single userspace API for everything (task management, file I/O, window management, etc...). All an application needs to do is to include os.h and link against api.so. The kernel is not unix based.
 
 I try to keep things as simple and understandable as possible whilst still being speedy. There are tons of security holes, that's not a priority right now.
 
-Current goal is to port Doom and some other stuff. :)
+I used these projects as reference for implementing the more tedious parts (Thanks!):
+- [soso](https://github.com/ozkl/soso)
+- xv6
 
 ## Building
 
