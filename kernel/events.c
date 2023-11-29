@@ -38,6 +38,7 @@ void destroy_events_for_task(Task* task) {
 void handle_event(const Event* event) {
     push_cli();
 
+    // kernel_log("evt %u", event->type);
     // should this be in gui.c?
 
     if (event->type == EVENT_MOUSE_MOVE) {
@@ -58,6 +59,8 @@ void handle_event(const Event* event) {
         }
     }
     // todo: send events to tasks listening in the background
+
+    gui.needs_redraw = true;
 
     pop_cli();
 }

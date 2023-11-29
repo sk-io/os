@@ -11,6 +11,8 @@
 #include "events.h"
 #include "userheap.h"
 #include "windows.h"
+#include "gui.h"
+#include "kernel.h"
 
 #define KERNEL_STACK_SIZE (0x1000 - 16)
 
@@ -151,11 +153,13 @@ s32 create_user_task(const char* path) {
     return tasks[index].id;
 }
 
-void create_kernel_task(void* func) {
+s32 create_kernel_task(void* func) {
     int index = find_available_task_slot();
 
+    Task* task = create_task(index, (u32) func, true, initial_page_dir);
     num_tasks++;
-    create_task(index, (u32) func, true, initial_page_dir);
+
+    return task->id;
 }
 
 void kill_task(u32 id) {
@@ -199,22 +203,24 @@ void kill_task(u32 id) {
 }
 
 static int choose_next_task() {
-    if (num_tasks == 1) {
-        return 0;
+    if (graphics_enabled && should_gui_redraw()) { // gui task always gets priority
+        return 1;
     }
 
-    // naive scheduling: just cycle through all the tasks
+    // naive scheduling: just cycle through all the tasks once
     int index = current_task_index;
 
-    while (true) {
+    for (int i = 0; i < MAX_TASKS; i++) {
         index++;
         index %= MAX_TASKS;
 
         if (tasks[index].state == TASK_STATE_READY) {
-            break; // we found one
+            return index; // we found a ready task, could be the same as we were in before
         }
     }
-    return index;
+
+    // couldnt find anyone else, go back to kernel task
+    return 0;
 }
 
 void task_schedule() {

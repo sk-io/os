@@ -79,7 +79,8 @@ void kernel_main(struct multiboot_info* info) {
 
         init_graphics((u32*) framebuffer_addr, framebuffer_width, framebuffer_height, (u32) framebuffer_bpp / 8, framebuffer_pitch);
         init_gui(framebuffer_width, framebuffer_height);
-        create_kernel_task(gui_thread_entry);
+        gui.task_id = create_kernel_task(gui_thread_entry);
+        get_task(gui.task_id)->state = TASK_STATE_IDLE;
 
         graphics_fill(0xFFFFFFFF);
         create_user_task("doom.exe");

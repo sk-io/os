@@ -33,6 +33,7 @@ void handle_key_event(TrapFrame* frame) {
     }
 
     char key = translate_to_ascii(scancode, holding_shift, false);
+    // kernel_log("key scancode: %u   ASCII: %u", scancode, key);
 
     Event event;
     event.type = EVENT_KEYBOARD;
@@ -40,7 +41,6 @@ void handle_key_event(TrapFrame* frame) {
     event.data1 = key;
     event.data2 = scancode >> 7 == 0;
     handle_event(&event);
-    // kernel_log("key scancode: %u", scancode);
 }
 
 static char scancode_map[128] = {

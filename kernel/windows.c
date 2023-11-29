@@ -5,6 +5,7 @@
 #include "gui.h"
 #include "sharedmem.h"
 #include "util.h"
+#include "interrupts.h"
 
 Window windows[MAX_WINDOWS];
 s32 currently_dragging_window = -1;
@@ -107,6 +108,7 @@ static s32 get_framebuffer_shmem_id(s32 window_id) {
 }
 
 static s32 swap_buffers(s32 window_id) {
+    VERIFY_INTERRUPTS_DISABLED;
     gui.needs_redraw = true;
 
     Window* w = &windows[window_id];

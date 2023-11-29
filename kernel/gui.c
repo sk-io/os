@@ -13,6 +13,8 @@
 #include "time.h"
 #include "interrupts.h"
 
+#define GUI_DRAW_INTERVAL 40
+
 GUI gui;
 
 s32 testbutton_x, testbutton_y;
@@ -31,7 +33,7 @@ void init_gui(s32 width, s32 height) {
     gui.prev_cursor_x = gui.cursor_x;
     gui.prev_cursor_y = gui.cursor_y;
     gui.needs_redraw = true;
-
+    
     init_windows();
     
     testbutton_x = graphics.width - 100;
@@ -44,13 +46,13 @@ void gui_thread_entry() {
     // disable_interrupts();
 
     while (1) {
-        if (gui.needs_redraw) {
-            gui.needs_redraw = false;
-            gui_draw_frame();
-        }
+        while (!should_gui_redraw());
 
         push_cli();
         gui_handle_events();
+        gui_draw_frame();
+        gui.needs_redraw = false;
+        gui.last_redraw_time = get_system_time_millis();
         pop_cli();
     }
 }
@@ -182,4 +184,8 @@ void draw_debug_console(u32 color) {
             index++;
         }
     }
+}
+
+bool should_gui_redraw() {
+    return gui.needs_redraw && (get_system_time_millis() - gui.last_redraw_time) >= GUI_DRAW_INTERVAL;
 }

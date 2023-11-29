@@ -41,7 +41,7 @@ libsgfx:
 	make -C sgfx
 
 run: $(IMAGE)
-	qemu-system-i386 -cdrom $(IMAGE) -serial stdio
+	qemu-system-i386 -cdrom $(IMAGE) -serial stdio -accel kvm
 
 drun: $(IMAGE)
 	qemu-system-i386 -s -S -cdrom $(IMAGE) -serial stdio
