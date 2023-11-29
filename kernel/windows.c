@@ -31,6 +31,7 @@ void init_windows() {
     for (int i = 0; i < MAX_WINDOWS; i++)
         window_z_order[i] = -1;
     
+    // FIXME: make syscall_ functions and verify args
     register_syscall(SYSCALL_CREATE_WINDOW, create_window);
     register_syscall(SYSCALL_DESTROY_WINDOW, destroy_window);
     register_syscall(SYSCALL_GET_WINDOW_FB_SHMEM_ID, get_framebuffer_shmem_id);

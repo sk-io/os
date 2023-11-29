@@ -72,14 +72,13 @@ static void gui_draw_frame() {
     u64 time = get_system_time_millis();
     // if (time)
     //     time /= 1000;
-    char time_str[128];
+    char status_str[128];
 
     int phys_mem = pmm_get_total_allocated_pages() * 4;
+    snprintf(status_str, sizeof(status_str), "phys used: %dKiB   systime: %u", phys_mem, time);
+    graphics_draw_string(status_str, 3, graphics.height - 15, 0);
 
-    sprintf(time_str, "phys used: %dKiB   systime: %u", phys_mem, time);
-    graphics_draw_string(time_str, 3, graphics.height - 15, 0);
-
-    graphics_copy_rect(gui.cursor_x, gui.cursor_y, 12, 19, 0, 0, res_cursor_raw);
+    sgfx_copy_rect_alpha(&graphics, gui.cursor_x, gui.cursor_y, 12, 19, 0, 0, res_cursor_raw);
 
     graphics_copy_backbuffer();
 }

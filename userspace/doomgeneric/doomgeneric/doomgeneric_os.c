@@ -45,7 +45,8 @@ static unsigned char ascii_to_doomkey(unsigned int key) {
     case '\n':
         return KEY_ENTER;
     }
-    return -1;
+    
+    return 0xfe;
 }
 
 static void add_key_to_queue(int pressed, unsigned char key) {
@@ -59,13 +60,15 @@ static void add_key_to_queue(int pressed, unsigned char key) {
 void DG_DrawFrame() {
     // for (int i = 0; i < DOOMGENERIC_RESX * DOOMGENERIC_RESY; i++)
     //     fb[i] = 0xFF00FF00;
-    uint32_t* draw_fb = fb + (shown_buffer == 0 ? (DOOMGENERIC_RESX * DOOMGENERIC_RESY) : 0);
+    // uint32_t* draw_fb = fb + (shown_buffer == 0 ? (DOOMGENERIC_RESX * DOOMGENERIC_RESY) : 0);
 
-    memcpy(draw_fb, DG_ScreenBuffer, DOOMGENERIC_RESX * DOOMGENERIC_RESY * 4);
-    for (int i = 0; i < DOOMGENERIC_RESX * DOOMGENERIC_RESY; i++)
-        draw_fb[i] |= 0xFF000000;
+    // memcpy(draw_fb, DG_ScreenBuffer, DOOMGENERIC_RESX * DOOMGENERIC_RESY * 4);
+    // // for (int i = 0; i < DOOMGENERIC_RESX * DOOMGENERIC_RESY; i++)
+    // //     draw_fb[i] |= 0xFF000000;
 
     shown_buffer = os_swap_window_buffers(window);
+    uint32_t* draw_fb = fb + (shown_buffer == 0 ? (DOOMGENERIC_RESX * DOOMGENERIC_RESY) : 0);
+    DG_ScreenBuffer = draw_fb;
 
     OSEvent event;
     while (os_poll_event(&event)) {
@@ -74,6 +77,7 @@ void DG_DrawFrame() {
             int pressed = key_event->state == 1;
 
             unsigned char key = ascii_to_doomkey(key_event->ascii);
+
             if (key_event->scancode == 29) {
                 key = KEY_FIRE;
                 pressed = 1;
@@ -82,8 +86,9 @@ void DG_DrawFrame() {
                 key = KEY_FIRE;
                 pressed = 0;
             }
-            
-            add_key_to_queue(pressed, key);
+
+            if (key != 0xfe)
+                add_key_to_queue(pressed, key);
         }
     }
 }
@@ -125,6 +130,9 @@ int main(int argc, char **argv) {
     };
 
     doomgeneric_Create(num_doom_args, doom_args);
+
+    uint32_t* draw_fb = fb + (shown_buffer == 0 ? (DOOMGENERIC_RESX * DOOMGENERIC_RESY) : 0);
+    DG_ScreenBuffer = draw_fb;
 
     for (int i = 0;; i++) {
         doomgeneric_Tick();

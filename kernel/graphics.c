@@ -23,6 +23,8 @@ void init_graphics(u32* framebuffer_paddr, u32 width, u32 height, u32 bpp, u32 p
     }
 }
 
+// TODO: get rid of these and just use sgfx_ instead
+
 void graphics_fill(u32 color) {
     sgfx_fill(&graphics, color);
 }

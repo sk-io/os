@@ -2,8 +2,10 @@
 
 #define CLAMP(x, a, b) (((x) < (a)) ? (a) : ((x) > (b) ? (b) : (x)))
 #define ABS(x) (((x) < 0) ? (-(x)) : (x))
+#define MIN(x, y) (((x) < (y)) ?  (x) : (y))
+#define MAX(x, y) (((x) > (y)) ?  (x) : (y))
 
-void sgfx_init(GraphicsContext* ctx, u32* framebuffer, u32 width, u32 height) {
+void sgfx_init(GraphicsContext* ctx, u32* framebuffer, s32 width, s32 height) {
     ctx->framebuffer = framebuffer;
     ctx->width = width;
     ctx->height = height;
@@ -36,15 +38,52 @@ void sgfx_fill_rect(const GraphicsContext* ctx, s32 x, s32 y, s32 width, s32 hei
 }
 
 void sgfx_copy_rect(const GraphicsContext* ctx, s32 xdest, s32 ydest, s32 width, s32 height, s32 xsrc, s32 ysrc, u32* source) {
-    for (s32 yi = 0; yi < height; yi++) {
-        s32 _y = yi + ydest;
-        if (_y < 0 || _y >= (s32) ctx->height)
-            continue;
+    if (xdest >= ctx->width)
+        return;
+    if (ydest >= ctx->height)
+        return;
+    if (xdest + width <= 0)
+        return;
+    if (ydest + height <= 0)
+        return;
 
-        for (s32 xi = 0; xi < width; xi++) {
-            s32 _x = xi + xdest;
-            if (_x < 0 || _x >= (s32) ctx->width)
-                continue;
+    s32 x0 = MAX(xdest, 0);
+    s32 x1 = MIN(xdest + width, ctx->width);
+    s32 y0 = MAX(ydest, 0);
+    s32 y1 = MIN(ydest + height, ctx->height);
+
+    for (s32 _y = y0; _y < y1; _y++) {
+        s32 yi = _y - ydest;
+
+        for (s32 _x = x0; _x < x1; _x++) {
+            s32 xi = _x - xdest;
+            
+            u32 c = source[(xsrc + xi) + (ysrc + yi) * width];
+            ctx->framebuffer[_x + _y * ctx->width] = c;
+        }
+    }
+}
+
+void sgfx_copy_rect_alpha(const GraphicsContext* ctx, s32 xdest, s32 ydest, s32 width, s32 height, s32 xsrc, s32 ysrc, u32* source) {
+    if (xdest >= ctx->width)
+        return;
+    if (ydest >= ctx->height)
+        return;
+    if (xdest + width <= 0)
+        return;
+    if (ydest + height <= 0)
+        return;
+
+    s32 x0 = MAX(xdest, 0);
+    s32 x1 = MIN(xdest + width, ctx->width);
+    s32 y0 = MAX(ydest, 0);
+    s32 y1 = MIN(ydest + height, ctx->height);
+
+    for (s32 _y = y0; _y < y1; _y++) {
+        s32 yi = _y - ydest;
+
+        for (s32 _x = x0; _x < x1; _x++) {
+            s32 xi = _x - xdest;
             
             u32 c = source[(xsrc + xi) + (ysrc + yi) * width];
             if ((c >> 24) == 0)

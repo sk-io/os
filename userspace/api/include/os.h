@@ -50,6 +50,7 @@ OS_EXPORT void os_free(void* addr);
 // window
 #define OS_FULLSCREEN (1 << 0)
 #define OS_DOUBLE_BUFFERED (1 << 1)
+#define OS_FRAMEBUFFER_TRANSPARENCY (1 << 2)
 
 OS_EXPORT int32_t os_create_window(int32_t width, int32_t height, uint32_t flags);
 OS_EXPORT int32_t os_destroy_window(int32_t window_id);
