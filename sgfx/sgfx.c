@@ -20,19 +20,24 @@ void sgfx_fill(const GraphicsContext* ctx, u32 color) {
     }
 }
 
-void sgfx_fill_rect(const GraphicsContext* ctx, s32 x, s32 y, s32 width, s32 height, u32 color) {
-    // TODO: optimize?
-    for (s32 yi = 0; yi < height; yi++) {
-        s32 _y = yi + y;
-        if (_y < 0 || _y >= (s32) ctx->height)
-            continue;
+void sgfx_fill_rect(const GraphicsContext* ctx, s32 xdest, s32 ydest, s32 width, s32 height, u32 color) {
+    if (xdest >= ctx->width)
+        return;
+    if (ydest >= ctx->height)
+        return;
+    if (xdest + width <= 0)
+        return;
+    if (ydest + height <= 0)
+        return;
 
-        for (s32 xi = 0; xi < width; xi++) {
-            s32 _x = xi + x;
-            if (_x < 0 || _x >= (s32) ctx->width)
-                continue;
-            
-            ctx->framebuffer[_x + _y * ctx->width] = color;
+    s32 x0 = MAX(xdest, 0);
+    s32 x1 = MIN(xdest + width, ctx->width);
+    s32 y0 = MAX(ydest, 0);
+    s32 y1 = MIN(ydest + height, ctx->height);
+
+    for (s32 y = y0; y < y1; y++) {
+        for (s32 x = x0; x < x1; x++) {
+            ctx->framebuffer[x + y * ctx->width] = color;
         }
     }
 }
@@ -52,15 +57,17 @@ void sgfx_copy_rect(const GraphicsContext* ctx, s32 xdest, s32 ydest, s32 width,
     s32 y0 = MAX(ydest, 0);
     s32 y1 = MIN(ydest + height, ctx->height);
 
-    for (s32 _y = y0; _y < y1; _y++) {
-        s32 yi = _y - ydest;
+    s32 yi = y0 - ydest + ysrc;
+    for (s32 y = y0; y < y1; y++) {
+        
+        s32 xi = x0 - xdest + xsrc;
+        for (s32 x = x0; x < x1; x++) {
+            ctx->framebuffer[x + y * ctx->width] = source[xi + yi * width];
 
-        for (s32 _x = x0; _x < x1; _x++) {
-            s32 xi = _x - xdest;
-            
-            u32 c = source[(xsrc + xi) + (ysrc + yi) * width];
-            ctx->framebuffer[_x + _y * ctx->width] = c;
+            xi++;
         }
+
+        yi++;
     }
 }
 
@@ -79,17 +86,21 @@ void sgfx_copy_rect_alpha(const GraphicsContext* ctx, s32 xdest, s32 ydest, s32 
     s32 y0 = MAX(ydest, 0);
     s32 y1 = MIN(ydest + height, ctx->height);
 
-    for (s32 _y = y0; _y < y1; _y++) {
-        s32 yi = _y - ydest;
+    s32 yi = y0 - ydest + ysrc;
+    for (s32 y = y0; y < y1; y++) {
+        
+        s32 xi = x0 - xdest + xsrc;
+        for (s32 x = x0; x < x1; x++) {
+            u32 c = source[xi + yi * width];
 
-        for (s32 _x = x0; _x < x1; _x++) {
-            s32 xi = _x - xdest;
-            
-            u32 c = source[(xsrc + xi) + (ysrc + yi) * width];
-            if ((c >> 24) == 0)
-                continue;
-            ctx->framebuffer[_x + _y * ctx->width] = c;
+            if ((c >> 24) != 0) {
+                ctx->framebuffer[x + y * ctx->width] = c;
+            }
+
+            xi++;
         }
+
+        yi++;
     }
 }
 

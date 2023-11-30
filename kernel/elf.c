@@ -33,18 +33,18 @@ static const char* get_section_name(const ELFObject* elf, Elf32_Shdr* section) {
 }
 
 static const char* get_string(const ELFObject* elf, u32 str_offset, Elf32_Shdr* string_table_section) {
-    const char* string_table = elf->raw + string_table_section->sh_offset;
+    const char* string_table = (const char*) (elf->raw + string_table_section->sh_offset);
     return string_table + str_offset;
 }
 
 const char* get_elf_symbol(const ELFObject* elf, Elf32_Shdr* symtab, Elf32_Shdr* strtab, int index) {
-    Elf32_Sym* table = elf->raw + symtab->sh_offset;
+    Elf32_Sym* table = (Elf32_Sym*) (elf->raw + symtab->sh_offset);
     return get_string(elf, table[index].st_name, strtab);
 }
 
 // requires elf to be mem mapped?
 void parse_dynamic_section(ELFObject* elf, Elf32_Shdr* section) {
-    Elf32_Dyn* table = elf->raw + section->sh_offset;
+    Elf32_Dyn* table = (Elf32_Dyn*) (elf->raw + section->sh_offset);
     // kernel_log("parsing .dynamic section");
     int num_entries = section->sh_size / section->sh_entsize;
     // kernel_log("num .dynamic entries = %u", num_entries);
@@ -60,7 +60,7 @@ void parse_dynamic_section(ELFObject* elf, Elf32_Shdr* section) {
     }
     assert(strtab != NULL);
 
-    const char* string_table = strtab->d_un.d_ptr;
+    const char* string_table = (const char*) strtab->d_un.d_ptr;
     // kernel_log("dynamic string table addr = %x", strtab->d_un.d_ptr);
 
     int num = 0;
@@ -78,10 +78,10 @@ void parse_dynamic_section(ELFObject* elf, Elf32_Shdr* section) {
 void parse_symbol_table(ELFObject* elf, Elf32_Shdr* section, Elf32_Shdr* string_table) {
     // kernel_log("parsing symbol table");
 
-    Elf32_Sym* table = elf->raw + section->sh_offset;
+    Elf32_Sym* table = (Elf32_Sym*) (elf->raw + section->sh_offset);
     u32 num_entries = section->sh_size / section->sh_entsize;
 
-    for (int i = 0; i < num_entries; i++) {
+    for (u32 i = 0; i < num_entries; i++) {
         const char* name = get_string(elf, table[i].st_name, string_table);
         kernel_log("symbol: %s", name);
     }
@@ -155,14 +155,14 @@ bool load_elf_executable(ELFObject* elf) {
         }
 
         // allocate virtual pages
-        for (int j = 0; j < num_pages; j++) {
+        for (u32 j = 0; j < num_pages; j++) {
             mem_map_page((segment->p_vaddr & ~0xFFF) + j * 0x1000, pmm_alloc_pageframe(), flags | PAGE_FLAG_OWNER);
         }
         // zero them, small optimization: dont zero to-be overwritten parts
-        memset((segment->p_vaddr & ~0xFFF), 0, num_pages * 0x1000);
+        memset((void*) (segment->p_vaddr & ~0xFFF), 0, num_pages * 0x1000);
 
         // copy it.
-        memcpy(segment->p_vaddr, elf->raw + segment->p_offset, segment->p_filesz);
+        memcpy((void*) segment->p_vaddr, elf->raw + segment->p_offset, segment->p_filesz);
     }
 
     if (elf->dynamic_section == NULL) {
@@ -178,10 +178,10 @@ bool load_elf_executable(ELFObject* elf) {
 Elf32_Sym* find_symbol(ELFObject* elf, Elf32_Shdr* symtab_section, Elf32_Shdr* string_table, const char* symbol) {
     // kernel_log("parsing symbol table");
 
-    Elf32_Sym* table = elf->raw + symtab_section->sh_offset;
+    Elf32_Sym* table = (Elf32_Sym*) (elf->raw + symtab_section->sh_offset);
     u32 num_entries = symtab_section->sh_size / symtab_section->sh_entsize;
 
-    for (int i = 0; i < num_entries; i++) {
+    for (u32 i = 0; i < num_entries; i++) {
         const char* name = get_string(elf, table[i].st_name, string_table);
         // kernel_log("symbol: %s", name);
 

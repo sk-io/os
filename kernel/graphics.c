@@ -23,39 +23,9 @@ void init_graphics(u32* framebuffer_paddr, u32 width, u32 height, u32 bpp, u32 p
     }
 }
 
-// TODO: get rid of these and just use sgfx_ instead
-
-void graphics_fill(u32 color) {
-    sgfx_fill(&graphics, color);
-}
-
-void graphics_fill_rect(s32 x, s32 y, s32 width, s32 height, u32 color) {
-    sgfx_fill_rect(&graphics, x, y, width, height, color);
-}
-
-void graphics_copy_rect(s32 xdest, s32 ydest, s32 width, s32 height, s32 xsrc, s32 ysrc, u32* source) {
-    sgfx_copy_rect(&graphics, xdest, ydest, width, height, xsrc, ysrc, source);
-}
-
 void graphics_copy_backbuffer() {
     int total = graphics.width * graphics.height;
     for (int i = 0; i < total; i++) {
         frontbuffer[i] = graphics.framebuffer[i];
     }
-}
-
-void graphics_draw_char(u8 c, s32 x0, s32 y0, u32 color) {
-    sgfx_draw_char(&graphics, c, x0, y0, color);
-}
-
-void graphics_draw_string(const char* str, s32 x0, s32 y0, u32 color) {
-    sgfx_draw_string(&graphics, str, x0, y0, color);
-}
-
-void graphics_draw_hline(s32 x, s32 y, s32 w, u32 color) {
-    sgfx_draw_hline(&graphics, x, y, w, color);
-}
-
-void graphics_draw_vline(s32 x, s32 y, s32 h, u32 color) {
-    sgfx_draw_vline(&graphics, x, y, h, color);
 }

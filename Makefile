@@ -1,6 +1,6 @@
 CC = clang
 LD = clang
-CFLAGS = -g -nostdlib -ffreestanding -m32 -fno-builtin -no-pie -Wall -Wextra -Isgfx
+CFLAGS = -g -nostdlib -ffreestanding -m32 -fno-builtin -Wall -Wextra -Isgfx
 LDFLAGS = -g -nostdlib -ffreestanding -m32 -fno-builtin -no-pie -Tkernel.ld -Lsgfx -lsgfx -lgcc
 ASFLAGS = -felf32
 

@@ -6,6 +6,7 @@
 #include "sharedmem.h"
 #include "util.h"
 #include "interrupts.h"
+#include "graphics.h"
 
 Window windows[MAX_WINDOWS];
 s32 currently_dragging_window = -1;
@@ -141,25 +142,25 @@ static void draw_window(s32 id) {
 
     // copy the contents of the framebuffer to the screen
     u32* source = ((u32) w->framebuffer) + (w->shown_buffer == 0 ? 0 : w->framebuffer_size_bytes);
-    graphics_copy_rect(w->x + WINDOW_CONTENT_XOFFSET, w->y + WINDOW_CONTENT_YOFFSET, w->width, w->height, 0, 0, source);
+    sgfx_copy_rect(&graphics, w->x + WINDOW_CONTENT_XOFFSET, w->y + WINDOW_CONTENT_YOFFSET, w->width, w->height, 0, 0, source);
 
     // window title bar
-    graphics_fill_rect(w->x + 1, w->y + 1, w->width, WINDOW_CONTENT_YOFFSET - 1, border_color);
+    sgfx_fill_rect(&graphics, w->x + 1, w->y + 1, w->width, WINDOW_CONTENT_YOFFSET - 1, border_color);
 
     // window outline
-    graphics_draw_hline(w->x, w->y, w->width + WINDOW_CONTENT_XOFFSET * 2, border_color);
-    graphics_draw_hline(w->x, w->y + WINDOW_CONTENT_YOFFSET + w->height, w->width + WINDOW_CONTENT_XOFFSET * 2, border_color);
-    graphics_draw_vline(w->x, w->y, w->height + WINDOW_CONTENT_YOFFSET, border_color);
-    graphics_draw_vline(w->x + w->width + 1, w->y, w->height + WINDOW_CONTENT_YOFFSET, border_color);
+    sgfx_draw_hline(&graphics, w->x, w->y, w->width + WINDOW_CONTENT_XOFFSET * 2, border_color);
+    sgfx_draw_hline(&graphics, w->x, w->y + WINDOW_CONTENT_YOFFSET + w->height, w->width + WINDOW_CONTENT_XOFFSET * 2, border_color);
+    sgfx_draw_vline(&graphics, w->x, w->y, w->height + WINDOW_CONTENT_YOFFSET, border_color);
+    sgfx_draw_vline(&graphics, w->x + w->width + 1, w->y, w->height + WINDOW_CONTENT_YOFFSET, border_color);
 
     // window title
-    graphics_draw_string(w->title, w->x + 5, w->y + 5, 0xFFFFFF);
+    sgfx_draw_string(&graphics, w->title, w->x + 5, w->y + 5, 0xFFFFFF);
 
     // close button
     s32 close_button_x = w->x + w->width + 2 - CLOSE_BUTTON_WIDTH - 1;
     s32 close_button_y = w->y + 1;
-    graphics_fill_rect(close_button_x, close_button_y, CLOSE_BUTTON_WIDTH, CLOSE_BUTTON_HEIGHT, 0xFFFFFF);
-    graphics_draw_string("x", close_button_x + 5, close_button_y + 3, 0);
+    sgfx_fill_rect(&graphics, close_button_x, close_button_y, CLOSE_BUTTON_WIDTH, CLOSE_BUTTON_HEIGHT, 0xFFFFFF);
+    sgfx_draw_string(&graphics, "x", close_button_x + 5, close_button_y + 3, 0);
 
     // signal task
     push_cli();

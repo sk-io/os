@@ -19,7 +19,7 @@ void init_console() {
     console.height = graphics_enabled ? 50 : 25;
     console.cursor_x = 0;
     console.cursor_y = 0;
-    console.buffer = (u8*) (graphics_enabled ? gui.fake_console_buffer : 0xC00B8000);
+    console.buffer = graphics_enabled ? (u8*)gui.fake_console_buffer : (u8*)0xC00B8000;
     console.clear_color = 0x0F;
 
     clear_prompt();

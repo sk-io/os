@@ -1,6 +1,6 @@
 # You can override the CFLAGS and C compiler externally,
 # e.g. make PLATFORM=cortex-m3
-CFLAGS = -g -std=gnu11 -nostdlib -ffreestanding -m32 -Wall -Wextra -lgcc -I ../api/include -O2
+CFLAGS = -g -std=gnu11 -nostdlib -ffreestanding -m32 -Wall -Wextra -I ../api/include -O2
 CFLAGS += -g -Wall -I include
 
 CC = clang

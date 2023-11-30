@@ -58,7 +58,7 @@ char* strncpy(char* dst, const char* src, u32 n) {
 }
 
 void crash_and_burn() {
-    graphics_fill(0x0000FF);
+    sgfx_fill(&graphics, 0x0000FF);
     draw_debug_console(0xFFFFFF);
     graphics_copy_backbuffer();
 

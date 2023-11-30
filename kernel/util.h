@@ -25,8 +25,8 @@ void crash_and_burn();
 void kernel_assert(int condition, const char* file, int line, const char* error_msg);
 
 // todo: pass vargs
-#define assert_msg(x, msg) kernel_assert(x, __FILE__, __LINE__, msg)
-#define assert(x) kernel_assert(x, __FILE__, __LINE__, "")
+#define assert_msg(x, msg) kernel_assert((int) (x), __FILE__, __LINE__, msg)
+#define assert(x) kernel_assert((int) (x), __FILE__, __LINE__, "")
 
 #define CEIL_DIV(a, b) (((a) + (b) - 1) / (b))
 #define CLAMP(x, a, b) (((x) < (a)) ? (a) : ((x) > (b) ? (b) : (x)))

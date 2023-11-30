@@ -58,14 +58,14 @@ void gui_thread_entry() {
 }
 
 static void gui_draw_frame() {
-    graphics_fill(0xFFFFFFFF);
+    sgfx_fill(&graphics, 0xFFFFFFFF);
 
     draw_debug_console(0);
     draw_windows();
 
-    graphics_fill_rect(testbutton_x, testbutton_y, testbutton_w, testbutton_h, 0xFFFF00FF);
+    sgfx_fill_rect(&graphics, testbutton_x, testbutton_y, testbutton_w, testbutton_h, 0xFFFF00FF);
 
-    graphics_fill_rect(graphics.width - 10, 2, 8, 8, redraw_indicator ? 0xFF00FF : 0);
+    sgfx_fill_rect(&graphics, graphics.width - 10, 2, 8, 8, redraw_indicator ? 0xFF00FF : 0);
     redraw_indicator ^= 1;
 
     // draw time
@@ -76,7 +76,7 @@ static void gui_draw_frame() {
 
     int phys_mem = pmm_get_total_allocated_pages() * 4;
     snprintf(status_str, sizeof(status_str), "phys used: %dKiB   systime: %u", phys_mem, time);
-    graphics_draw_string(status_str, 3, graphics.height - 15, 0);
+    sgfx_draw_string(&graphics, status_str, 3, graphics.height - 15, 0);
 
     sgfx_copy_rect_alpha(&graphics, gui.cursor_x, gui.cursor_y, 12, 19, 0, 0, res_cursor_raw);
 
@@ -179,7 +179,7 @@ void draw_debug_console(u32 color) {
     for (int y = 0; y < 50; y++) {
         for (int x = 0; x < 80; x++) {
             u16 c = gui.fake_console_buffer[index];
-            graphics_draw_char(c & 0xFF, x * 10, y * 10, color);
+            sgfx_draw_char(&graphics, c & 0xFF, x * 10, y * 10, color);
             index++;
         }
     }
