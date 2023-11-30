@@ -15,6 +15,10 @@ int32_t os_read_file(int32_t fd, char* buffer, int32_t num_bytes) {
     return syscall_read_file(fd, buffer, num_bytes);
 }
 
+int32_t os_write_file(int32_t fd, const char* buffer, int32_t num_bytes) {
+    return syscall_write_file(fd, buffer, num_bytes);
+}
+
 int32_t os_get_file_size(int32_t fd) {
     return syscall_get_file_size(fd);
 }

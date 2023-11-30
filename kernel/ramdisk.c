@@ -37,17 +37,23 @@ DSTATUS disk_status(BYTE pdrv) {
 
 DRESULT disk_read(BYTE pdrv, BYTE* buffer, DWORD sector, UINT count) {
     VERIFY_INTERRUPTS_DISABLED;
+    
     uint32_t offset = sector * RAMDISK_BLOCKSIZE;
     uint32_t size = count * RAMDISK_BLOCKSIZE;
-    // disable_interrupts();
     memcpy(buffer, (u8*) (ramdisk.location + offset), size);
-    // enable_interrupts();
 
     return RES_OK;
 }
 
-// DRESULT disk_write(BYTE pdrv, const BYTE* buff, DWORD sector, UINT count) {
-// }
+DRESULT disk_write(BYTE pdrv, const BYTE* buffer, DWORD sector, UINT count) {
+    VERIFY_INTERRUPTS_DISABLED;
+
+    uint32_t offset = sector * RAMDISK_BLOCKSIZE;
+    uint32_t size = count * RAMDISK_BLOCKSIZE;
+    memcpy((u8*) (ramdisk.location + offset), buffer, size);
+
+    return RES_OK;
+}
 
 DRESULT disk_ioctl(BYTE pdrv, BYTE cmd, void* buff) {
     VERIFY_INTERRUPTS_DISABLED;

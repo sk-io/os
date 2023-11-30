@@ -163,6 +163,15 @@ int syscall_read_file(int fd, char* buffer, int num_bytes) {
     return ret;
 }
 
+int syscall_write_file(int fd, char* buffer, int num_bytes) {
+    int ret;
+    asm volatile(
+        "int $0x80"
+        : "=a" (ret) : "a"(SYSCALL_WRITE_FILE), "b"(fd), "c"(buffer), "d"(num_bytes)
+    );
+    return ret;
+}
+
 int syscall_get_file_size(int fd) {
     int ret;
     asm volatile(

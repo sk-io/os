@@ -21,6 +21,7 @@ void syscall_set_heap_end(uint32_t heap_end);
 int syscall_open_file(const char* path);
 int syscall_close_file(int fd);
 int syscall_read_file(int fd, char* buffer, int num_bytes);
+int syscall_write_file(int fd, char* buffer, int num_bytes);
 int syscall_get_file_size(int fd);
 int syscall_get_file_offset(int fd);
 int syscall_set_file_offset(int fd, uint32_t offset);

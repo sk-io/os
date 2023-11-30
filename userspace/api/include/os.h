@@ -33,6 +33,7 @@ typedef struct {
 OS_EXPORT int32_t os_open_file(const char* path);
 OS_EXPORT int32_t os_close_file(int32_t fd);
 OS_EXPORT int32_t os_read_file(int32_t fd, char* buffer, int32_t num_bytes);
+OS_EXPORT int32_t os_write_file(int32_t fd, const char* buffer, int32_t num_bytes);
 OS_EXPORT int32_t os_get_file_size(int32_t fd);
 OS_EXPORT uint32_t os_get_file_offset(int32_t fd);
 OS_EXPORT uint32_t os_set_file_offset(int32_t fd, uint32_t offset);

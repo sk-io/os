@@ -1,6 +1,6 @@
 #pragma once
 
-// i need to organize this..
+// i REALLY need to organize this..
 
 #define SYSCALL_GET_TASK_ID 1
 #define SYSCALL_EXIT  2
@@ -35,3 +35,4 @@
 #define SYSCALL_GET_FILE_OFFSET 31
 #define SYSCALL_SET_FILE_OFFSET 32
 #define SYSCALL_GET_SYSTEM_TIME 33
+#define SYSCALL_WRITE_FILE 34

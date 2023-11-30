@@ -14,30 +14,29 @@ void crash() {
     *frick = 1234;
 }
 
+void write_test() {
+    const char* text = "It's working!";
+
+    FILE* file = fopen("out.txt", "w");
+    fwrite(text, 1, strlen(text) + 1, file);
+    fclose(file);
+}
+
 int main(int argc, char* argv[]) {
-    printf("hello!!");
+    write_test();
 
-
-    FILE* file = fopen("DOOM1.WAD", "r");
+    FILE* file = fopen("out.txt", "r");
 
     fseek(file, 0, SEEK_END);
     int size = ftell(file);
-    fseek(file, size, SEEK_SET);
-    printf("file size: %u\n", size);
+    fseek(file, 0, SEEK_SET);
 
-    // fseek(file, 4196010, SEEK_SET);
-    // fseek(file, -16, SEEK_END);
-    fseek(file, -16, SEEK_CUR);
-    int pos = ftell(file);
-    printf("current file pos: %u\n", pos);
+    printf("file size: %u\n", size);
 
     char buf[16];
     fread(buf, 1, sizeof(buf), file);
 
-    for (int i = 0; i < sizeof(buf); i++) {
-        // os_print_char(buf[i]);
-        os_printf("%x: %x", i, (uint8_t) buf[i]);
-    }
+    os_print(buf);
 
     fclose(file);
 

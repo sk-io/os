@@ -39,6 +39,7 @@ static void syscall_exec(const char* path) {
     create_user_task(path);
 }
 
+// FIXME: specify mode?
 static u32 syscall_open_file(const char* path) {
     int fd = -1;
     for (int i = 0; i < MAX_OPEN_FILES; i++) {
@@ -50,7 +51,7 @@ static u32 syscall_open_file(const char* path) {
     assert_msg(fd != -1, "too many opened files!");
     // kernel_log("--> syscall_open_file   fd=%d %s", fd, path);
 
-    FRESULT res = f_open(&current_task->open_files[fd], path, FA_READ);
+    FRESULT res = f_open(&current_task->open_files[fd], path, FA_READ | FA_WRITE);
     assert_msg(res == FR_OK, "f_open");
 
     kernel_log("opened file %s with fd=%d", path, fd);
@@ -59,39 +60,55 @@ static u32 syscall_open_file(const char* path) {
 
 static u32 syscall_read_file(u32 fd, u8* buf, u32 num_bytes) {
     fd -= 1000;
-    assert_msg(fd < MAX_OPEN_FILES, "");
-    assert_msg(current_task->open_files[fd].obj.fs != 0, "");
+    assert(fd < MAX_OPEN_FILES);
+    assert(current_task->open_files[fd].obj.fs != 0);
+    if (num_bytes == 0)
+        return 0;
+
     UINT br;
     FRESULT res = f_read(&current_task->open_files[fd], buf, num_bytes, &br);
-    assert_msg(res == FR_OK, "");
+    assert(res == FR_OK);
+    return br;
+}
+
+static u32 syscall_write_file(u32 fd, u8* buf, u32 num_bytes) {
+    fd -= 1000;
+    assert(fd < MAX_OPEN_FILES);
+    assert(current_task->open_files[fd].obj.fs != 0);
+    if (num_bytes == 0)
+        return 0;
+    
+    UINT br;
+    FRESULT res = f_write(&current_task->open_files[fd], buf, num_bytes, &br);
+    assert(res == FR_OK);
     return br;
 }
 
 static void syscall_close_file(u32 fd) {
     fd -= 1000;
-    assert_msg(fd < MAX_OPEN_FILES, "");
+    assert(fd < MAX_OPEN_FILES);
 
     FRESULT res = f_close(&current_task->open_files[fd]);
-    assert_msg(res == FR_OK, "");
+    assert(res == FR_OK);
 }
 
 static u32 syscall_get_file_size(u32 fd) {
     fd -= 1000;
-    assert_msg(fd < MAX_OPEN_FILES, "");
+    assert(fd < MAX_OPEN_FILES);
 
     return f_size(&current_task->open_files[fd]);
 }
 
 static u32 syscall_get_file_offset(u32 fd) {
     fd -= 1000;
-    assert_msg(fd < MAX_OPEN_FILES, "");
+    assert(fd < MAX_OPEN_FILES);
 
     return f_tell(&current_task->open_files[fd]);
 }
 
 static u32 syscall_set_file_offset(u32 fd, u32 offset) {
     fd -= 1000;
-    assert_msg(fd < MAX_OPEN_FILES, "");
+    assert(fd < MAX_OPEN_FILES);
 
     f_lseek(&current_task->open_files[fd], offset);
     return 0;
@@ -243,6 +260,7 @@ void init_syscalls() {
     register_syscall(SYSCALL_OPEN_FILE, syscall_open_file);
     register_syscall(SYSCALL_CLOSE_FILE, syscall_close_file);
     register_syscall(SYSCALL_READ_FILE, syscall_read_file);
+    register_syscall(SYSCALL_WRITE_FILE, syscall_write_file);
     register_syscall(SYSCALL_GET_FILE_SIZE, syscall_get_file_size);
     register_syscall(SYSCALL_GET_FILE_OFFSET, syscall_get_file_offset);
     register_syscall(SYSCALL_SET_FILE_OFFSET, syscall_set_file_offset);

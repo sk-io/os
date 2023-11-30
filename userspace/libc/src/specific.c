@@ -42,32 +42,24 @@ int fseek(FILE *stream, long offset, int whence) {
 }
 
 long ftell(FILE *stream) {
-    // os_print("ftell");
     return os_get_file_offset((int32_t) stream);
 }
 
 int fflush(FILE *stream) {
     os_print("fflush");
-    // os_exit();
     return 0;
 }
 
 size_t fread(void *ptr, size_t size, size_t nmemb, FILE *stream) {
-    // os_print("fread");
-    return os_read_file((int32_t) stream, (char*) ptr, nmemb);
-
-    // os_exit();
+    return os_read_file((int32_t) stream, (char*) ptr, size * nmemb);
 }
 
 size_t fwrite(const void *ptr, size_t size, size_t nmemb, FILE *stream) {
-    os_print("fwrite");
-    os_exit();
-    return 0;
+    return os_write_file((int32_t) stream, (const char*) ptr, size * nmemb);
 }
 
 int mkdir(const char *path, uint32_t mode) {
     os_print("mkdir");
-    // os_exit();
     return 0;
 }
 
