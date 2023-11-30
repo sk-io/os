@@ -17,8 +17,10 @@
 
 GUI gui;
 
-s32 testbutton_x, testbutton_y;
-s32 testbutton_w, testbutton_h;
+struct {
+    s32 x, y;
+    s32 w, h;
+} file_button;
 
 s32 redraw_indicator = 0;
 
@@ -36,10 +38,10 @@ void init_gui(s32 width, s32 height) {
     
     init_windows();
     
-    testbutton_x = graphics.width - 100;
-    testbutton_y = graphics.height - 100;
-    testbutton_w = 50;
-    testbutton_h = 50;
+    file_button.w = 130;
+    file_button.h = 20;
+    file_button.x = graphics.width - file_button.w - 10;
+    file_button.y = graphics.height - file_button.h - 10;
 }
 
 void gui_thread_entry() {
@@ -58,13 +60,19 @@ void gui_thread_entry() {
 }
 
 static void gui_draw_frame() {
+    // clear screen
     sgfx_fill(&graphics, 0xFFFFFFFF);
 
+    // background terminal thing
     draw_debug_console(0);
+
+    // file button
+    sgfx_draw_box(&graphics, file_button.x, file_button.y, file_button.w, file_button.h, 0x8ecae6, 0);
+    sgfx_draw_string(&graphics, "File Browser", file_button.x + 5, file_button.y + 5, 0);
+
     draw_windows();
 
-    sgfx_fill_rect(&graphics, testbutton_x, testbutton_y, testbutton_w, testbutton_h, 0xFFFF00FF);
-
+    // redraw indicator
     sgfx_fill_rect(&graphics, graphics.width - 10, 2, 8, 8, redraw_indicator ? 0xFF00FF : 0);
     redraw_indicator ^= 1;
 
@@ -84,8 +92,8 @@ static void gui_draw_frame() {
 }
 
 static void handle_left_click() {
-    if (gui.cursor_x >= testbutton_x && gui.cursor_x < testbutton_x + testbutton_w
-        && gui.cursor_y >= testbutton_y && gui.cursor_y < testbutton_y + testbutton_h) {
+    if (gui.cursor_x >= file_button.x && gui.cursor_x < file_button.x + file_button.w
+        && gui.cursor_y >= file_button.y && gui.cursor_y < file_button.y + file_button.h) {
         create_user_task("files.exe");
     }
 

@@ -193,6 +193,14 @@ void sgfx_draw_vline(const GraphicsContext* ctx, s32 x, s32 y, s32 h, u32 color)
     }
 }
 
+void sgfx_draw_box(const GraphicsContext* ctx, s32 x, s32 y, s32 width, s32 height, u32 color, u32 border_color) {
+    sgfx_fill_rect(ctx, x + 1, y + 1, width - 2, height - 2, color);
+    sgfx_draw_hline(ctx, x, y, width, border_color);
+    sgfx_draw_hline(ctx, x, y + height - 1, width, border_color);
+    sgfx_draw_vline(ctx, x, y, height, border_color);
+    sgfx_draw_vline(ctx, x + width - 1, y, height, border_color);
+}
+
 void sgfx_pixel(GraphicsContext* context, s32 x, s32 y, u32 color) {
     if (x < 0) return;
     if (y < 0) return;

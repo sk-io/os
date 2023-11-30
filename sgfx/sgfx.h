@@ -20,6 +20,7 @@ void sgfx_draw_char(const GraphicsContext* ctx, u8 c, s32 x0, s32 y0, u32 color)
 void sgfx_draw_string(const GraphicsContext* ctx, const char* str, s32 x0, s32 y0, u32 color);
 void sgfx_draw_hline(const GraphicsContext* ctx, s32 x, s32 y, s32 w, u32 color);
 void sgfx_draw_vline(const GraphicsContext* ctx, s32 x, s32 y, s32 h, u32 color);
+void sgfx_draw_box(const GraphicsContext* ctx, s32 x, s32 y, s32 width, s32 height, u32 color, u32 border_color);
 void sgfx_pixel(GraphicsContext* context, s32 x, s32 y, u32 color);
 void sgfx_draw_line(GraphicsContext* context, s32 x0, s32 y0, s32 x1, s32 y1, u32 color);
 

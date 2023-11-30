@@ -54,7 +54,7 @@ void handle_event(const Event* event) {
         if (w != NULL) {
             send_event_to_task(w->owner_task_id, event);
         } else if (event->type == EVENT_KEYBOARD) {
-            if (event->data0 >> 7 == 0 && event->data1 != 0)
+            if (event->data2 && event->data1 != 0)
                 console_key_typed(event->data1);
         }
     }
