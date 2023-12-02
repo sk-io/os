@@ -19,7 +19,7 @@ OS_EXPORT void os_temp_init(); // todo: remove this?
 OS_EXPORT int32_t os_get_task_id();
 OS_EXPORT void os_print(const char* msg);
 OS_EXPORT void os_print_char(char c);
-OS_EXPORT void os_exec(const char* path);
+OS_EXPORT void os_exec(const char* path, const char* argv[]);
 OS_EXPORT void os_exit();
 OS_EXPORT uint32_t os_get_system_time();
 

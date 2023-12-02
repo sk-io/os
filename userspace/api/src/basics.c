@@ -18,8 +18,8 @@ void os_print_char(char c) {
     syscall_print_char(c);
 }
 
-void os_exec(const char* path) {
-    syscall_exec(path);
+void os_exec(const char* path, const char* argv[]) {
+    syscall_exec(path, argv);
 }
 
 uint32_t os_get_system_time() {

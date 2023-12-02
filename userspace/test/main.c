@@ -23,22 +23,28 @@ void write_test() {
 }
 
 int main(int argc, char* argv[]) {
-    write_test();
+    printf("num args: %d\n", argc);
 
-    FILE* file = fopen("out.txt", "r");
+    for (int i = 0; i < argc; i++) {
+        printf("  %d: %s\n", i, argv[i]);
+    }
 
-    fseek(file, 0, SEEK_END);
-    int size = ftell(file);
-    fseek(file, 0, SEEK_SET);
+    // write_test();
 
-    printf("file size: %u\n", size);
+    // FILE* file = fopen("out.txt", "r");
 
-    char buf[16];
-    fread(buf, 1, sizeof(buf), file);
+    // fseek(file, 0, SEEK_END);
+    // int size = ftell(file);
+    // fseek(file, 0, SEEK_SET);
 
-    os_print(buf);
+    // printf("file size: %u\n", size);
 
-    fclose(file);
+    // char buf[16];
+    // fread(buf, 1, sizeof(buf), file);
+
+    // os_print(buf);
+
+    // fclose(file);
 
     // for (int i = 0; i < 1; i++) {
     // int shmem = os_create_shared_mem(1000);

@@ -94,7 +94,7 @@ static void gui_draw_frame() {
 static void handle_left_click() {
     if (gui.cursor_x >= file_button.x && gui.cursor_x < file_button.x + file_button.w
         && gui.cursor_y >= file_button.y && gui.cursor_y < file_button.y + file_button.h) {
-        create_user_task("files.exe");
+        create_user_task("files.exe", NULL);
     }
 
     focused_window = window_under_cursor;

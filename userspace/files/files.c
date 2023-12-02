@@ -106,7 +106,7 @@ static void handle_left_click(int x, int y) {
         read_directory();
     } else {
         // execute binary
-        os_exec(entries[selected_entry].name);
+        os_exec(entries[selected_entry].name, NULL);
     }
 }
 

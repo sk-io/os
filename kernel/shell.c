@@ -37,7 +37,7 @@ void shell_execute(const char* code) {
 
     if (strncmp(code, "run", 3) == 0) {
         const char* path = code + 4;
-        create_user_task(path);
+        create_user_task(path, NULL);
         return;
     }
 

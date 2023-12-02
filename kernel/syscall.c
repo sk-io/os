@@ -34,9 +34,10 @@ static void syscall_print_char(char c) {
     kernel_log_char(c);
 }
 
-static void syscall_exec(const char* path) {
+// FIXME: this looks safe right?
+static void syscall_exec(const char* path, const char* argv[]) {
     // kernel_log("task %u exec: %s", current_task->id, path);
-    create_user_task(path);
+    create_user_task(path, argv);
 }
 
 // FIXME: specify mode?

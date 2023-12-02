@@ -32,10 +32,10 @@ void syscall_print_char(char c) {
     );
 }
 
-void syscall_exec(const char* path) {
+void syscall_exec(const char* path, const char* argv[]) {
     asm volatile(
         "int $0x80"
-        :: "a"(SYSCALL_EXEC), "b"(path)
+        :: "a"(SYSCALL_EXEC), "b"(path), "c"(argv)
     );
 }
 

@@ -12,7 +12,7 @@
     0xC000 0000 - kernel start
 */
 
-#define USER_STACK_PAGES (0x10)
+#define USER_STACK_PAGES 16
 
 #define USER_HEAP_START      0x20000000
 #define USER_STACK_BOTTOM    0xB0000000
@@ -22,6 +22,7 @@
 #define KERNEL_GFX           0xC8000000
 #define KERNEL_MALLOC        0xD0000000
 #define KERNEL_SHARED_MEMORY 0xF0000000
+#define TASK_INIT_DATA       (USER_STACK_BOTTOM - (USER_STACK_PAGES + 1) * 0x1000)
 
 #define PAGE_FLAG_PRESENT (1 << 0)
 #define PAGE_FLAG_WRITE   (1 << 1)
@@ -34,7 +35,6 @@
 // note that these are virtual addresses!
 #define REC_PAGEDIR ((u32*) 0xFFFFF000)
 #define REC_PAGETABLE(i) ((u32*) (0xFFC00000 + ((i) << 12)))
-// #define REC_PAGETABLE(i) ((u32*) (0xFFC00000 + ((i) * 0x400)))
 
 extern u32 initial_page_dir[1024];
 extern int mem_num_vpages;

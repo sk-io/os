@@ -139,8 +139,6 @@ u32 mem_unmap_page(u32 virt_addr) {
         
         // write to initial_page_dir, so that we can sync that across all others
 
-        // kernel_log("KERNEL SPACE !!!!!!!!!!");
-
         prev_page_dir = mem_get_current_page_directory();
 
         if (prev_page_dir != initial_page_dir)
@@ -177,7 +175,6 @@ u32 mem_unmap_page(u32 virt_addr) {
         // table is empty, destroy its physical frame if we own it.
         u32 pde = page_dir[pd_index];
         if (pde & PAGE_FLAG_OWNER) {
-            // kernel_log("REMOVING PAGETABLE");
             u32 pt_paddr = P_PHYS_ADDR(pde);
             // kernel_log("removing page table %x", pt_paddr);
             pmm_free_pageframe(pt_paddr);

@@ -60,7 +60,7 @@ extern Task* current_task;
 extern int num_tasks;
 
 void setup_tasks();
-s32 create_user_task(const char* path);
+s32 create_user_task(const char* path, const char* argv[]);
 s32 create_kernel_task(void* func);
 void kill_task(u32 id);
 void task_schedule();
