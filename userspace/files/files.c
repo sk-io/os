@@ -23,6 +23,14 @@ static void go_up();
 
 static GraphicsContext ctx;
 
+enum {
+    EXT_OTHER,
+    EXT_EXE,
+    EXT_TXT,
+};
+
+static int get_file_extension(const char* name);
+
 int main(int argc, char* argv[]) {
     int window = os_create_window(width, height, 0);
     os_set_window_title(window, "File Browser");
@@ -105,8 +113,18 @@ static void handle_left_click(int x, int y) {
 
         read_directory();
     } else {
-        // execute binary
-        os_exec(entries[selected_entry].name, NULL);
+        int ext = get_file_extension(entries[selected_entry].name);
+
+        if (ext == EXT_EXE) {
+            // execute binary
+            os_exec(entries[selected_entry].name, NULL);
+        } else if (ext == EXT_TXT) {
+            const char* argv[] = {
+                entries[selected_entry].name,
+                NULL
+            };
+            os_exec("edit.exe", argv);
+        }
     }
 }
 
@@ -137,4 +155,18 @@ static void go_up() {
         last[1] = '\0';
     else
         last[0] = '\0';
+}
+
+static int get_file_extension(const char* name) {
+    const char* dot = strrchr(name, '.');
+
+    if (dot == NULL || dot == name)
+        return EXT_OTHER;
+    
+    if (strcmp(dot, ".exe") == 0)
+        return EXT_EXE;
+    if (strcmp(dot, ".txt") == 0)
+        return EXT_TXT;
+    
+    return EXT_OTHER;
 }

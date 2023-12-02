@@ -12,7 +12,21 @@ static void handle_key_event(TrapFrame* frame);
 static u8 translate_to_ascii(u8 scancode, bool shift, bool alt);
 
 static bool holding_shift = false;
+static bool holding_ctrl = false;
+static bool holding_alt = false;
 static bool extended_byte = false;
+
+#define OS_SHIFT_HELD (1 << 0)
+#define OS_CTRL_HELD  (1 << 1)
+#define OS_ALT_HELD   (1 << 2)
+
+typedef struct {
+    uint32_t type;
+    uint32_t scancode;
+    uint16_t flags;
+    uint8_t ascii;
+    uint8_t state;
+} __attribute__((__packed__)) OSKeyboardEvent;
 
 void init_keyboard() {
     register_isr(IRQ_OFFSET + 1, handle_key_event);
@@ -40,20 +54,31 @@ void handle_key_event(TrapFrame* frame) {
     bool pressed = scancode >> 7 == 0;
     scancode &= 127;
 
-    if (scancode == 42) { // lshift
+    if (scancode == 0x2a) // lshift
         holding_shift = pressed;
-        return;
-    }
+
+    if (scancode == 0x1d) // lctrl
+        holding_ctrl = pressed;
+
+    if (scancode == 0x38) // alt
+        holding_alt = pressed;
     
     char ascii = extended_byte ? 0 : translate_to_ascii(scancode, holding_shift, false);
 
     u32 ps2_scancode = scancode | (extended_byte ? 0xE000 : 0);
-    Event event;
+    OSKeyboardEvent event;
     event.type = EVENT_KEYBOARD;
-    event.data0 = ps2_scancode;
-    event.data1 = ascii;
-    event.data2 = pressed;
-    handle_event(&event);
+    event.scancode = ps2_scancode;
+    event.ascii = ascii;
+    event.flags = 0;
+    if (holding_shift)
+        event.flags |= OS_SHIFT_HELD;
+    if (holding_ctrl)
+        event.flags |= OS_CTRL_HELD;
+    if (holding_alt)
+        event.flags |= OS_ALT_HELD;
+    event.state = pressed;
+    handle_event((const Event*) &event);
 
     // kernel_log("key scancode: %x, pressed=%u EB=%u", scancode, pressed, extended_byte);
     // kernel_log("ps2 scancode: %x", ps2_scancode);

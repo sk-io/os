@@ -80,28 +80,33 @@ typedef struct {
     uint32_t data0;
     uint32_t data1;
     uint32_t data2;
-} OSEvent;
+} __attribute__((__packed__)) OSEvent;
+
+#define OS_SHIFT_HELD (1 << 0)
+#define OS_CTRL_HELD  (1 << 1)
+#define OS_ALT_HELD   (1 << 2)
 
 typedef struct {
     uint32_t type;
     uint32_t scancode;
-    uint32_t ascii;
-    uint32_t state;
-} OSKeyboardEvent;
+    uint16_t flags;
+    uint8_t ascii;
+    uint8_t state;
+} __attribute__((__packed__)) OSKeyboardEvent;
 
 typedef struct {
     uint32_t type;
     uint32_t x;
     uint32_t y;
     uint32_t buttons;
-} OSMouseEvent;
+} __attribute__((__packed__)) OSMouseEvent;
 
 typedef struct {
     uint32_t type;
     uint32_t timer_id;
     uint32_t time_of_fire;
     uint32_t data2;
-} OSTimerEvent;
+} __attribute__((__packed__)) OSTimerEvent;
 
 OS_EXPORT int32_t os_poll_event(OSEvent* event);
 OS_EXPORT int32_t os_wait_for_events();

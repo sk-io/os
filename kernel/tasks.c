@@ -42,6 +42,8 @@ void setup_tasks() {
     // task 0 represents the execution we're in right now
 }
 
+static char argv_buffer[0x1000];
+
 s32 create_user_task(const char* path, const char* argv[]) {
     // todo: handle all the errors
     push_cli();
@@ -98,7 +100,7 @@ s32 create_user_task(const char* path, const char* argv[]) {
     // before entering the new page dir, we need to copy argv
     // since it can still point to the old tasks memory space
 
-    char argv_buffer[0x1000];
+    memset(argv_buffer, 0, 0x1000);
     int argv_buffer_size = setup_task_init_data(path, argv, argv_buffer);
 
     // set up memory space
@@ -148,7 +150,7 @@ s32 create_user_task(const char* path, const char* argv[]) {
 
     // map and copy argv
     mem_map_page(TASK_INIT_DATA, pmm_alloc_pageframe(), PAGE_FLAG_OWNER | PAGE_FLAG_USER);
-    memcpy(TASK_INIT_DATA, argv_buffer, argv_buffer_size);
+    memcpy(TASK_INIT_DATA, argv_buffer, 0x1000);
     
     kfree(elf.raw);
     elf.raw = NULL;

@@ -54,8 +54,10 @@ void handle_event(const Event* event) {
         if (w != NULL) {
             send_event_to_task(w->owner_task_id, event);
         } else if (event->type == EVENT_KEYBOARD) {
-            if (event->data2 && event->data1 != 0)
-                console_key_typed(event->data1);
+            if (event->data2 && event->data1 != 0) {
+                // FIXME: asdfbshjdfbshdfb
+                // console_key_typed(event->data2);
+            }
         }
     }
     // todo: send events to tasks listening in the background

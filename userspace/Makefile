@@ -25,6 +25,8 @@ all:
 	cp tasks/*.exe bin/
 	$(MAKE) -C doomgeneric
 	cp doomgeneric/*.exe bin/
+	$(MAKE) -C edit
+	cp edit/*.exe bin/
 	$(MAKE) -C test
 	cp test/*.exe bin/
 
@@ -37,5 +39,6 @@ clean:
 	$(MAKE) -C breakout clean
 	$(MAKE) -C timer clean
 	$(MAKE) -C doomgeneric clean
+	$(MAKE) -C edit clean
 	$(MAKE) -C test clean
 	rm -f bin/*.exe bin/*.so
