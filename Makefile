@@ -1,7 +1,7 @@
 CC = clang
 LD = clang
-CFLAGS = -g -nostdlib -ffreestanding -m32 -fno-builtin -Wall -Wextra -Isgfx
-LDFLAGS = -g -nostdlib -ffreestanding -m32 -fno-builtin -no-pie -Tkernel.ld -Lsgfx -lsgfx -lgcc
+CFLAGS = -g -nostdlib -ffreestanding -m32 -fno-builtin -Wall -Wextra -Isgfx -O2
+LDFLAGS = -g -nostdlib -ffreestanding -m32 -fno-builtin -no-pie -Tkernel.ld -Lsgfx -lsgfx -lgcc -O2
 ASFLAGS = -felf32
 
 SOURCES_C = $(patsubst %.c, %.o, $(wildcard kernel/*.c) $(wildcard kernel/**/*.c))

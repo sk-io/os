@@ -62,7 +62,7 @@ void handle_event(const Event* event) {
     }
     // todo: send events to tasks listening in the background
 
-    gui.needs_redraw = true;
+    gui.needs_update = true;
 
     pop_cli();
 }

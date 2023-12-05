@@ -42,33 +42,38 @@ void init_windows() {
 
 s32 create_window(s32 width, s32 height, u32 flags) {
     s32 index = find_window_slot();
-    assert(windows[index].state == 0);
+    Window* window = &windows[index];
+    assert(window->state == 0);
 
     memset(&windows[index], 0, sizeof(Window));
 
-    windows[index].state = 1;
-    windows[index].x = 30 + index * 40;
-    windows[index].y = 50 + index * 35;
-    windows[index].width = width;
-    windows[index].height = height;
-    windows[index].flags = flags;
-    windows[index].actual_width = width + 2;
-    windows[index].actual_height = height + WINDOW_CONTENT_YOFFSET + 1;
-    u32 fb_bytes = width * height * 4;
-    windows[index].framebuffer_size_bytes = fb_bytes;
-    windows[index].fb_shmem_id = sharedmem_create(fb_bytes * (flags & WINDOW_FLAG_DOUBLE_BUFFERED ? 2 : 1), 0);
-    windows[index].framebuffer = sharedmem_map(windows[index].fb_shmem_id, 0);
-    windows[index].shown_buffer = 0;
-    windows[index].owner_task_id = current_task->id;
+    window->state = 1;
+    window->x = 30 + index * 40;
+    window->y = 50 + index * 35;
+    window->width = width;
+    window->height = height;
+    window->flags = flags;
+    window->actual_width = width + 2;
+    window->actual_height = height + WINDOW_CONTENT_YOFFSET + 1;
+    window->owner_task_id = current_task->id;
 
-    strncpy(windows[index].title, "Cool Titles!", WINDOW_TITLE_MAX_LENGTH);
+    // set up framebuffer
+    u32 fb_bytes = width * height * 4;
+    window->framebuffer_size_bytes = fb_bytes;
+    u32 fb_whole_size = fb_bytes * (flags & WINDOW_FLAG_DOUBLE_BUFFERED ? 2 : 1);
+    window->fb_shmem_id = sharedmem_create(fb_whole_size, 0);
+    window->framebuffer = sharedmem_map(window->fb_shmem_id, 0);
+    memset(window->framebuffer, 0, fb_whole_size); // clear framebuffer(s)
+    window->shown_buffer = 0;
+
+    strncpy(window->title, "Cool Titles!", WINDOW_TITLE_MAX_LENGTH);
 
     window_z_order[z_order_length++] = index;
 
     move_window_to_front(index);
     focused_window = index;
 
-    gui.needs_redraw = true;
+    gui.needs_update = true;
 
     return index;
 }
@@ -93,7 +98,7 @@ void destroy_window(s32 window_id) {
         z_order_remove_at(index);
     }
 
-    gui.needs_redraw = true;
+    gui.needs_update = true;
 }
 
 static s32 find_window_slot() {
@@ -111,7 +116,7 @@ static s32 get_framebuffer_shmem_id(s32 window_id) {
 
 static s32 swap_buffers(s32 window_id) {
     VERIFY_INTERRUPTS_DISABLED;
-    gui.needs_redraw = true;
+    gui.needs_update = true;
 
     Window* w = &windows[window_id];
     if (w->flags & WINDOW_FLAG_DOUBLE_BUFFERED) {

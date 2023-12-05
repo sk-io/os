@@ -34,7 +34,7 @@ void init_gui(s32 width, s32 height) {
     gui.cursor_y = height / 2;
     gui.prev_cursor_x = gui.cursor_x;
     gui.prev_cursor_y = gui.cursor_y;
-    gui.needs_redraw = true;
+    gui.needs_update = true;
     
     init_windows();
     
@@ -53,7 +53,7 @@ void gui_thread_entry() {
         push_cli();
         gui_handle_events();
         gui_draw_frame();
-        gui.needs_redraw = false;
+        gui.needs_update = false;
         gui.last_redraw_time = get_system_time_millis();
         pop_cli();
     }
@@ -125,7 +125,7 @@ static void handle_left_click() {
         }
     }
 
-    gui.needs_redraw = true;
+    gui.needs_update = true;
 }
 
 static void gui_handle_events() {
@@ -163,7 +163,7 @@ static void gui_handle_events() {
     s32 dy = gui.cursor_y - gui.prev_cursor_y;
 
     if (dx != 0 || dy != 0) {
-        gui.needs_redraw = true;
+        gui.needs_update = true;
 
         if (currently_dragging_window != -1) {
             windows[currently_dragging_window].x += dx;
@@ -194,5 +194,5 @@ void draw_debug_console(u32 color) {
 }
 
 bool should_gui_redraw() {
-    return gui.needs_redraw && (get_system_time_millis() - gui.last_redraw_time) >= GUI_DRAW_INTERVAL;
+    return gui.needs_update && (get_system_time_millis() - gui.last_redraw_time) >= GUI_DRAW_INTERVAL;
 }

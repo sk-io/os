@@ -11,7 +11,7 @@
 #include "physalloc.h"
 #include "memory.h"
 
-#define NUM_SYSCALLS 256
+#define NUM_SYSCALLS 1024
 void* syscall_handlers[NUM_SYSCALLS];
 
 static void handle_syscall_interrupt(TrapFrame* frame);
@@ -284,6 +284,7 @@ void init_syscalls() {
 }
 
 void register_syscall(u32 vector, void* func) {
+    assert(vector < NUM_SYSCALLS);
     assert(syscall_handlers[vector] == 0);
     syscall_handlers[vector] = func;
 }
@@ -309,7 +310,8 @@ static void handle_syscall_interrupt(TrapFrame* frame) {
         "pop %%ebx \n"
         "pop %%ebx \n"
         "pop %%ebx \n"
-        : "=a" (ret) : "r" (frame->edi), "r" (frame->esi), "r" (frame->edx), "r" (frame->ecx), "r" (frame->ebx), "r" (handler)
+        : "=a" (ret)
+        : "r" (frame->edi), "r" (frame->esi), "r" (frame->edx), "r" (frame->ecx), "r" (frame->ebx), "r" (handler)
     );
     frame->eax = ret;
 }

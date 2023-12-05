@@ -2,291 +2,159 @@
 
 #include "../../../kernel/syscall_list.h"
 
-int syscall_get_task_id() {
-    int ret;
-    asm volatile(
-        "int $0x80"
-        : "=a" (ret) : "a"(SYSCALL_GET_TASK_ID)
-    );
+static int32_t _syscall_0(uint32_t syscall) {
+    int32_t ret;
+    asm volatile("int $0x80" : "=a" (ret) : "a"(syscall));
     return ret;
+}
+
+static int32_t _syscall_1(uint32_t syscall, int32_t arg0) {
+    int32_t ret;
+    asm volatile("int $0x80" : "=a" (ret) : "a"(syscall), "b"(arg0));
+    return ret;
+}
+
+static int32_t _syscall_2(uint32_t syscall, int32_t arg0, int32_t arg1) {
+    int32_t ret;
+    asm volatile("int $0x80" : "=a" (ret) : "a"(syscall), "b"(arg0), "c"(arg1));
+    return ret;
+}
+
+static int32_t _syscall_3(uint32_t syscall, int32_t arg0, int32_t arg1, int32_t arg2) {
+    int32_t ret;
+    asm volatile("int $0x80" : "=a" (ret) : "a"(syscall), "b"(arg0), "c"(arg1), "d"(arg2));
+    return ret;
+}
+
+int syscall_get_task_id() {
+    return _syscall_0(SYSCALL_GET_TASK_ID);
 }
 
 void syscall_exit() {
-    asm volatile(
-        "int $0x80"
-        :: "a"(SYSCALL_EXIT)
-    );
+    _syscall_0(SYSCALL_EXIT);
 }
 
 void syscall_print(const char* str) {
-    asm volatile(
-        "int $0x80"
-        :: "a"(SYSCALL_PRINT), "b"(str)
-    );
+    _syscall_1(SYSCALL_PRINT, str);
 }
 
 void syscall_print_char(char c) {
-    asm volatile(
-        "int $0x80"
-        :: "a"(SYSCALL_PRINT_CHAR), "b"(c)
-    );
+    _syscall_1(SYSCALL_PRINT_CHAR, c);
 }
 
 void syscall_exec(const char* path, const char* argv[]) {
-    asm volatile(
-        "int $0x80"
-        :: "a"(SYSCALL_EXEC), "b"(path), "c"(argv)
-    );
+    _syscall_2(SYSCALL_EXEC, path, argv);
 }
 
 int syscall_get_event_buffer_shmem_id() {
-    int shmem_id;
-    asm volatile(
-        "int $0x80"
-        : "=a"(shmem_id) : "a"(SYSCALL_GET_EVENT_BUFFER_SHMEM_ID)
-    );
-    return shmem_id;
+    return _syscall_0(SYSCALL_GET_EVENT_BUFFER_SHMEM_ID);
 }
 
 void syscall_wait_for_events() {
-    asm volatile(
-        "int $0x80"
-        :: "a"(SYSCALL_WAIT_FOR_EVENT)
-    );
+    _syscall_0(SYSCALL_WAIT_FOR_EVENT);
 }
 
 void syscall_set_timer_interval(int timer_id, int interval_ms) {
-    asm volatile(
-        "int $0x80"
-        :: "a"(SYSCALL_SET_TIMER_INTERVAL), "b"(timer_id), "c"(interval_ms)
-    );
+    _syscall_2(SYSCALL_SET_TIMER_INTERVAL, timer_id, interval_ms);
 }
 
 int syscall_create_window(int width, int height, unsigned int flags) {
-    int ret;
-    asm volatile(
-        "int $0x80"
-        : "=a" (ret)
-        : "a"(SYSCALL_CREATE_WINDOW), "b"(width), "c"(height), "d"(flags)
-    );
-    return ret;
+    return _syscall_3(SYSCALL_CREATE_WINDOW, width, height, flags);
 }
 
 int syscall_destroy_window(int window_id) {
-    int ret;
-    asm volatile(
-        "int $0x80"
-        : "=a" (ret)
-        : "a"(SYSCALL_CREATE_WINDOW), "b"(window_id)
-    );
-    return ret;
+    return _syscall_1(SYSCALL_CREATE_WINDOW, window_id);
 }
 
 int syscall_get_window_fb_shmem_id(int window_id) {
-    int id;
-    asm volatile(
-        "int $0x80"
-        : "=a" (id)
-        : "a"(SYSCALL_GET_WINDOW_FB_SHMEM_ID), "b"(window_id)
-    );
-    return id;
+    return _syscall_1(SYSCALL_GET_WINDOW_FB_SHMEM_ID, window_id);
 }
 
 int syscall_swap_window_buffers(int window_id) {
-    int ret;
-    asm volatile(
-        "int $0x80"
-        : "=a"(ret)
-        : "a"(SYSCALL_WINDOW_SWAP_BUFFERS), "b"(window_id)
-    );
-    return ret;
+    return _syscall_1(SYSCALL_WINDOW_SWAP_BUFFERS, window_id);
 }
 
 int syscall_set_window_title(int window_id, const char* title) {
-    int ret;
-    asm volatile(
-        "int $0x80"
-        : "=a"(ret)
-        : "a"(SYSCALL_SET_WINDOW_TITLE), "b"(window_id), "c"(title)
-    );
-    return ret;
+    return _syscall_2(SYSCALL_SET_WINDOW_TITLE, window_id, title);
 }
 
 uint32_t syscall_get_heap_start() {
-    int ret;
-    asm volatile(
-        "int $0x80"
-        : "=a" (ret) : "a"(SYSCALL_GET_HEAP_START)
-    );
-    return ret;
+    return _syscall_0(SYSCALL_GET_HEAP_START);
 }
 
 uint32_t syscall_get_heap_end() {
-    int ret;
-    asm volatile(
-        "int $0x80"
-        : "=a" (ret) : "a"(SYSCALL_GET_HEAP_END)
-    );
-    return ret;
+    return _syscall_0(SYSCALL_GET_HEAP_END);
 }
 
 void syscall_set_heap_end(uint32_t heap_end) {
-    asm volatile(
-        "int $0x80"
-        :: "a"(SYSCALL_SET_HEAP_END), "b"(heap_end)
-    );
+    _syscall_1(SYSCALL_SET_HEAP_END, heap_end);
 }
 
 int syscall_open_file(const char* path) {
-    int ret;
-    asm volatile(
-        "int $0x80"
-        : "=a" (ret) : "a"(SYSCALL_OPEN_FILE), "b"(path)
-    );
-    return ret;
+    return _syscall_1(SYSCALL_OPEN_FILE, path);
 }
 
 int syscall_close_file(int fd) {
-    asm volatile(
-        "int $0x80"
-        :: "a"(SYSCALL_CLOSE_FILE), "b"(fd)
-    );
-    return 0;
+    _syscall_1(SYSCALL_CLOSE_FILE, fd);
+    return 0; // FIXME: ?
 }
 
 int syscall_read_file(int fd, char* buffer, int num_bytes) {
-    int ret;
-    asm volatile(
-        "int $0x80"
-        : "=a" (ret) : "a"(SYSCALL_READ_FILE), "b"(fd), "c"(buffer), "d"(num_bytes)
-    );
-    return ret;
+    return _syscall_3(SYSCALL_READ_FILE, fd, buffer, num_bytes);
 }
 
 int syscall_write_file(int fd, char* buffer, int num_bytes) {
-    int ret;
-    asm volatile(
-        "int $0x80"
-        : "=a" (ret) : "a"(SYSCALL_WRITE_FILE), "b"(fd), "c"(buffer), "d"(num_bytes)
-    );
-    return ret;
+    return _syscall_3(SYSCALL_WRITE_FILE, fd, buffer, num_bytes);
 }
 
 int syscall_get_file_size(int fd) {
-    int ret;
-    asm volatile(
-        "int $0x80"
-        : "=a"(ret) : "a"(SYSCALL_GET_FILE_SIZE), "b"(fd)
-    );
-    return ret;
+    return _syscall_1(SYSCALL_GET_FILE_SIZE, fd);
 }
 
 int syscall_get_file_offset(int fd) {
-    int ret;
-    asm volatile(
-        "int $0x80"
-        : "=a"(ret) : "a"(SYSCALL_GET_FILE_OFFSET), "b"(fd)
-    );
-    return ret;
+    return _syscall_1(SYSCALL_GET_FILE_SIZE, fd);
 }
 
 int syscall_set_file_offset(int fd, uint32_t offset) {
-    int ret;
-    asm volatile(
-        "int $0x80"
-        : "=a"(ret) : "a"(SYSCALL_SET_FILE_OFFSET), "b"(fd), "c"(offset)
-    );
-    return ret;
+    return _syscall_2(SYSCALL_SET_FILE_OFFSET, fd, offset);
 }
 
 int syscall_open_dir(const char* path) {
-    int ret;
-    asm volatile(
-        "int $0x80"
-        : "=a"(ret) : "a"(SYSCALL_OPEN_DIR), "b"(path)
-    );
-    return ret;
+    return _syscall_1(SYSCALL_OPEN_DIR, path);
 }
 
 int syscall_close_dir() {
-    int ret;
-    asm volatile(
-        "int $0x80"
-        : "=a"(ret) : "a"(SYSCALL_CLOSE_DIR)
-    );
-    return ret;
+    return _syscall_0(SYSCALL_CLOSE_DIR);
 }
 
 int syscall_next_file_in_dir(OSFileInfo* info) {
-    int ret;
-    asm volatile(
-        "int $0x80"
-        : "=a"(ret) : "a"(SYSCALL_NEXT_FILE_IN_DIR), "b"(info)
-    );
-    return ret;
+    return _syscall_1(SYSCALL_NEXT_FILE_IN_DIR, info);
 }
 
 int syscall_create_shared_mem(int size) {
-    int ret;
-    asm volatile(
-        "int $0x80"
-        : "=a"(ret) : "a"(SYSCALL_SHMEM_CREATE), "b"(size)
-    );
-    return ret;
+    return _syscall_1(SYSCALL_SHMEM_CREATE, size);
 }
 
 int syscall_destroy_shared_mem(int id) {
-    asm volatile(
-        "int $0x80"
-        :: "a"(SYSCALL_SHMEM_DESTROY), "b"(id)
-    );
-    return 0;
+    return _syscall_1(SYSCALL_SHMEM_DESTROY, id);
 }
 
 int syscall_shared_mem_exists(int id) {
-    int ret;
-    asm volatile(
-        "int $0x80"
-        : "=a"(ret)
-        : "a"(SYSCALL_SHMEM_EXISTS), "b"(id)
-    );
-    return ret;
+    return _syscall_1(SYSCALL_SHMEM_EXISTS, id);
 }
 
 void syscall_unmap_shared_mem(int id) {
-    asm volatile(
-        "int $0x80"
-        :: "a"(SYSCALL_SHMEM_UNMAP), "b"(id)
-    );
-    return;
+    _syscall_1(SYSCALL_SHMEM_UNMAP, id);
 }
 
 void* syscall_map_shared_mem(int id) {
-    void* addr;
-    asm volatile(
-        "int $0x80"
-        : "=a"(addr)
-        : "a"(SYSCALL_SHMEM_MAP), "b"(id)
-    );
-    return addr;
+    return _syscall_1(SYSCALL_SHMEM_MAP, id);
 }
 
 os_errorcode syscall_get_task_info(OSTaskInfo* list, uint32_t list_max_size, uint32_t* num_tasks) {
-    os_errorcode error;
-    asm volatile(
-        "int $0x80"
-        : "=a"(error)
-        : "a"(SYSCALL_GET_TASK_INFO), "b"(list), "c"(list_max_size), "d"(num_tasks)
-    );
-    return error;
+    return _syscall_3(SYSCALL_GET_TASK_INFO, list, list_max_size, num_tasks);
 }
 
 uint32_t syscall_get_system_time() {
-    uint32_t ret;
-    asm volatile(
-        "int $0x80"
-        : "=a"(ret)
-        : "a"(SYSCALL_GET_SYSTEM_TIME)
-    );
-    return ret;
+    return _syscall_0(SYSCALL_GET_SYSTEM_TIME);
 }

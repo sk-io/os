@@ -56,7 +56,7 @@ void console_key_typed(char c) {
     update_cursor_pos();
 
     if (graphics_enabled)
-        gui.needs_redraw = true;
+        gui.needs_update = true;
 }
 
 void console_set_prompt_enabled(bool enabled) {

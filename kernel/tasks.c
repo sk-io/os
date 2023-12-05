@@ -45,7 +45,11 @@ void setup_tasks() {
 static char argv_buffer[0x1000];
 
 s32 create_user_task(const char* path, const char* argv[]) {
-    // todo: handle all the errors
+    s32 task_id = -1;
+    ELFObject elf = {0};
+    u32* prev_pd = NULL;
+    u32* pagedir = NULL;
+
     push_cli();
 
     kernel_log("starting task: %s", path);
@@ -55,45 +59,23 @@ s32 create_user_task(const char* path, const char* argv[]) {
     res = f_open(&file, path, FA_READ);
     if (res != FR_OK) {
         kernel_log("create_user_task: failed to open executable file %s. error=%u", path, res);
-        pop_cli();
-        return -1;
+        goto error;
     }
 
-    ELFObject elf = {0};
-    memset(&elf, 0, sizeof(ELFObject));
-    
     elf.size = f_size(&file);
     if (elf.size < 52) {
         kernel_log("create_user_task: elf file is too small. size=%u", elf.size);
-        f_close(&file);
-        pop_cli();
-        return -1;
+        goto error;
     }
 
     elf.raw = kmalloc(elf.size);
 
-    // hack: pad malloc until page aligned.
-    // dont need it for exes since we copy everything anyway
-    // elf.mem = kmalloc(elf.size + 0x1000);
-
-    // elf.raw = elf.mem;
-    // if ((u32) elf.raw & 0xFFF) {
-    //     u32 addr = (u32) elf.raw;
-    //     addr &= ~0xFFF;
-    //     addr += 0x1000;
-    //     elf.raw = (u8*) addr;
-    // }
-
     UINT br;
     res = f_read(&file, elf.raw, elf.size, &br);
     if (res != FR_OK) {
-        f_close(&file);
-        kfree(elf.raw);
         kernel_log("create_user_task: failed to read from executable file %s. error=%u", path, res);
-        pop_cli();
-        return -1;
+        goto error;
     }
-    f_close(&file);
 
     int index = find_available_task_slot();
 
@@ -104,44 +86,32 @@ s32 create_user_task(const char* path, const char* argv[]) {
     int argv_buffer_size = setup_task_init_data(path, argv, argv_buffer);
 
     // set up memory space
-    u32* prev_pd = mem_get_current_page_directory();
-    u32* pagedir = mem_alloc_page_dir();
+    prev_pd = mem_get_current_page_directory();
+    pagedir = mem_alloc_page_dir();
     mem_change_page_directory(pagedir);
 
     // load elf, requires some memory to be set up
-
     if (!parse_elf(&elf)) {
-        mem_change_page_directory(prev_pd);
-        mem_free_page_dir(pagedir);
         kernel_log("create_user_task: failed to parse ELF binary");
-        kfree(elf.raw);
-        pop_cli();
-        return -1;
+        goto error;
     }
     
     if (!load_elf_executable(&elf)) {
-        mem_change_page_directory(prev_pd);
-        mem_free_page_dir(pagedir);
         kernel_log("create_user_task: failed to load ELF into memory");
-        kfree(elf.raw);
-        pop_cli();
-        return -1;
+        goto error;
     }
 
     if (!elf.entry) {
-        mem_change_page_directory(prev_pd);
-        mem_free_page_dir(pagedir);
         kernel_log("create_user_task: ELF has no entry");
-        kfree(elf.raw);
-        pop_cli();
-        return -1;
+        goto error;
     }
     
     // init the task
     Task* new_task = create_task(index, elf.entry, false, pagedir);
+    task_id = new_task->id;
     init_events_for_task(new_task);
     init_user_heap(new_task);
-    init_shared_libs_for_task(new_task->id, &elf);
+    init_shared_libs_for_task(task_id, &elf);
 
     // allocate and map user stack
     for (int i = 0; i < USER_STACK_PAGES; i++) {
@@ -152,25 +122,31 @@ s32 create_user_task(const char* path, const char* argv[]) {
     mem_map_page(TASK_INIT_DATA, pmm_alloc_pageframe(), PAGE_FLAG_OWNER | PAGE_FLAG_USER);
     memcpy(TASK_INIT_DATA, argv_buffer, 0x1000);
     
-    kfree(elf.raw);
-    elf.raw = NULL;
-
     for (int i = 0; i < MAX_OPEN_FILES; i++) {
         f_close(&new_task->open_files[i]);
     }
-    mem_change_page_directory(prev_pd);
 
-    num_tasks++;
+    goto cleanup;
+error:
+    if (pagedir != NULL)
+        mem_free_page_dir(pagedir);
+    if (new_task != NULL)
+        kill_task(new_task->id);
+cleanup:
+    if (prev_pd != NULL)
+        mem_change_page_directory(prev_pd);
+    f_close(&file);
+    if (elf.raw != NULL)
+        kfree(elf.raw);
 
     pop_cli();
-    return tasks[index].id;
+    return task_id;
 }
 
 s32 create_kernel_task(void* func) {
     int index = find_available_task_slot();
 
     Task* task = create_task(index, (u32) func, true, initial_page_dir);
-    num_tasks++;
 
     return task->id;
 }
@@ -208,7 +184,7 @@ void kill_task(u32 id) {
 
     mem_free_page_dir(task->pagedir);
     kfree(task->kesp0 - KERNEL_STACK_SIZE);
-    memset(&tasks[index], 0, sizeof(Task));
+    memset(task, 0, sizeof(Task));
 
     num_tasks--;
 
@@ -255,13 +231,15 @@ static Task* create_task(u32 index, u32 eip, bool kernel_task, u32* pagedir) {
     context->ebp = 0;
     context->eip = (u32) isr_exit;
 
-    tasks[index].kesp0 = kernel_stack;
-    tasks[index].kesp = (u32) kesp;
-    tasks[index].id = index + 1000;
-    tasks[index].state = TASK_STATE_READY;
-    tasks[index].pagedir = pagedir;
-    tasks[index].is_kernel_task = kernel_task;
-    tasks[index].shmem.vaddr_start = USER_SHARED_MEMORY;
+    task->kesp0 = kernel_stack;
+    task->kesp = (u32) kesp;
+    task->id = index + 1000;
+    task->state = TASK_STATE_READY;
+    task->pagedir = pagedir;
+    task->is_kernel_task = kernel_task;
+    task->shmem.vaddr_start = USER_SHARED_MEMORY;
+
+    num_tasks++;
 
     return task;
 }

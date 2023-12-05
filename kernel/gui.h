@@ -6,7 +6,7 @@ typedef struct {
     s32 width, height;
     s32 cursor_x, cursor_y;
     s32 prev_cursor_x, prev_cursor_y;
-    bool needs_redraw; // also processes input, hmm...
+    bool needs_update;
     bool left_click;
     u16 fake_console_buffer[50 * 80];
     u64 last_redraw_time;
