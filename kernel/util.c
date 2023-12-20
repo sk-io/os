@@ -57,6 +57,13 @@ char* strncpy(char* dst, const char* src, u32 n) {
     return (dst);
 }
 
+u32 strlen(const char* str) {
+	const char *ss = str;
+	while (*ss)
+		ss++;
+	return ss - str;
+}
+
 void crash_and_burn() {
     sgfx_fill(&graphics, 0x0000FF);
     draw_debug_console(0xFFFFFF);
@@ -76,4 +83,31 @@ void kernel_assert(int condition, const char* file, int line, const char *error_
         g /= g;
         crash_and_burn();
     }
+}
+
+char *strchr(const char *s, int c)
+{
+	while (*s != (char)c) {
+		if (!*s)
+			return NULL;
+		s++;
+	}
+
+	return (char *)s;
+}
+
+char *strncat(char *dst, const char *src, size_t n)
+{
+	char *q = strchr(dst, '\0');
+	const char *p = src;
+	char ch;
+
+	while (n--) {
+		*q++ = ch = *p++;
+		if (!ch)
+			return dst;
+	}
+	*q = '\0';
+
+	return dst;
 }

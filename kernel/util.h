@@ -7,6 +7,9 @@ void* memcpy(void* dest, const void* src, u32 len);
 u32 strcmp(const char* s1, const char* s2);
 u32 strncmp(const char* s1, const char* s2, u32 n);
 char* strncpy(char* dst, const char* src, u32 n);
+u32 strlen(const char* str);
+char *strchr(const char *s, int c);
+char *strncat(char *dst, const char *src, size_t n);
 
 static inline void outb(u16 port, u8 value) {
     asm volatile("outb %1, %0" :: "dN" (port), "a" (value));

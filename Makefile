@@ -32,7 +32,7 @@ $(KERNEL): $(OBJ) libsgfx
 $(RAMDISK): user
 	dd if=/dev/zero of=$(RAMDISK) bs=8M count=1
 	mformat -i $(RAMDISK) ::
-	mcopy -i $(RAMDISK) userspace/bin/* ::
+	mcopy -i $(RAMDISK) -s userspace/bin/* ::
 
 user: libsgfx
 	make -C userspace
