@@ -16,18 +16,6 @@ static bool holding_ctrl = false;
 static bool holding_alt = false;
 static bool extended_byte = false;
 
-#define OS_SHIFT_HELD (1 << 0)
-#define OS_CTRL_HELD  (1 << 1)
-#define OS_ALT_HELD   (1 << 2)
-
-typedef struct {
-    uint32_t type;
-    uint32_t scancode;
-    uint16_t flags;
-    uint8_t ascii;
-    uint8_t state;
-} __attribute__((__packed__)) OSKeyboardEvent;
-
 void init_keyboard() {
     register_isr(IRQ_OFFSET + 1, handle_key_event);
 }

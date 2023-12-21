@@ -15,7 +15,7 @@ void init_graphics(u32* framebuffer_paddr, u32 width, u32 height, u32 bpp, u32 p
     frontbuffer = (u32*) KERNEL_GFX;
 
     u32 size_bytes = width * height * bpp;
-    u32 needed_page_count = size_bytes / 0x1000 + 1;
+    u32 needed_page_count = CEIL_DIV(size_bytes, 0x1000);
 
     for (u32 i = 0; i < needed_page_count; i++) {
         u32 offset = i * 0x1000;

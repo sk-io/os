@@ -48,6 +48,7 @@ void console_key_typed(char c) {
 
     vga_write_char(c);
     if (c == '\n') {
+        console.prompt_buffer[console.prompt_pos - 1] = '\0';
         shell_execute(console.prompt_buffer);
         clear_prompt();
         console_print("> ");

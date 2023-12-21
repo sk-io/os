@@ -54,9 +54,10 @@ void handle_event(const Event* event) {
         if (w != NULL) {
             send_event_to_task(w->owner_task_id, event);
         } else if (event->type == EVENT_KEYBOARD) {
-            if (event->data2 && event->data1 != 0) {
-                // FIXME: asdfbshjdfbshdfb
-                // console_key_typed(event->data2);
+            OSKeyboardEvent* key_event = (OSKeyboardEvent*) event;
+
+            if (key_event->ascii && key_event->state) {
+                console_key_typed(key_event->ascii);
             }
         }
     }
@@ -91,13 +92,6 @@ static void task_wait_for_event() {
     task_schedule();
     assert(current_task->state != TASK_STATE_WAIT_FOR_EVENT);
 }
-
-typedef struct {
-    unsigned int type;
-    unsigned int timer_id;
-    unsigned int time_of_fire;
-    unsigned int data2;
-} OSTimerEvent;
 
 void check_event_timers() {
     u64 time = get_system_time_millis();

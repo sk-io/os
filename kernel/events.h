@@ -14,11 +14,39 @@ enum {
 };
 
 typedef struct {
-    u32 type;
-    u32 data0;
-    u32 data1;
-    u32 data2;
-} Event;
+    uint32_t type;
+    uint32_t data0;
+    uint32_t data1;
+    uint32_t data2;
+} __attribute__((__packed__)) Event;
+
+// FIXME: for now, keep in sync with os.h
+
+#define OS_SHIFT_HELD (1 << 0)
+#define OS_CTRL_HELD  (1 << 1)
+#define OS_ALT_HELD   (1 << 2)
+
+typedef struct {
+    uint32_t type;
+    uint32_t scancode;
+    uint16_t flags;
+    uint8_t ascii;
+    uint8_t state;
+} __attribute__((__packed__)) OSKeyboardEvent;
+
+typedef struct {
+    uint32_t type;
+    uint32_t x;
+    uint32_t y;
+    uint32_t buttons;
+} __attribute__((__packed__)) OSMouseEvent;
+
+typedef struct {
+    uint32_t type;
+    uint32_t timer_id;
+    uint32_t time_of_fire;
+    uint32_t data2;
+} __attribute__((__packed__)) OSTimerEvent;
 
 #define EVENT_BUFFER_SIZE 256
 
