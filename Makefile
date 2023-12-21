@@ -30,8 +30,8 @@ $(KERNEL): $(OBJ) libsgfx
 	nasm $(ASFLAGS) $< -o $@
 
 $(RAMDISK): user
-	dd if=/dev/zero of=$(RAMDISK) bs=8M count=1
-	mformat -i $(RAMDISK) ::
+	dd if=/dev/zero of=$(RAMDISK) bs=40M count=1
+	mformat -i $(RAMDISK) -F ::
 	mcopy -i $(RAMDISK) -s userspace/bin/* ::
 
 user: libsgfx

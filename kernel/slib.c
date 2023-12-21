@@ -2,10 +2,11 @@
 
 #include "util.h"
 #include "printf.h"
-#include "fatfs/fatfs_ff.h"
+// #include "fatfs/fatfs_ff.h"
 #include "elf.h"
 #include "memory.h"
 #include "tasks.h"
+#include "disk.h"
 
 SharedLibrary loaded_shared_libs[MAX_SHARED_LIBRARIES];
 
@@ -54,19 +55,16 @@ static SharedLibrary* find_or_load_shared_lib(const char* name) {
     lib->num_users = 0;
     strncpy(lib->path, path, MAX_PATH_LENGTH);
     
-    FIL file;
-    FRESULT res;
-    res = f_open(&file, path, FA_READ);
-    if (res != FR_OK) {
-        kernel_log("find_and_load_shared_lib: failed to open executable file %s. error=%u", path, res);
+    FAT32_File file;
+    if (!fat32_find_file(&ramdisk.volume, path, &file)) {
+        kernel_log("find_and_load_shared_lib: failed to open library %s", path);
         return NULL;
     }
 
     ELFObject elf;
-    elf.size = f_size(&file);
+    elf.size = file.size;
     if (elf.size < 52) {
         kernel_log("find_and_load_shared_lib: elf file is too small. size=%u", elf.size);
-        f_close(&file);
         return NULL;
     }
 
@@ -82,15 +80,13 @@ static SharedLibrary* find_or_load_shared_lib(const char* name) {
         elf.raw = (u8*) addr;
     }
 
-    UINT br;
-    res = f_read(&file, elf.raw, elf.size, &br);
-    f_close(&file);
+    fat32_read_file(&ramdisk.volume, &file, elf.raw, file.size, 0);
 
-    if (res != FR_OK) {
-        kfree(elf.mem);
-        kernel_log("find_and_load_shared_lib: failed to read from executable file %s. error=%u", path, res);
-        return NULL;
-    }
+    // if (res != FR_OK) {
+    //     kfree(elf.mem);
+    //     kernel_log("find_and_load_shared_lib: failed to read from executable file %s. error=%u", path, res);
+    //     return NULL;
+    // }
 
     if (!parse_elf(&elf)) {
         kfree(elf.mem);
@@ -100,6 +96,8 @@ static SharedLibrary* find_or_load_shared_lib(const char* name) {
 
     lib->elf = elf; // copy
     return lib;
+
+    // TODO: use goto cleanup
 }
 
 // FIXME: acts on current pdir

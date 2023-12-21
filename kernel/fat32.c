@@ -151,7 +151,7 @@ static u32 fat32_strncmp_nocase(const char* s1, const char* s2, u32 n) {
 }
 
 // not recursive
-bool fat32_find_file_in_dir(FAT32_Volume* volume, FAT32_File* dir_file, const char* name, u32 name_len, FAT32_File* out_file) {
+static bool fat32_find_file_in_dir(FAT32_Volume* volume, FAT32_File* dir_file, const char* name, u32 name_len, FAT32_File* out_file) {
 	// printf("find_file_in_dir %.*s\n", name_len, name);
 
 	u32 dir_content_size_sectors = count_fat_chain_length(volume, dir_file->cluster);

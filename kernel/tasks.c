@@ -13,6 +13,7 @@
 #include "windows.h"
 #include "gui.h"
 #include "kernel.h"
+#include "disk.h"
 
 #define KERNEL_STACK_SIZE (0x1000 - 16)
 
@@ -54,15 +55,13 @@ s32 create_user_task(const char* path, const char* argv[]) {
 
     kernel_log("starting task: %s", path);
 
-    FIL file;
-    FRESULT res;
-    res = f_open(&file, path, FA_READ);
-    if (res != FR_OK) {
-        kernel_log("create_user_task: failed to open executable file %s. error=%u", path, res);
+    FAT32_File file;
+    if (!fat32_find_file(&ramdisk.volume, path, &file)) {
+        kernel_log("create_user_task: failed to open executable file %s", path);
         goto error;
     }
 
-    elf.size = f_size(&file);
+    elf.size = file.size;
     if (elf.size < 52) {
         kernel_log("create_user_task: elf file is too small. size=%u", elf.size);
         goto error;
@@ -70,12 +69,15 @@ s32 create_user_task(const char* path, const char* argv[]) {
 
     elf.raw = kmalloc(elf.size);
 
-    UINT br;
-    res = f_read(&file, elf.raw, elf.size, &br);
-    if (res != FR_OK) {
-        kernel_log("create_user_task: failed to read from executable file %s. error=%u", path, res);
-        goto error;
-    }
+    // UINT br;
+    // res = f_read(&file, elf.raw, elf.size, &br);
+
+    fat32_read_file(&ramdisk.volume, &file, elf.raw, elf.size, 0);
+    // FIXME
+    // if (res != FR_OK) {
+    //     kernel_log("create_user_task: failed to read from executable file %s. error=%u", path, res);
+    //     goto error;
+    // }
 
     int index = find_available_task_slot();
 
@@ -122,9 +124,9 @@ s32 create_user_task(const char* path, const char* argv[]) {
     mem_map_page(TASK_INIT_DATA, pmm_alloc_pageframe(), PAGE_FLAG_OWNER | PAGE_FLAG_USER);
     memcpy(TASK_INIT_DATA, argv_buffer, 0x1000);
     
-    for (int i = 0; i < MAX_OPEN_FILES; i++) {
-        f_close(&new_task->open_files[i]);
-    }
+    // for (int i = 0; i < MAX_OPEN_FILES; i++) {
+    //     f_close(&new_task->open_files[i]);
+    // }
 
     goto cleanup;
 error:
@@ -135,7 +137,7 @@ error:
 cleanup:
     if (prev_pd != NULL)
         mem_change_page_directory(prev_pd);
-    f_close(&file);
+    // f_close(&file);
     if (elf.raw != NULL)
         kfree(elf.raw);
 

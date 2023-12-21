@@ -83,3 +83,7 @@ typedef struct {
     fat32_entry *fat;
     u32 cluster_size; // in bytes
 } FAT32_Volume;
+
+void fat32_init_volume(FAT32_Volume* volume);
+bool fat32_find_file(FAT32_Volume* volume, const char* path, FAT32_File* out_file);
+void fat32_read_file(FAT32_Volume* volume, FAT32_File* file, u8* out_buffer, u32 num_bytes, u32 start_offset);
