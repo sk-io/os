@@ -7,7 +7,6 @@
 #include "log.h"
 #include "kmalloc.h"
 #include "elf.h"
-#include "ramdisk.h"
 #include "events.h"
 #include "userheap.h"
 #include "windows.h"
@@ -57,7 +56,7 @@ s32 create_user_task(const char* path, const char* argv[]) {
 
     FAT32_File file;
     if (!fat32_find_file(&ramdisk.volume, path, &file)) {
-        kernel_log("create_user_task: failed to open executable file %s", path);
+        kernel_log("create_user_task: failed to open executable file '%s'", path);
         goto error;
     }
 

@@ -23,30 +23,37 @@ void fat32_read_file(FAT32_Volume* volume, FAT32_File* file, u8* out_buffer, u32
 	}
 
 	u32 cluster = file->cluster;
-	// printf("advancing %u clusters\n", start_offset / volume->cluster_size);
-	for (int i = 0; i < start_offset / volume->cluster_size; i++) {
+	u32 clusters_to_advance = start_offset / volume->cluster_size;
+	// kernel_log("advancing %u clusters", clusters_to_advance);
+	for (int i = 0; i < clusters_to_advance; i++) {
 		start_offset -= volume->cluster_size;
 		cluster = volume->fat[cluster] & 0xFFFFFF;
-		if (cluster == 0xFFFFFF) {
-			break;
-		}
+		assert(cluster != 0xFFFFFF);
 	}
 
 	assert(cluster != 0xFFFFFF);
 
-	u32 bytes_left = num_bytes - start_offset;
+	u32 bytes_left = num_bytes;
 	while (true) {
 		for (int i = start_offset / sector_size; i < header->sectors_per_cluster; i++) {
+			start_offset %= sector_size;
+			
 			u8 buffer[sector_size];
 			disk_read_sector(buffer, cluster_to_sector(volume, cluster) + i);
 
-			u32 bytes_to_read = bytes_left > sector_size ? sector_size : bytes_left;
-			bytes_to_read -= start_offset;
+			u32 bytes_to_read = bytes_left;
+			if (bytes_left + start_offset > sector_size) {
+				// reaches into the next sector
+				bytes_to_read = sector_size - start_offset;
+			}
+
 			memcpy(out_buffer, buffer + start_offset, bytes_to_read);
 			bytes_left -= bytes_to_read;
 			out_buffer += bytes_to_read;
 
 			start_offset = 0;
+			if (bytes_left == 0)
+				return;
 		}
 
 		cluster = volume->fat[cluster] & 0xFFFFFF;
@@ -237,6 +244,9 @@ void fat32_init_volume(FAT32_Volume* volume) {
 	}
 
 	volume->cluster_size = volume->header.sectors_per_cluster * sector_size;
+
+	kernel_log("Initialized FAT32 filesystem");
+	kernel_log("FAT32 cluster size=%u sector(s)", volume->header.sectors_per_cluster);
 }
 
 bool fat32_find_file(FAT32_Volume* volume, const char* path, FAT32_File* out_file) {
@@ -244,15 +254,19 @@ bool fat32_find_file(FAT32_Volume* volume, const char* path, FAT32_File* out_fil
 	if (path_len == 0)
 		return false;
 	
-	assert(path[0] == '/');
+	// if (path[0] != '/') {
+	// 	kernel_log("fat32_find_file %s\n", path);
+	// 	return false;
+	// }
+	// assert(path[0] == '/');
 
 	// start at root dir
 	FAT32_File file = {0};
 	file.attrib |= DIR_ENTRY_ATTRIB_SUBDIR;
 	file.cluster = volume->header.root_cluster;
 	
-	u32 start = 1;
-	for (int i = 1; i < path_len; i++) {
+	u32 start = path[0] == '/' ? 1 : 0;
+	for (int i = start; i < path_len; i++) {
 		const char* name = path + start;
 
 		if (path[i] == '/') {

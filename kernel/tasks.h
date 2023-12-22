@@ -1,11 +1,10 @@
 #pragma once
 
 #include "types.h"
-#include "ramdisk.h"
-#include "fatfs/fatfs_ff.h"
 #include "slib.h"
 #include "config.h"
 #include "sharedmem.h"
+#include "fat32.h"
 
 // used for newly created tasks
 typedef struct {
@@ -41,7 +40,7 @@ typedef struct {
     u32* pagedir; // this task's page directory, kernel tasks use the initial pagedir
     u32 is_kernel_task;
     u32 state; // task state enum
-    FIL open_files[MAX_OPEN_FILES]; // hack
+    FAT32_File open_files[MAX_OPEN_FILES]; // hack
     void* event_buffer; // address to shared memory in kernel vmem (kernel-side)
     s32 event_shmem_id; // used to share the buffer with userspace
     SharedMemoryMappingPool shmem;
@@ -49,7 +48,7 @@ typedef struct {
     u32 heap_start; // page aligned
     u32 heap_end;
 
-    DIR open_dir;
+    // DIR open_dir;
 
     Timer timers[MAX_TIMERS];
     OpenSharedLibrary slibs[MAX_SHARED_LIBS_PER_TASK];

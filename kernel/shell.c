@@ -8,32 +8,32 @@
 #include "memory.h"
 #include "tasks.h"
 #include "syscall.h"
-#include "ramdisk.h"
 
 void shell_execute(const char* code) {
     if (strcmp(code, "\n") == 0)
         return;
 
-    if (strncmp(code, "ls", 2) == 0) {
-        FRESULT res;
-        DIR dir;
-        res = f_opendir(&dir, "");
-        assert_msg(res == FR_OK, "f_opendir");
+    // TODO: 
+    // if (strncmp(code, "ls", 2) == 0) {
+    //     FRESULT res;
+    //     DIR dir;
+    //     res = f_opendir(&dir, "");
+    //     assert_msg(res == FR_OK, "f_opendir");
 
-        FILINFO info;
-        while (true) {
-            res = f_readdir(&dir, &info);
-            assert_msg(res == FR_OK, "f_readdir");
+    //     FILINFO info;
+    //     while (true) {
+    //         res = f_readdir(&dir, &info);
+    //         assert_msg(res == FR_OK, "f_readdir");
 
-            if (info.fname[0] == 0)
-                break;
+    //         if (info.fname[0] == 0)
+    //             break;
             
-            kernel_log("%s", info.fname);
-        }
+    //         kernel_log("%s", info.fname);
+    //     }
 
-        f_closedir(&dir);
-        return;
-    }
+    //     f_closedir(&dir);
+    //     return;
+    // }
 
     if (strncmp(code, "run", 3) == 0) {
         const char* path = code + 4;

@@ -72,6 +72,7 @@ typedef struct {
     u32 attrib;
     u32 cluster;
     u32 size;
+    u32 offset; // not used by any fat32_* funcs
 } FAT32_File;
 
 typedef u32 fat32_entry;
