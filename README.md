@@ -6,12 +6,13 @@
 
 * Higher half multitasking kernel
 * Essential stuff like paging, interrupts, PS2 mouse/keyboard support
-* FAT filesystem via FatFS
+* FAT32 filesystem with LFN support
 * Userspace
 * Framebuffer graphics (using shared memory)
 * Event system (using shared memory)
 * Shared libraries
 * A single userspace OS API a la winapi
+* Libc using [baselibc](https://github.com/PetteriAimonen/Baselibc)
 * Runs DOOM using [doomgeneric](https://github.com/ozkl/doomgeneric)
 
 Currently relies on multiboot/grub to provide a ramdisk and a framebuffer. Does not have SMP support.
