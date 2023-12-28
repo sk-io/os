@@ -3,8 +3,6 @@
 #include "types.h"
 #include "fat32.h"
 
-#define SECTOR_SIZE 512
-
 typedef struct {
     u32 addr;
     u32 size;

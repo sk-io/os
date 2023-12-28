@@ -2,7 +2,6 @@
 
 #include "util.h"
 #include "printf.h"
-// #include "fatfs/fatfs_ff.h"
 #include "elf.h"
 #include "memory.h"
 #include "tasks.h"

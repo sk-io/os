@@ -26,5 +26,6 @@ void init_disks(u32 ramdisk_location, u32 ramdisk_size) {
 }
 
 void disk_read_sector(u8* out_buffer, u32 sector) {
+    assert((sector + 1) * SECTOR_SIZE < ramdisk.size);
     memcpy(out_buffer, ramdisk.addr + sector * SECTOR_SIZE, SECTOR_SIZE);
 }

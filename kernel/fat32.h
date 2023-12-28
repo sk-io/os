@@ -2,6 +2,8 @@
 
 #include "types.h"
 
+#define SECTOR_SIZE 512
+
 #pragma pack(push, 1)
 
 typedef struct {
@@ -85,6 +87,16 @@ typedef struct {
     u32 cluster_size; // in bytes
 } FAT32_Volume;
 
+typedef struct {
+    u32 cluster;
+    u32 entry; // in cluster
+
+    u8 sector_buffer[SECTOR_SIZE];
+    u32 buffered_sector;
+} FAT32_DirList;
+
 void fat32_init_volume(FAT32_Volume* volume);
 bool fat32_find_file(FAT32_Volume* volume, const char* path, FAT32_File* out_file);
 void fat32_read_file(FAT32_Volume* volume, FAT32_File* file, u8* out_buffer, u32 num_bytes, u32 start_offset);
+void fat32_list_dir(FAT32_Volume* volume, FAT32_File* dir, FAT32_DirList* dir_list);
+bool fat32_next_dir_entry(FAT32_Volume* volume, FAT32_DirList* dir_list, FAT32_File* out_file, char out_name[256]);
