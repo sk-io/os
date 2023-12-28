@@ -6,17 +6,24 @@
 #include "log.h"
 
 #define DIR_ENTRY_ATTRIB_LFN 0x0F
-#define DIR_ENTRY_ATTRIB_SUBDIR 0x10
 
 static u32 cluster_to_sector(const FAT32_Volume* volume, u32 cluster) {
 	return volume->data_start_sector + (cluster - 2) * volume->header.sectors_per_cluster;
+}
+
+static int toupper(int c) {
+	return (c >= 'a' && c <= 'z') ? (c & ~32) : c;
+}
+
+static int tolower(int c) {
+	return (c >= 'A' && c <= 'Z') ? (c | 32) : c;
 }
 
 void fat32_read_file(FAT32_Volume* volume, FAT32_File* file, u8* out_buffer, u32 num_bytes, u32 start_offset) {
 	FAT32_Header* header = &volume->header;
 
 	// printf("fat32_read_file start=%u num=%u attrib=%02x\n", start_offset, num_bytes, file->attrib);
-	if (start_offset + num_bytes > file->size && !(file->attrib & DIR_ENTRY_ATTRIB_SUBDIR)) {
+	if (start_offset + num_bytes > file->size && !(file->attrib & FAT32_IS_DIR)) {
 		assert(false);
 	}
 
@@ -79,6 +86,12 @@ static void parse_short_filename(char output[13], FAT32_Directory_Entry* entry) 
 	output[i + 1] = '.';
 	output[i + 2] = '\0';
 	strncat(output, (const char*)entry->short_ext, 3);
+
+	if (entry->lowercase) {
+		for (i = 0; i < 13; i++) {
+			output[i] = tolower(output[i]);
+		}
+	}
 }
 
 static char ucs2_to_ascii(u16 ucs2) {
@@ -132,10 +145,6 @@ static u32 count_fat_chain_length(const FAT32_Volume* volume, u32 cluster) {
 	}
 
 	return length;
-}
-
-static int toupper(int c) {
-	return (c >= 'a' && c <= 'z') ? (c & ~32) : c;
 }
 
 static u32 fat32_strncmp_nocase(const char* s1, const char* s2, u32 n) {
@@ -202,7 +211,7 @@ bool fat32_find_file(FAT32_Volume* volume, const char* path, FAT32_File* out_fil
 
 	// start at root dir
 	FAT32_File file = {0};
-	file.attrib |= DIR_ENTRY_ATTRIB_SUBDIR;
+	file.attrib |= FAT32_IS_DIR;
 	file.cluster = volume->header.root_cluster;
 	
 	if (path[0] == '/' && path[1] == '\0') {
@@ -223,7 +232,7 @@ bool fat32_find_file(FAT32_Volume* volume, const char* path, FAT32_File* out_fil
 				return false; // couldnt find subdir
 			}
 
-			assert(file.attrib & DIR_ENTRY_ATTRIB_SUBDIR);
+			assert(file.attrib & FAT32_IS_DIR);
 			start = i + 1;
 		} else if (i == path_len - 1) {
 			// name of the file
@@ -242,7 +251,7 @@ bool fat32_find_file(FAT32_Volume* volume, const char* path, FAT32_File* out_fil
 }
 
 void fat32_list_dir(FAT32_Volume* volume, FAT32_File* dir, FAT32_DirList* dir_list) {
-	assert(dir->attrib & DIR_ENTRY_ATTRIB_SUBDIR);
+	assert(dir->attrib & FAT32_IS_DIR);
 
 	dir_list->cluster = dir->cluster;
 	dir_list->entry = 0;

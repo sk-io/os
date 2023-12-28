@@ -132,7 +132,7 @@ static void read_directory() {
     num_entries = 0;
     // os_printf("reading from %s", path);
 
-    if (!os_open_dir(path)) {
+    if (os_open_dir(path)) {
         os_printf("failed to open %s", path);
         return;
     }

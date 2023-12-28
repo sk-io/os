@@ -144,14 +144,17 @@ static void syscall_set_heap_end(u32 heap_end) {
 }
 
 static int syscall_open_dir(const char* path) {
-    // return f_opendir(&current_task->open_dir, path) == FR_OK;
-    assert(false);
+    FAT32_File dir_file;
+    if (!fat32_find_file(&ramdisk.volume, path, &dir_file)) {
+        assert(0);
+    }
+
+    fat32_list_dir(&ramdisk.volume, &dir_file, &current_task->dir_list);
     return 0;
 }
 
 static int syscall_close_dir() {
-    // return f_closedir(&current_task->open_dir) == FR_OK;
-    assert(false);
+    current_task->dir_list.cluster = 0;
     return 0;
 }
 
@@ -162,19 +165,17 @@ typedef struct {
 #define OS_FILE_INFO_IS_DIR 16
 
 static int syscall_next_file_in_dir(OSFileInfo* info_out) {
-    assert(false);
-    // FILINFO info;
-    // f_readdir(&current_task->open_dir, &info);
-    
-    // if (info.fname[0] == '\0')
-    //     return 0;
+    assert(current_task->dir_list.cluster != 0);
 
-    // info_out->attributes = 0;
-    // if (info.fattrib & AM_DIR) {
-    //     info_out->attributes |= OS_FILE_INFO_IS_DIR;
-    // }
+    FAT32_File file;
+    if (!fat32_next_dir_entry(&ramdisk.volume, &current_task->dir_list, &file, info_out->name)) {
+        return 0;
+    }
 
-    // strncpy(info_out->name, info.fname, sizeof(info.fname));
+    if (file.attrib & FAT32_IS_DIR) {
+        info_out->attributes |= OS_FILE_INFO_IS_DIR;
+    }
+
     return 1;
 }
 

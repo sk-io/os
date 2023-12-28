@@ -3,6 +3,7 @@
 #include "types.h"
 
 #define SECTOR_SIZE 512
+#define FAT32_IS_DIR 0x10
 
 #pragma pack(push, 1)
 
@@ -42,7 +43,7 @@ typedef struct {
     u8 short_name[8];
     u8 short_ext[3];
     u8 attrib;
-    u8 uhhh;
+    u8 lowercase;
     u8 uhhhhhhh;
     u16 creation_time;
     u16 creation_date;

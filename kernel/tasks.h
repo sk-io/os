@@ -48,7 +48,7 @@ typedef struct {
     u32 heap_start; // page aligned
     u32 heap_end;
 
-    // DIR open_dir;
+    FAT32_DirList dir_list;
 
     Timer timers[MAX_TIMERS];
     OpenSharedLibrary slibs[MAX_SHARED_LIBS_PER_TASK];
