@@ -41,7 +41,7 @@ libsgfx:
 	make -C sgfx
 
 run: $(IMAGE)
-	qemu-system-i386 -cdrom $(IMAGE) -serial stdio -accel kvm
+	qemu-system-i386 -cdrom $(IMAGE) -serial stdio -accel kvm -hda ramdisk.fat -boot order=d
 
 drun: $(IMAGE)
 	qemu-system-i386 -s -S -cdrom $(IMAGE) -serial stdio

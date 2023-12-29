@@ -21,6 +21,16 @@ static inline u8 inb(u16 port) {
     return ret;
 }
 
+static inline void outw(u16 port, u16 value) {
+    asm volatile("outw %1, %0" :: "dN" (port), "a" (value));
+}
+
+static inline u16 inw(u16 port) {
+    u16 ret;
+    asm volatile("inw %1, %0" : "=a" (ret) : "dN" (port));
+    return ret;
+}
+
 #define UNUSED_VAR(x) (void) x
 #define halt() asm volatile("hlt")
 

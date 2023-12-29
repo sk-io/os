@@ -81,6 +81,11 @@ void handle_interrupt(TrapFrame* frame) {
         return;
     }
 
+    if (frame->interrupt == IRQ_OFFSET + 14 || frame->interrupt == IRQ_OFFSET + 15) {
+        // ignore ATA
+        return;
+    }
+
     ISRFunction isr = isr_functions[frame->interrupt];
     if (isr != NULL) {
         isr(frame);

@@ -2,6 +2,7 @@
 
 #include "util.h"
 #include "memory.h"
+#include "ata.h"
 
 // TODO: allow for multiple storage devices other than just the ramdisk
 
@@ -22,10 +23,12 @@ void init_disks(u32 ramdisk_location, u32 ramdisk_size) {
         mem_map_page((char*) (KERNEL_RAMDISK + offset), ((u32) ramdisk_location) + offset, 0);
     }
 
+    init_ata();
     fat32_init_volume(&ramdisk.volume);
 }
 
 void disk_read_sector(u8* out_buffer, u32 sector) {
     assert((sector + 1) * SECTOR_SIZE < ramdisk.size);
-    memcpy(out_buffer, ramdisk.addr + sector * SECTOR_SIZE, SECTOR_SIZE);
+    // memcpy(out_buffer, ramdisk.addr + sector * SECTOR_SIZE, SECTOR_SIZE);
+    ata_read_sector(sector, out_buffer);
 }
