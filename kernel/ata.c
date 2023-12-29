@@ -34,11 +34,10 @@ static void wait_for_drq() {
     while (!(inb(PRIMARY_STATUS) & STATUS_DRQ));
 }
 
-void init_ata() {
+bool init_ata() {
     VERIFY_INTERRUPTS_DISABLED;
 
     kernel_log("attempting to init ata drive");
-    // kernel_log("status=%x", inb(PRIMARY_STATUS));
 
     // select drive 0
     outb(PRIMARY_DRIVE, 0xA0);
@@ -56,13 +55,13 @@ void init_ata() {
     u8 status = inb(PRIMARY_STATUS);
     if (status == 0) {
         kernel_log("Could not identify a valid ATA drive!");
-        assert(0);
+        return false;
     }
 
     wait_for_bsy();
     wait_for_drq();
 
-    kernel_log("status=%02x", inb(PRIMARY_STATUS));
+    // kernel_log("status=%02x", inb(PRIMARY_STATUS));
 
     u16 data[256];
     for (int i = 0; i < 256; i++) {
@@ -71,13 +70,20 @@ void init_ata() {
 
     bool supports_lba48_mode = (data[83] >> 10) & 1;
     assert(supports_lba48_mode);
+    return true;
 }
 
 void ata_read_sector(u64 lba, u8* out_buffer) {
     // kernel_log("[ATA] reading sector %u", lba);
 
+    wait_for_bsy();
     u16 sectors = 1;
     outb(PRIMARY_DRIVE, 0x40);
+
+    // delay
+    for (int i = 0; i < 15; i++)
+        inb(PRIMARY_STATUS);
+
     outb(PRIMARY_SECTORS, sectors >> 8);
     outb(PRIMARY_LBA_LO, lba >> (3 * 8));
     outb(PRIMARY_LBA_MI, lba >> (4 * 8));

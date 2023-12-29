@@ -55,7 +55,7 @@ s32 create_user_task(const char* path, const char* argv[]) {
     kernel_log("starting task: %s", path);
 
     FAT32_File file;
-    if (!fat32_find_file(&ramdisk.volume, path, &file)) {
+    if (!fat32_find_file(&primary_volume, path, &file)) {
         kernel_log("create_user_task: failed to open executable file '%s'", path);
         goto error;
     }
@@ -71,7 +71,7 @@ s32 create_user_task(const char* path, const char* argv[]) {
     // UINT br;
     // res = f_read(&file, elf.raw, elf.size, &br);
 
-    fat32_read_file(&ramdisk.volume, &file, elf.raw, elf.size, 0);
+    fat32_read_file(&primary_volume, &file, elf.raw, elf.size, 0);
     // FIXME
     // if (res != FR_OK) {
     //     kernel_log("create_user_task: failed to read from executable file %s. error=%u", path, res);

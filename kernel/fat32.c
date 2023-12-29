@@ -174,6 +174,9 @@ static bool find_file_in_dir(FAT32_Volume* volume, FAT32_File* dir_file, const c
 }
 
 void fat32_init_volume(FAT32_Volume* volume) {
+	kernel_log("Initializing FAT32 filesystem");
+    memset(volume, 0, sizeof(FAT32_Volume));
+
 	u8 sector_buffer[SECTOR_SIZE];
 	disk_read_sector(sector_buffer, 0);
 	memcpy(&volume->header, sector_buffer, sizeof(FAT32_Header));
@@ -199,9 +202,8 @@ void fat32_init_volume(FAT32_Volume* volume) {
 
 	volume->cluster_size = volume->header.sectors_per_cluster * SECTOR_SIZE;
 
-	printf("Initialized FAT32 filesystem\n");
-	printf("[FAT32] cluster size=%u sector(s)\n", volume->header.sectors_per_cluster);
-	printf("[FAT32] FAT size=%u bytes\n", volume->fat_size_in_sectors * SECTOR_SIZE);
+	kernel_log("[FAT32] cluster size=%u sector(s)", volume->header.sectors_per_cluster);
+	kernel_log("[FAT32] FAT size=%u bytes", volume->fat_size_in_sectors * SECTOR_SIZE);
 }
 
 bool fat32_find_file(FAT32_Volume* volume, const char* path, FAT32_File* out_file) {

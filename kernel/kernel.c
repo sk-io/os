@@ -25,25 +25,6 @@
 
 bool graphics_enabled;
 
-void testo() {
-    FAT32_File file;
-    if (!fat32_find_file(&ramdisk.volume, "doom1.wad", &file)) {
-        assert(false);
-    }
-
-    const int num_read = 616;
-    u8* content = kmalloc(num_read);
-    kernel_log("stupid read!");
-    fat32_read_file(&ramdisk.volume, &file, content, num_read, 1000000);
-
-    for (int i = 0; i < 16; i++) {
-        kernel_log("%02x", content[num_read - 16 + i]);
-    }
-    
-    kfree(content);
-    kernel_log("DONE!");
-}
-
 void kernel_main(struct multiboot_info* info) {
     disable_interrupts();
     setup_gdt();
@@ -52,11 +33,6 @@ void kernel_main(struct multiboot_info* info) {
 
     init_logging(true);
     kernel_log("Hello!");
-
-    u32 mod_count = info->mods_count;
-    assert_msg(mod_count, "zero modules!");
-    u32 ramdisk_start = *(u32*) (info->mods_addr);
-    u32 ramdisk_end = *(u32*) (info->mods_addr + 4);
 
     u32 framebuffer_addr = info->framebuffer_addr;
     u32 framebuffer_width = info->framebuffer_width;
@@ -72,27 +48,32 @@ void kernel_main(struct multiboot_info* info) {
     init_syscalls();
 
     //enable_fpu();
+    
+    init_disks(info);
 
     init_timer(1000);
 
-    u32 phys_alloc_start = (ramdisk_end + 0xFFF) & ~0xFFF;
-    assert(phys_alloc_start >= ramdisk_end);
+    // if not using ramdisk, start after the kernel at 16MB
+    u32 phys_alloc_start = 0x100000 * 16;
+    if (using_ramdisk) {
+        // otherwise, start after the ramdisk
+        phys_alloc_start = (ramdisk.phys_addr + ramdisk.size + 0xFFF) & ~0xFFF;
+    }
+    kernel_log("Starting physical allocation from %x", phys_alloc_start);
     init_memory(info->mem_upper * 1024, phys_alloc_start);
+
     kernel_log("Initial pagedir is at %x", mem_get_current_page_directory());
     kernel_log("Setting up kernel heap");
     kmalloc_init(0x1000);
+
+    map_ramdisk();
 
     setup_tasks();
     sharedmem_init();
     init_shared_libs();
     init_events();
 
-    u32 ramdisk_size = ramdisk_end - ramdisk_start;
-    init_disks(ramdisk_start + 0xC0000000, ramdisk_size);
-
-    testo();
-
-    kernel_log("ramdisk is at %x to %x", ramdisk_start + 0xC0000000, ramdisk_end + 0xC0000000);
+    fat32_init_volume(&primary_volume);
 
     if (graphics_enabled) {
         kernel_log("framebuffer is at %x", framebuffer_addr);
@@ -103,8 +84,8 @@ void kernel_main(struct multiboot_info* info) {
         get_task(gui.task_id)->state = TASK_STATE_IDLE;
 
         sgfx_fill(&graphics, 0xFFFFFFFF);
-        // create_user_task("doom.exe", NULL);
-        // create_user_task("/breakout.exe", NULL);
+
+        // create_user_task("files.exe", NULL);
     }
 
     init_keyboard();

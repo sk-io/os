@@ -1,7 +1,7 @@
 ENTRY(_start)
 
 SECTIONS {
-	. = 0x00100000;
+	. = 2M; /* put kernel at 2MB physical */
 
 	.multiboot ALIGN(4K) : {
 		*(.multiboot)

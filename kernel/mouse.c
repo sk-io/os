@@ -68,7 +68,6 @@ static void handle_mouse_interrupt(TrapFrame* frame) {
         mouse.left_button = buffer[1] & 1;
         if (mouse.left_button)
             gui.left_click = true;
-        // kernel_log("mouse x=%d, y=%d", mouse_x_acc, mouse_y_acc);
 
         gui.needs_update = true;
     }

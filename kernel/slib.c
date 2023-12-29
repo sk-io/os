@@ -55,7 +55,7 @@ static SharedLibrary* find_or_load_shared_lib(const char* name) {
     strncpy(lib->path, path, MAX_PATH_LENGTH);
     
     FAT32_File file;
-    if (!fat32_find_file(&ramdisk.volume, path, &file)) {
+    if (!fat32_find_file(&primary_volume, path, &file)) {
         kernel_log("find_and_load_shared_lib: failed to open library %s", path);
         return NULL;
     }
@@ -79,7 +79,7 @@ static SharedLibrary* find_or_load_shared_lib(const char* name) {
         elf.raw = (u8*) addr;
     }
 
-    fat32_read_file(&ramdisk.volume, &file, elf.raw, file.size, 0);
+    fat32_read_file(&primary_volume, &file, elf.raw, file.size, 0);
 
     // if (res != FR_OK) {
     //     kfree(elf.mem);

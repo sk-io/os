@@ -52,7 +52,7 @@ static u32 syscall_open_file(const char* path) {
     assert_msg(fd != -1, "too many opened files!");
     // kernel_log("--> syscall_open_file   fd=%d %s", fd, path);
 
-    if (!fat32_find_file(&ramdisk.volume, path, &current_task->open_files[fd])) {
+    if (!fat32_find_file(&primary_volume, path, &current_task->open_files[fd])) {
         assert(false);
     }
 
@@ -72,7 +72,7 @@ static u32 syscall_read_file(u32 fd, u8* buf, u32 num_bytes) {
     assert(file->cluster != 0);
 
     // printf("syscall_read_file num_bytes=%u offset=%u\n", num_bytes, file->offset);
-    fat32_read_file(&ramdisk.volume, file, buf, num_bytes, file->offset);
+    fat32_read_file(&primary_volume, file, buf, num_bytes, file->offset);
     file->offset += num_bytes;
 
     return num_bytes;
@@ -145,11 +145,11 @@ static void syscall_set_heap_end(u32 heap_end) {
 
 static int syscall_open_dir(const char* path) {
     FAT32_File dir_file;
-    if (!fat32_find_file(&ramdisk.volume, path, &dir_file)) {
+    if (!fat32_find_file(&primary_volume, path, &dir_file)) {
         assert(0);
     }
 
-    fat32_list_dir(&ramdisk.volume, &dir_file, &current_task->dir_list);
+    fat32_list_dir(&primary_volume, &dir_file, &current_task->dir_list);
     return 0;
 }
 
@@ -168,7 +168,7 @@ static int syscall_next_file_in_dir(OSFileInfo* info_out) {
     assert(current_task->dir_list.cluster != 0);
 
     FAT32_File file;
-    if (!fat32_next_dir_entry(&ramdisk.volume, &current_task->dir_list, &file, info_out->name)) {
+    if (!fat32_next_dir_entry(&primary_volume, &current_task->dir_list, &file, info_out->name)) {
         return 0;
     }
 
