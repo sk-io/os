@@ -2,7 +2,7 @@
 
 #include "util.h"
 #include "disk.h"
-#include "malloc.h"
+#include "kmalloc.h"
 #include "log.h"
 
 #define DIR_ENTRY_ATTRIB_LFN 0x0F
