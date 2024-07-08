@@ -11,7 +11,8 @@
 * Framebuffer graphics (using shared memory)
 * Event system (using shared memory)
 * Shared libraries
-* A single userspace OS API a la winapi
+* A single userspace OS API in the style of win32 API
+* Binary compatibility between apps and the OS (in theory :P)
 * Libc using [baselibc](https://github.com/PetteriAimonen/Baselibc)
 * Runs DOOM using [doomgeneric](https://github.com/ozkl/doomgeneric)
 
@@ -19,7 +20,9 @@ Currently relies on multiboot/grub to provide a ramdisk and a framebuffer. Does 
 
 ## Architecture/Motivation
 
-This is a completely monolithic OS with a single userspace API for everything (task management, file I/O, window management, etc...). All an application needs to do is to include os.h and link against api.so. The kernel is not unix based.
+I started this project to learn more about the inner workings of graphical multitasking operating systems. There's no end goal, I just work on it whenever I feel like it.
+
+This is a completely monolithic OS with a single userspace API for everything (task management, file I/O, window management, etc...). All an application needs to do is to include os.h and dynamically link against api.so. This provides Application/OS binary compatibility and allows you to rebuild the kernel without rebuilding all the apps and vice versa (as long as the API doesn't change). The kernel is not unix based.
 
 I try to keep things as simple and understandable as possible whilst still being speedy. There are tons of security holes, that's not a priority right now.
 
